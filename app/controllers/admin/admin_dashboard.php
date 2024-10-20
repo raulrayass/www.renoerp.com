@@ -26,7 +26,7 @@ $role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // rol de ingreso
     <link rel="stylesheet" href="/www.renoerp.com/public/templates/dist/css/adminlte.min.css">
 
     <style>
-        /* Tus estilos personalizados */
+        /* estilos personalizados */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f4f6f9;
@@ -78,7 +78,7 @@ $role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // rol de ingreso
             color: #ffffff;
             font-weight: 500;
             margin: 0 20px;
-            font-size: 1.5rem; /* Tamaño de fuente más grande */
+            font-size: 1.5rem; /* Tamaño de fuente */
         }
 
         .content-header {
@@ -126,7 +126,7 @@ $role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // rol de ingreso
 
         /* Estilo para las tarjetas de resumen */
         .summary-card {
-            border-radius: 12px; /* Bordes más redondeados */
+            border-radius: 12px; /* Bordes redondeados */
             background-color: #ffffff;
             padding: 15px;
             margin-bottom: 15px;
@@ -378,6 +378,8 @@ $role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // rol de ingreso
 <script src="/www.renoerp.com/public/templates/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="/www.renoerp.com/public/templates/dist/js/adminlte.js"></script>
 <script>
+
+    
     // Acción de pantalla completa
     document.getElementById('fullscreen-btn').addEventListener('click', function () {
         if (!document.fullscreenElement) {
