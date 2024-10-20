@@ -9,5 +9,5 @@ session_unset();
 session_destroy();
 
 // Redirigir al login, correción de ruta
-header("Location: /RRSoluciones/www.renoamd.com/login/login.php");
+header("Location: /www.renoerp.com/login/login.php");
 exit;

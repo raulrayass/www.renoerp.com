@@ -3,13 +3,13 @@ session_start();
 
 // Comprobar si el usuario ha iniciado sesión
 if (!isset($_SESSION['user_id'])) {
-    header('Location: /www.renoamd.com/login/login.php'); // Redirigir a login si no está autenticado
+    header('Location: /www.renoerp.com/login/login.php'); // Redirigir a login si no está autenticado
     exit();
 }
 
 // Obtener el nombre del usuario y rol desde la sesión
 $user_name = $_SESSION['username'] ?? 'Usuario'; // Guardar en la sesión
-$role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // Suponiendo que el rol se almacena aquí
+$role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // rol de ingreso
 ?>
 
 <!DOCTYPE html>
@@ -18,12 +18,12 @@ $role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // Suponiendo que el r
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reno Carrocerias | Dashboard</title>
-    <meta name="description" content="AdminLTE 3 - Dashboard para el Almacen de Reno Carrocerias.">
+    <meta name="description" content="Dashboard Manager.">
 
     <!-- Rutas -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <link rel="stylesheet" href="/RRSoluciones/www.renoamd.com/public/templates/plugins/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="/RRSoluciones/www.renoamd.com/public/templates/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="/www.renoerp.com/public/templates/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="/www.renoerp.com/public/templates/dist/css/adminlte.min.css">
 
     <style>
         /* Tus estilos personalizados */
@@ -204,7 +204,7 @@ $role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // Suponiendo que el r
         <span class="navbar-title">Dashboard</span> <!-- Título "Dashboard" en la barra superior -->
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-                <a class="nav-link navbar-notifications" href="/RRSoluciones/www.renoamd.com/app/controllers/manager/manager_dashboard.php">
+                <a class="nav-link navbar-notifications" href="/www.renoerp.com/app/controllers/manager/manager_dashboard.php">
                     <i class="fas fa-home"></i>
                 </a>
             </li>
@@ -221,13 +221,13 @@ $role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // Suponiendo que el r
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#" class="profile-link">
-                    <img src="/RRSoluciones/www.renoamd.com/public/images/profile.jpg" class="img-circle elevation-2" alt="Foto de perfil" style="width: 30px; height: 30px;">
+                    <img src="/www.renoerp.com/public/images/profile.jpg" class="img-circle elevation-2" alt="Foto de perfil" style="width: 30px; height: 30px;">
                     <span id="user_name" style="font-weight: bold;"><?php echo $user_name; ?></span> <!-- Nombre en negrita -->
                     <span id="role_name" style="font-size: 0.8rem; color: #b0b0b0;"><?php echo $role_name; ?></span> <!-- Rol debajo del nombre -->
                 </a>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                     <a href="#" class="dropdown-item"><i class="fas fa-user-cog"></i> Perfil</a>
-                    <a href="/RRSoluciones/www.renoamd.com/app/controllers/session/logout_session.php" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                    <a href="/www.renoerp.com/app/controllers/session/logout_session.php" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
                 </div>
             </li>
         </ul>
@@ -236,7 +236,7 @@ $role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // Suponiendo que el r
     <!-- Menu Lateral -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="#" class="brand-link">
-            <img src="/RRSoluciones/www.renoamd.com/public/images/logo.png" alt="Reno ERP" class="brand-image">
+            <img src="/www.renoerp.com/public/images/logo.png" alt="Reno ERP" class="brand-image">
             <span class="brand-text font-weight-bold" style="font-size: 1.5rem;">RENO ERP</span> <!-- Título en negrita -->
         </a>
 
@@ -369,14 +369,14 @@ $role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // Suponiendo que el r
         <div class="float-right d-none d-sm-inline">
             Versión 1.0
         </div>
-        <strong>&copy; 2024 <a href="https://www.renoamd.com">RENO Carrocerias</a>.</strong> Todos los derechos reservados.
+        <strong>&copy; 2024 <a href="https://www.renoerp.com">RENO Carrocerias</a>.</strong> Todos los derechos reservados.
     </footer>
 </div>
 
 <!-- Scripts -->
-<script src="/RRSoluciones/www.renoamd.com/public/templates/plugins/jquery/jquery.min.js"></script>
-<script src="/RRSoluciones/www.renoamd.com/public/templates/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="/RRSoluciones/www.renoamd.com/public/templates/dist/js/adminlte.js"></script>
+<script src="/www.renoerp.com/public/templates/plugins/jquery/jquery.min.js"></script>
+<script src="/www.renoerp.com/public/templates/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/www.renoerp.com/public/templates/dist/js/adminlte.js"></script>
 <script>
     // Acción de pantalla completa
     document.getElementById('fullscreen-btn').addEventListener('click', function () {

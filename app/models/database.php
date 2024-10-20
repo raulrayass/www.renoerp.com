@@ -1,6 +1,6 @@
 <?php
 
-define('URLSERVER', 'http://RRSoluciones/www.renoamd.com/'); // URL temporal
+define('URLSERVER', 'http://localhost/www.renoerp.com/app/controllers/');
 
 // Configuración de la conexión a la base de datos
 $host = 'localhost';
