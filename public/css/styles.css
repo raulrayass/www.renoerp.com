@@ -1,0 +1,12 @@
+.navbar {
+    background-color: #f8f9fa; /* Fondo claro */
+}
+
+.nav-link {
+    color: #495057; /* Color del texto */
+}
+
+.navbar .badge {
+    background-color: #007bff; /* Color del badge */
+    font-size: 0.9rem; /* Tamaño de fuente más pequeño */
+}

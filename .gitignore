@@ -1,0 +1,12 @@
+##/logs               # Ignora cualquier directorio llamado 'logs' en cualquier parte del proyecto.
+# *.log               # Ignora todos los archivos con la extensión '.log', que suelen ser archivos de registro.
+# /sessions           # Ignora el directorio 'sessions', donde se almacenan datos temporales de sesión.
+# config/local.php    # Ignora el archivo 'local.php' en el directorio de configuración, que podría contener información sensible.
+# db.config.php       # Ignora el archivo 'db.config.php', que probablemente tenga configuraciones de base de datos.
+# .env.local          # Ignora el archivo '.env.local', que normalmente contiene variables de entorno locales y secretos.
+# /imagenes           # Ignora el directorio 'imagenes', que puede contener archivos generados o temporales.
+ /home/rafarsmb/Documents/GitHub/RRSoluciones/www.renoamd.com/public/imagenes  # Ignora la ruta absoluta a un directorio de imágenes específico.
+www.renoamd.com/public/imagenes  # Ignora la ruta relativa a un directorio de imágenes en el servidor.
+www.renoamd.com/public/dashboard_templates/admin/imagenes  # Ignora imágenes en la plantilla de administración del panel de control.
+www.renoamd.com/public/dashboard_templates/admin/LTE/imagenes  # Ignora imágenes en una subcarpeta de la plantilla de administración.
+# */                  # Ignora cualquier otro archivo o directorio en el nivel actual.
