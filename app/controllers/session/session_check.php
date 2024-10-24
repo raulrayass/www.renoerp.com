@@ -1,8 +1,19 @@
 <?php
-session_start(); // Inicia la sesión
+// Duración de inactividad en segundos (5 segundos para pruebas)
+$inactive_time = 5;
 
-// Verifica si el usuario ha iniciado sesión
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../../login/login.php"); // Redirige a la página de inicio de sesión
-    exit; // Termina la ejecución del script
+// Comprobar si hay actividad en la sesión
+if (isset($_SESSION['last_activity'])) {
+    // Calcular el tiempo inactivo
+    $session_lifetime = time() - $_SESSION['last_activity'];
+    
+    if ($session_lifetime > $inactive_time) {
+        // Redirigir a la pantalla de bloqueo si la inactividad supera el límite
+        header('Location: ' . URLSERVER . 'login/lockscreen.php');
+        exit();
+    }
 }
+
+// Actualizar la última actividad
+$_SESSION['last_activity'] = time();
+?>

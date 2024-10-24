@@ -1,9 +1,10 @@
 <?php
-session_start();
+// Incluir el archivo de configuración
+require_once '../../models/settings/config.php'; 
 
 if (!isset($_SESSION['user_id'])) {
     // Si el usuario no está autenticado, redirigir a login
-    header("Location: ../login.php");
+    header("Location: " . URLSERVER . "login/login.php");
     exit();
 }
 
@@ -11,28 +12,28 @@ if (!isset($_SESSION['user_id'])) {
 $role_id = $_SESSION['role_id'];
 switch ($role_id) {
     case 1:
-        header("Location: ../admin/admin_dashboard.php");
+        header("Location: " . URLSERVER . "app/views/admin/admin_dashboard.php");
         break;
     case 2:
-        header("Location: ../manager/manager_dashboard.php");
+        header("Location: " . URLSERVER . "app/views/manager/manager_dashboard.php");
         break;
     case 3:
-        header("Location: /app/controllers/warehouse/warehouse_dashboard.php");
+        header("Location: " . URLSERVER . "app/views/warehouse/warehouse_dashboard.php");
         break;
     case 4:
-        header("Location: /app/controllers/production/production_dashboard.php");
+        header("Location: " . URLSERVER . "app/views/production/production_dashboard.php");
         break;
     case 5:
-        header("Location: /app/controllers/sales/sales_dashboard.php");
+        header("Location: " . URLSERVER . "app/views/sales/sales_dashboard.php");
         break;
     case 6:
-        header("Location: /app/controllers/purchases/purchase_dashboard.php");
+        header("Location: " . URLSERVER . "app/views/purchases/purchase_dashboard.php");
         break;
     case 7:
-        header("Location: /app/controllers/hr/employee_management.php");
+        header("Location: " . URLSERVER . "app/views/hr/employee_management.php");
         break;
     default:
-        header("Location: ../login.php?error=true");
+        header("Location: " . URLSERVER . "app/login/login.php?error=true");
         break;
 }
 ?>
