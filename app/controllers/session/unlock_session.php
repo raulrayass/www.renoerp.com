@@ -24,13 +24,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Verificar la contraseña
             if (password_verify($password, $hashed_password)) {
                 // La contraseña es correcta, puedes desbloquear la sesión
-                $_SESSION['is_logged_in'] = session_id(); // Volver a marcar como logueado
+                $_SESSION['is_logged_in'] = session_id(); // Marcar como logueado nuevamente
                 
                 // Actualizar el tiempo de la última actividad
                 $_SESSION['last_activity'] = time();
 
+                // Actualizar `is_logged_in` en la base de datos a 1
+                $update_stmt = $pdo->prepare("UPDATE tbl_users SET is_logged_in = 1 WHERE id_user = :id_user");
+                $update_stmt->bindParam(':id_user', $user_id);
+                $update_stmt->execute();
+
                 // Redirigir al dashboard
-                header('Location: ' . URLSERVER . 'app/controllers/session/redirect_dashboard.php'); // Asegúrate de que la ruta sea correcta
+                header('Location: ' . URLSERVER . 'app/controllers/session/redirect_dashboard.php');
                 exit();
             } else {
                 $_SESSION['error'] = 'Contraseña incorrecta. Inténtalo de nuevo.';

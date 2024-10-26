@@ -1,18 +1,14 @@
 <?php
-session_start(); // Mantener la sesión iniciada en lockscreen
-
+session_start();
 require_once '../settings/settings_control.php';
-require_once '../settings/constants.php';
-require_once '../settings/database.php';
-require_once '../settings/routes.php';
-
-// Evitar el control de inactividad en lockscreen para prevenir bucles de redirección
-// No incluimos session_control.php aquí para evitar redirección en lockscreen
-
-// Verificar si hay un mensaje de sesión re establecida
-$message = isset($_SESSION['session_restored']) ? $_SESSION['session_restored'] : null;
-if ($message) {
-    unset($_SESSION['session_restored']); // Limpiar mensaje después de mostrarlo
+// Recuperar el usuario actual de la sesión
+if (isset($_SESSION['id_user'])) {
+    $user_id = $_SESSION['id_user'];
+    
+    // Actualizar `is_logged_in` a 0 para indicar que la sesión está bloqueada
+    $stmt = $pdo->prepare("UPDATE tbl_users SET is_logged_in = 0 WHERE id_user = :id_user");
+    $stmt->bindParam(':id_user', $user_id);
+    $stmt->execute();
 }
 ?>
 
