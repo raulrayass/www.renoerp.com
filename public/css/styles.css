@@ -1,12 +1,15 @@
-.navbar {
-    background-color: #f8f9fa; /* Fondo claro */
+/* Estilos para el breadcrumb */
+.breadcrumb-container {
+    background-color: #ffffff; /* Fondo blanco para el breadcrumb */
+    padding: 10px 15px; /* Espaciado interno */
+    border-bottom: 1px solid #dee2e6; /* Línea inferior para separación */
+    position: fixed; /* Fija la posición */
+    top: 56px; /* Ajusta según la altura de la navbar */
+    left: 0;
+    right: 0;
+    z-index: 1030; /* Asegura que esté sobre otros elementos */
 }
 
-.nav-link {
-    color: #495057; /* Color del texto */
-}
-
-.navbar .badge {
-    background-color: #007bff; /* Color del badge */
-    font-size: 0.9rem; /* Tamaño de fuente más pequeño */
+.content-wrapper {
+    padding-top: 80px; /* Ajusta el padding superior para evitar que el contenido esté detrás del breadcrumb */
 }

@@ -1,19 +1,34 @@
 <?php 
 session_start(); // Iniciar la sesión
+
 // Incluir el archivo de control de sesión
-require_once __DIR__ . '/../../../settings/settings_control.php';
-require_once __DIR__ . '/../../controllers/session/session_control.php'; // Asegúrate de que esto esté incluido
+require_once __DIR__ . '/../../../settings/settings_control.php'; // Ruta a settings_control.php
+require_once __DIR__ . '/../../controllers/session/session_control.php'; // Ruta a session_control.php
+
+// Incluir el controlador del breadcrumb
+require_once __DIR__ . '/../../controllers/navigation/BreadcrumbController.php'; // Ruta a BreadcrumbController
+$breadcrumbController = new BreadcrumbController();
+
+// Agregar la ruta actual al breadcrumb
+$breadcrumbController->addBreadcrumbItem('Dashboard', '/app/views/admin/admin_dashboard.php'); // Asegúrate de que esta ruta sea correcta
+$breadcrumbItems = $breadcrumbController->getBreadcrumb(); // Obtener los elementos del breadcrumb
 
 // Incluye los archivos de la vista usando rutas relativas
-require_once __DIR__ . '/layout/header.php'; 
-require_once __DIR__ . '/layout/navbar.php'; 
-require_once __DIR__ . '/layout/sidebar.php'; 
+require_once __DIR__ . '/layout/header.php'; // Ruta a header.php
+require_once __DIR__ . '/layout/navbar.php'; // Ruta a navbar.php
+require_once __DIR__ . '/layout/sidebar.php'; // Ruta a sidebar.php
 ?>
 
 <!-- Contenido Principal -->
 <div class="content-wrapper">
     <div class="content">
         <div class="container-fluid">
+            <!-- Incluir el breadcrumb justo debajo de la barra de navegación -->
+            <?php 
+            // Incluir el breadcrumb
+            require_once __DIR__ . '/../navigation/breadcrumb.php'; // Ruta a breadcrumb.php
+            ?>
+
             <div class="row">
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-success summary-card">
@@ -79,6 +94,6 @@ require_once __DIR__ . '/layout/sidebar.php';
 
 <?php 
 // Incluir el pie de página y scripts usando rutas relativas
-require_once __DIR__ . '/layout/footer.php'; 
-require_once __DIR__ . '/layout/scripts.php'; 
+require_once __DIR__ . '/layout/footer.php'; // Ruta a footer.php
+require_once __DIR__ . '/layout/scripts.php'; // Ruta a scripts.php
 ?>
