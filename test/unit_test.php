@@ -1,7 +1,7 @@
 <?php 
 // Script para realizar pruebas unitarias
 
-require_once '../app/models/database.php'; //conexión a la base de datos
+require_once '../settings/database.php'; //conexión a la base de datos
 
 // Función para actualizar la contraseña
 function updatePassword($email, $newPassword) {
@@ -25,8 +25,8 @@ function updatePassword($email, $newPassword) {
 
 // usuarios a actualizar
 $usersToUpdate = [
-    'admin@example.com' => 'password', // Cuenta de administrador
-    'manager@example.com' => 'password123', // manager cuenta
+    'raul.rayas@reno.com' => 'rayas', // Cuenta de administrador
+    'javier.banuelos@reno.com' => 'reno123', // manager cuenta
     
 ];
 

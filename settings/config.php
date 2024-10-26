@@ -1,6 +1,5 @@
 <?php
 // config.php
-define('URLSERVER', 'http://localhost/www.renoerp.com/');
 
 // Establecer la zona horaria
 date_default_timezone_set('America/Mexico_City');

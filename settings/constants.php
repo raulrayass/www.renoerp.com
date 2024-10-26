@@ -1,6 +1,9 @@
 <?php
 // constants.php
 
+define('URLSERVER', 'http://localhost/www.renoerp.com/');
+
+
 // Colores de la aplicación
 define('PRIMARY_COLOR', '#002667');        // Color principal (Azul oscuro)
 define('SECONDARY_COLOR_1', '#d23337');    // Primer color secundario (Rojo)

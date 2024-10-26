@@ -1,4 +1,6 @@
-<?php session_start(); ?> <!--inicio de session-->
+<?php 
+session_start(); 
+?> <!--inicio de session-->
 
 <!DOCTYPE html>
 <html lang="es">
@@ -18,8 +20,8 @@
 
   <style>
     body {
-      background-image: url('../public/images/background_2.jpg');
-      background-size: cover;
+      background-image: url('../public/images/uploads/page/background.jpg'); /* Cambiar background */
+      background-size: cover; /* Cambiar a 'contain' si lo prefieres */
       background-position: center;
       background-repeat: no-repeat;
       margin: 0;
@@ -27,6 +29,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden; /* Evitar scroll */
     }
     .login-box {
       background-color: transparent;
@@ -79,7 +82,7 @@
 <body class="hold-transition login-page">
   <div class="login-box">
     <div class="logo-container">
-      <img src="../public/images/logo.png" alt="Logo" class="logo">
+      <img src="../public/images/uploads/page/logo.png" alt="Logo" class="logo"> <!-- Cambiar logo -->
     </div>
     <h1 class="text-center">RENO ERP</h1>
     <p class="login-box-msg text-center">Inicia sesión para continuar</p>

@@ -2,14 +2,12 @@
 // Iniciar sesión si no está iniciada
 session_start();
 
-// Incluir la conexión a la base de datos y la configuración
-require_once '../../models/settings/database.php';
-require_once '../../models/settings/config.php'; // Para incluir la URLSERVER
+require_once __DIR__ . '/../../../settings/settings_control.php';
 
 // Verificar si el usuario está logueado antes de intentar actualizar el estado
-if (isset($_SESSION['user_id'])) {
+if (isset($_SESSION['id_user'])) { // Cambiado de 'user_id' a 'id_user'
     // Obtener el ID del usuario de la sesión
-    $user_id = $_SESSION['user_id'];
+    $user_id = $_SESSION['id_user'];
 
     // Conexión a la base de datos utilizando PDO
     global $pdo;

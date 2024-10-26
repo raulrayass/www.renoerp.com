@@ -32,6 +32,26 @@
             }
         });
     });
+
+    // Manejo de inactividad
+    let inactivityTime = function () {
+        let timeout;
+        window.onload = resetTimer; // Resetea el temporizador si hay actividad
+        window.onmousemove = resetTimer;
+        window.onkeypress = resetTimer;
+
+        function logout() {
+            // Redirigir a lockscreen
+            window.location.href = "<?php echo URLSERVER; ?>login/lockscreen.php";
+        }
+
+        function resetTimer() {
+            clearTimeout(timeout);
+            timeout = setTimeout(logout, 300000); // 5 minutos en milisegundos
+        }
+    };
+
+    inactivityTime(); // Llamar a la función
 </script>
 </body>
 </html>

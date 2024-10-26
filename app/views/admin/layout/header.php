@@ -1,16 +1,3 @@
-<?php
-
-// Comprobar si el usuario ha iniciado sesión
-if (!isset($_SESSION['id_user'])) {
-    header('Location: ' . URLSERVER . 'login/login.php'); // Redirigir a login si no está autenticado
-    exit();
-}
-
-// Obtener el nombre del usuario y rol desde la sesión
-$user_name = $_SESSION['username'] ?? 'Usuario'; // Guardar en la sesión
-$role_name = $_SESSION['role_name'] ?? 'Rol desconocido'; // rol de ingreso
-?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
