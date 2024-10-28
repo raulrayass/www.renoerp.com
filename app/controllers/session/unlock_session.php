@@ -29,9 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Actualizar el tiempo de la última actividad
                 $_SESSION['last_activity'] = time();
 
-                // Actualizar `is_logged_in` en la base de datos a 1
-                $update_stmt = $pdo->prepare("UPDATE tbl_users SET is_logged_in = 1 WHERE id_user = :id_user");
+                // Obtener el nuevo browser_id
+                $new_browser_id = session_id(); // Podrías usar otra lógica para generar el browser_id
+
+                // Actualizar `is_logged_in` y `browser_id` en la base de datos
+                $update_stmt = $pdo->prepare("UPDATE tbl_users SET is_logged_in = 1, browser_id = :browser_id WHERE id_user = :id_user");
                 $update_stmt->bindParam(':id_user', $user_id);
+                $update_stmt->bindParam(':browser_id', $new_browser_id);
                 $update_stmt->execute();
 
                 // Redirigir al dashboard
@@ -53,3 +57,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     header('Location: ' . URLSERVER . 'login/lockscreen.php');
     exit();
 }
+?>

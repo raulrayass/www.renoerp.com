@@ -41,9 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['profile_image'] = $user['profile_image'];
             $_SESSION['is_logged_in'] = session_id(); // Prevenir doble sesión
 
-            // Actualizar el estado de is_logged_in en la base de datos
-            $update_stmt = $pdo->prepare("UPDATE tbl_users SET is_logged_in = 1 WHERE id_user = :id_user");
+            // Actualizar el estado de is_logged_in y browser_id en la base de datos
+            $update_stmt = $pdo->prepare("UPDATE tbl_users SET is_logged_in = 1, browser_id = :browser_id WHERE id_user = :id_user");
             $update_stmt->bindParam(':id_user', $user['id_user']);
+            $browser_id = session_id(); // Obtener el nuevo browser_id
+            $update_stmt->bindParam(':browser_id', $browser_id);
             $update_stmt->execute();
 
             // Redireccionar al dashboard correspondiente
