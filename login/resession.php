@@ -11,10 +11,6 @@ if (isset($_SESSION['id_user'])) {
     $stmt = $pdo->prepare("UPDATE tbl_users SET is_logged_in = 0, browser_id = NULL WHERE id_user = :id_user");
     $stmt->bindParam(':id_user', $user_id);
     $stmt->execute();
-} else {
-    // Si no hay un usuario en la sesión, redirigir a login
-    header("Location: " . URLSERVER . "login/login.php");
-    exit();
 }
 ?>
 
@@ -108,7 +104,7 @@ if (isset($_SESSION['id_user'])) {
         </div>
         
         <!-- Formulario para desbloquear sesión -->
-        <form class="lockscreen-credentials" action="<?php echo URLSERVER; ?>app/controllers/session/unlock_session.php" method="post">
+        <form class="lockscreen-credentials" action="<?php echo URLSERVER; ?>app/controllers/session/re_session.php" method="post">
             <div class="input-group mb-3">
                 <input type="password" name="password" class="form-control" placeholder="Contraseña" required>
                 <div class="input-group-append">
@@ -146,15 +142,13 @@ if (isset($_SESSION['id_user'])) {
 <script>
     $(document).ready(function() {
         // Si hay un mensaje de sesión restablecida, mostrar alerta
-        <?php if (isset($_SESSION['message'])): ?>
+        <?php if ($message): ?>
             Swal.fire({
                 icon: 'success',
                 title: 'Éxito',
                 text: 'Sesión re establecida',
                 confirmButtonText: 'Aceptar'
             });
-            // Limpiar el mensaje después de mostrarlo
-            <?php unset($_SESSION['message']); ?>
         <?php endif; ?>
     });
 </script>

@@ -1,7 +1,71 @@
 <?php 
 session_start(); 
-?> <!--inicio de session-->
+require_once '../settings/settings_control.php';
 
+// Obtener el browser_id actual de la cookie, o generar uno nuevo si no existe
+if (isset($_COOKIE['browser_id'])) {
+    $browser_id = $_COOKIE['browser_id']; // Usar el browser_id de la cookie
+} else {
+    $browser_id = session_id(); // Generar uno nuevo
+    setcookie('browser_id', $browser_id, time() + (86400 * 30), "/"); // 30 días de expiración
+}
+
+// Consultar la base de datos para ver si hay una sesión activa
+$stmt = $pdo->prepare("SELECT * FROM tbl_users WHERE is_logged_in = 1");
+$stmt->execute();
+
+// Obtener el resultado
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Debug: Imprimir browser_id actual y el de la base de datos
+echo "<pre>";
+echo "Browser ID Actual: " . htmlspecialchars($browser_id) . "<br>";
+if ($user) {
+    echo "Browser ID en la Tabla: " . htmlspecialchars($user['browser_id']) . "<br>";
+} else {
+    echo "No se encontró usuario activo.<br>";
+}
+echo "</pre>";
+
+// Si hay una sesión activa con el mismo browser_id, redirigir a resession.php
+if ($user && $user['browser_id'] === $browser_id) {
+    header("Location: resession.php");
+    exit();
+}
+
+// Continúa con el flujo normal de la página de inicio de sesión
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Aquí iría la lógica de validación de credenciales (ejemplo):
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    
+    // Consulta a la base de datos para validar credenciales
+    $stmt = $pdo->prepare("SELECT * FROM tbl_users WHERE username = :username");
+    $stmt->bindParam(':username', $username);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Validar la contraseña
+    if ($user && password_verify($password, $user['password'])) {
+        // Iniciar sesión
+        $_SESSION['id_user'] = $user['id_user'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['profile_image'] = $user['profile_image'];
+        
+        // Actualizar el estado de la sesión
+        $stmt = $pdo->prepare("UPDATE tbl_users SET is_logged_in = 1, browser_id = :browser_id WHERE id_user = :id_user");
+        $stmt->bindParam(':browser_id', $browser_id);
+        $stmt->bindParam(':id_user', $user['id_user']);
+        $stmt->execute();
+        
+        // Redirigir a la página de inicio
+        header("Location: " . URLSERVER . "app/views/dashboard.php");
+        exit();
+    } else {
+        $error_message = "Nombre de usuario o contraseña incorrectos.";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
