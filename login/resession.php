@@ -127,12 +127,6 @@ if (isset($_SESSION['id_user'])) {
         <a href="<?php echo URLSERVER; ?>login/login.php" style="color: #002667;">O inicia sesión como otro usuario</a>
     </div>
     
-    <!-- Pie de página -->
-    <div class="lockscreen-footer text-center">
-        Copyright &copy; 2024 <b><a href="https://adminlte.io" class="text-black">AdminLTE.io</a></b><br>
-        Todos los derechos reservados
-    </div>
-</div>
 
 <!-- Scripts -->
 <script src="<?php echo URLSERVER; ?>public/templates/plugins/jquery/jquery.min.js"></script>
