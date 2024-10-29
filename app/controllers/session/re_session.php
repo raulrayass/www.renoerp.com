@@ -2,7 +2,7 @@
 // Iniciar sesión si no está iniciada
 session_start();
 
-// Incluir la configuración de conexión a la base de datos
+// Conexión a la configuración de la base de datos
 require_once __DIR__ . '/../../../settings/settings_control.php';
 
 // Comprobar si el usuario ya está logueado

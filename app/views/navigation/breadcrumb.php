@@ -1,8 +1,7 @@
 <?php
-// Asegúrate de que se pase el array de elementos del breadcrumb a esta vista
+// Breadcrumb.php
 $breadcrumbItems = isset($breadcrumbItems) ? $breadcrumbItems : [];
 
-// Agregar una clase CSS opcional para el breadcrumb activo
 $activeClass = 'active';
 ?>
 

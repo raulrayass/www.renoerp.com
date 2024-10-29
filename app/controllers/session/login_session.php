@@ -1,6 +1,6 @@
 <?php 
 session_start();
-require_once __DIR__ . '/../../../settings/settings_control.php';
+require_once __DIR__ . '/../../../settings/settings_control.php'; //                                         Conexión a la configuración de la base de datos
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

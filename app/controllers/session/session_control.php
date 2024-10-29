@@ -1,4 +1,6 @@
 <?php
+// session_start(); - Iniciar sesión se incluye en el dashboard principal
+
 
 error_reporting(E_ALL); // Activa la visualización de errores
 ini_set('display_errors', 1); // Configura la visualización de errores

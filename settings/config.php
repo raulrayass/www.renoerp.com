@@ -2,7 +2,7 @@
 // config.php
 
 // Establecer la zona horaria
-date_default_timezone_set('America/Mexico_City');
+date_default_timezone_set('America/Mexico_City'); // Zona horaria de la aplicación
 
 define('DEBUG_MODE', true); 
 

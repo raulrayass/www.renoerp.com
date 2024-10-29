@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../settings/settings_control.php';
+require_once '../settings/settings_control.php'; // Incluir la configuración de conexión a la base de datos
 
 // Recuperar el usuario actual de la sesión
 if (isset($_SESSION['id_user'])) {

@@ -17,7 +17,7 @@ function redirect($route) {
     } else {
         // Ruta no encontrada - redirigir a una página de error 404
         header("HTTP/1.0 404 Not Found");
-        include '404.php'; // Pendiente hacer archivo php de error 404
+        include '404.php'; // Pendiente hacer la vista php de error 404
         exit();
     }
 }

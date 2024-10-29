@@ -1,7 +1,7 @@
 <?php
 // constants.php
 
-define('URLSERVER', 'http://localhost/www.renoerp.com/');
+define('URLSERVER', 'http://localhost/www.renoerp.com/'); // URL del servidor
 
 
 // Colores de la aplicación

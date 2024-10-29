@@ -2,7 +2,7 @@
 // Iniciar sesión si no está iniciada
 session_start();
 
-require_once __DIR__ . '/../../../settings/settings_control.php';
+require_once __DIR__ . '/../../../settings/settings_control.php';  // Conexión a la configuración de la base de datos
 
 // Verificar si el usuario está logueado antes de intentar actualizar el estado
 if (isset($_SESSION['id_user'])) {

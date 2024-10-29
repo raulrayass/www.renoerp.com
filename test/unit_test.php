@@ -1,7 +1,6 @@
 <?php 
-// Script para realizar pruebas unitarias
-
-require_once '../settings/database.php'; //conexión a la base de datos
+// Script para pruebas
+require_once '../settings/settings_control.php'; //Conexión a la base de datos y configuiración global
 
 // Función para actualizar la contraseña
 function updatePassword($email, $newPassword) {

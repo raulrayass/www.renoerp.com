@@ -1,5 +1,5 @@
 <?php
-require_once '../../models/navigation/BreadcrumbModel.php'; // Ruta corregida al modelo
+require_once '../../models/navigation/BreadcrumbModel.php'; // Ruta al modelo de breadcrumb
 
 class BreadcrumbController {
     private $model;
