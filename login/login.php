@@ -29,7 +29,7 @@ echo "</pre>";
 
 // Si hay una sesión activa con el mismo browser_id, redirigir a resession.php
 if ($user && $user['browser_id'] === $browser_id) {
-    header("Location: resession.php");
+    header("Location: lockscreen.php");
     exit();
 }
 
