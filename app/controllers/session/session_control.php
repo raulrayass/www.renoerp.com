@@ -23,7 +23,7 @@ if ($current_file != 'lockscreen.php') {
         $time_since_last_activity = $current_time - $_SESSION['last_activity'];
 
         // Si ha pasado más del tiempo permitido de inactividad (5 minutos = 300 segundos)
-        if ($time_since_last_activity > 30) {
+        if ($time_since_last_activity > 300) {
             // Redirigir a la pantalla de bloqueo
             header('Location: ' . URLSERVER . 'login/lockscreen.php');
             exit();

@@ -152,16 +152,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p class="login-box-msg text-center">Inicia sesión para continuar</p>
 
     <!-- Mensaje de error si las credenciales son incorrectas -->
-    <?php if (isset($_SESSION['error'])): ?>
-    <script>
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: '<?php echo $_SESSION['error']; ?>',
-        confirmButtonColor: '#002667'
-      });
-    </script>
-    <?php unset($_SESSION['error']); // Limpiar mensaje después de mostrarlo ?>
+    <?php if (isset($error_message)): ?>
+      <script>
+        $(document).ready(function() {
+          $('#errorModal').modal('show');
+        });
+      </script>
     <?php endif; ?>
 
     <!-- Formulario de inicio de sesión -->
@@ -193,6 +189,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p class="mb-1 text-center" style="margin-top: 20px;">
       <a href="forgot-password.php">No recuerdo mi contraseña</a>
     </p>
+  </div>
+
+  <!-- Modal de error -->
+  <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="errorModalLabel">Error de Inicio de Sesión</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <?php echo isset($error_message) ? htmlspecialchars($error_message) : ''; ?>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Scripts necesarios -->
