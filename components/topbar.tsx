@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -71,18 +72,22 @@ export function Topbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <p className="text-xs text-muted-foreground">Sesion activa</p>
-                  <p className="text-sm font-medium truncate">{user.email}</p>
-                </DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="font-normal">
+                    <p className="text-xs text-muted-foreground">Sesion activa</p>
+                    <p className="text-sm font-medium truncate">{user.email}</p>
+                  </DropdownMenuLabel>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={signOut}
-                  className="text-destructive focus:text-destructive gap-2 cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Cambiar usuario
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onClick={signOut}
+                    className="text-destructive focus:text-destructive gap-2 cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Cambiar usuario
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : null}
