@@ -17,11 +17,19 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
     setLoading(true)
 
     try {
-      await authClient.signIn.social({
+      const data = await authClient.signIn.social({
         provider: 'google',
-        callbackURL: '/',
+        callbackURL: typeof window !== 'undefined' ? window.location.origin : '/',
       })
+      
+      if (data?.data?.url) {
+        window.location.href = data.data.url
+      } else {
+        router.push('/')
+        router.refresh()
+      }
     } catch (err: any) {
+      console.error('[v0] Google OAuth error:', err)
       setError(err?.message ?? 'Ocurrió un error al iniciar sesión con Google')
       setLoading(false)
     }
