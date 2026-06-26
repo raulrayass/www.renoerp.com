@@ -11,8 +11,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'FinanzApp - Control de Ingresos y Egresos',
-  description: 'Gestiona tus finanzas personales: registra ingresos y egresos por categorías, visualiza tu balance y descarga reportes en Excel.',
+  title: 'Permanece Camp - Control de Finanzas',
+  description: 'Control de ingresos y egresos del campamento Permanece Camp de Nueva Creacion. Registra comida, hospedaje, pago de camperos y mas.',
   generator: 'v0.app',
   icons: {
     icon: [

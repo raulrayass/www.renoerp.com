@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { TrendingUp, LayoutDashboard, ArrowLeftRight, Tag, LogOut, User } from 'lucide-react'
+import { Tent, LayoutDashboard, ArrowLeftRight, Tag, LogOut, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { Button } from '@/components/ui/button'
@@ -33,9 +33,12 @@ export function Topbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-primary-foreground" />
+              <Tent className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-foreground text-sm hidden sm:inline">FinanzApp</span>
+            <div className="hidden sm:flex flex-col leading-tight">
+              <span className="font-bold text-foreground text-sm">Permanece Camp</span>
+              <span className="text-[10px] text-muted-foreground leading-none">Nueva Creacion</span>
+            </div>
           </Link>
 
           {/* Nav */}

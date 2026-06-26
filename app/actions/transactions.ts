@@ -91,17 +91,41 @@ export async function getDashboardData(userId: string) {
     expense: data.expense,
   }))
 
-  // Expense by category
+  // Expense by category (pie chart)
   const expenseByCat: Record<string, { name: string; color: string; total: number }> = {}
   allTransactions
     .filter((t) => t.type === 'expense')
     .forEach((t) => {
-      const key = t.categoryName ?? 'Sin categoría'
+      const key = t.categoryName ?? 'Sin categoria'
       if (!expenseByCat[key]) {
         expenseByCat[key] = { name: key, color: t.categoryColor ?? '#888', total: 0 }
       }
       expenseByCat[key].total += parseFloat(t.amount as string)
     })
+
+  // Income by category (pie chart)
+  const incomeByCat: Record<string, { name: string; color: string; total: number }> = {}
+  allTransactions
+    .filter((t) => t.type === 'income')
+    .forEach((t) => {
+      const key = t.categoryName ?? 'Sin categoria'
+      if (!incomeByCat[key]) {
+        incomeByCat[key] = { name: key, color: t.categoryColor ?? '#888', total: 0 }
+      }
+      incomeByCat[key].total += parseFloat(t.amount as string)
+    })
+
+  // Per-category comparison (income vs expense per category)
+  const allCatKeys = new Set([
+    ...Object.keys(expenseByCat),
+    ...Object.keys(incomeByCat),
+  ])
+  const categoryComparison = Array.from(allCatKeys).map((name) => ({
+    name,
+    income: incomeByCat[name]?.total ?? 0,
+    expense: expenseByCat[name]?.total ?? 0,
+    color: incomeByCat[name]?.color ?? expenseByCat[name]?.color ?? '#888',
+  })).sort((a, b) => (b.income + b.expense) - (a.income + a.expense))
 
   return {
     totalIncome,
@@ -109,6 +133,8 @@ export async function getDashboardData(userId: string) {
     balance: totalIncome - totalExpense,
     monthlyData,
     expenseByCategory: Object.values(expenseByCat).sort((a, b) => b.total - a.total),
+    incomeByCategory: Object.values(incomeByCat).sort((a, b) => b.total - a.total),
+    categoryComparison,
     recentTransactions: allTransactions.slice(0, 5),
   }
 }

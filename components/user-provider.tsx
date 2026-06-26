@@ -5,7 +5,7 @@ import { getOrCreateUser } from '@/app/actions/user'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { TrendingUp } from 'lucide-react'
+import { Tent } from 'lucide-react'
 
 interface UserCtx {
   user: { id: string; email: string; name: string | null } | null
@@ -77,12 +77,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         <div className="w-full max-w-sm">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4 shadow-lg">
-              <TrendingUp className="w-7 h-7 text-primary-foreground" />
+            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-4 shadow-lg">
+              <Tent className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">FinanzApp</h1>
-            <p className="text-muted-foreground text-sm mt-1 text-center">
-              Control de ingresos y egresos
+            <h1 className="text-2xl font-bold text-foreground text-balance text-center">Permanece Camp</h1>
+            <p className="text-primary text-sm font-medium mt-0.5">Nueva Creacion</p>
+            <p className="text-muted-foreground text-xs mt-1 text-center">
+              Control de ingresos y egresos del campamento
             </p>
           </div>
 
