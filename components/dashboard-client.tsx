@@ -46,7 +46,8 @@ export function DashboardClient({ userId }: { userId: string }) {
   const hasAnyData = totalIncome > 0 || totalExpense > 0
 
   return (
-    <div className="p-6 md:p-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+    <div className="w-full h-full overflow-y-auto">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
 
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -309,6 +310,7 @@ export function DashboardClient({ userId }: { userId: string }) {
           </div>
         )}
       </Card>
+      </div>
     </div>
   )
 }

@@ -29,22 +29,22 @@ export function Topbar() {
   const { user, signOut } = useUser()
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+    <header className="sticky top-0 z-40 bg-card border-b border-border shadow-sm">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-0">
+        <div className="flex items-center justify-between h-16 gap-3 sm:gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
-              <Tent className="w-6 h-6 text-white" />
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 hover:opacity-80 transition-opacity">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
+              <Tent className="w-5 h-5 text-white" />
             </div>
-            <div className="hidden md:flex flex-col leading-tight">
+            <div className="hidden sm:flex flex-col leading-tight">
               <span className="font-bold text-foreground text-sm">Permanece Camp</span>
-              <span className="text-[11px] text-slate-500 leading-none">Sistema de Gestión</span>
+              <span className="text-xs text-muted-foreground leading-none">Nueva Creación</span>
             </div>
           </Link>
 
           {/* Nav - Hidden on mobile, shown on md+ */}
-          <nav className="hidden md:flex items-center gap-1 flex-1 ml-8">
+          <nav className="hidden lg:flex items-center gap-1 flex-1 ml-6">
             {navItems.map(({ href, label, icon: Icon }) => {
               const active = pathname === href
               return (
@@ -54,22 +54,22 @@ export function Topbar() {
                   className={cn(
                     'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                     active
-                      ? 'bg-blue-50 text-blue-600 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-primary/10 text-primary shadow-sm'
+                      : 'text-foreground/60 hover:text-foreground hover:bg-muted'
                   )}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
-                  <span>{label}</span>
+                  <span className="hidden xl:inline">{label}</span>
                 </Link>
               )
             })}
           </nav>
 
-          {/* Mobile nav dropdown */}
-          <div className="md:hidden flex items-center gap-2">
+          {/* Mobile nav dropdown - shown on md and below */}
+          <div className="lg:hidden flex items-center gap-1">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
                   <LayoutDashboard className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -80,7 +80,7 @@ export function Topbar() {
                   const active = pathname === href
                   return (
                     <Link key={href} href={href}>
-                      <DropdownMenuItem className={cn('gap-2', active && 'bg-blue-50 text-blue-600')}>
+                      <DropdownMenuItem className={cn('gap-2 cursor-pointer', active && 'bg-primary/10 text-primary')}>
                         <Icon className="w-4 h-4" />
                         {label}
                       </DropdownMenuItem>
@@ -94,23 +94,23 @@ export function Topbar() {
           {/* User area */}
           {user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shrink-0 shadow-md">
+              <DropdownMenuTrigger className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-muted transition-colors">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shrink-0 shadow-md">
                   <User className="w-4 h-4 text-white" />
                 </div>
-                <span className="hidden sm:block truncate text-slate-700 text-sm font-medium max-w-[120px]">
+                <span className="hidden sm:block truncate text-foreground text-sm font-medium max-w-[120px]">
                   {user.name || user.email?.split('@')[0] || 'Usuario'}
                 </span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="font-normal py-2">
-                  <p className="text-xs text-slate-500">Sesión activa</p>
-                  <p className="text-sm font-semibold text-slate-900 truncate">{user.email}</p>
+                  <p className="text-xs text-muted-foreground">Sesión activa</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{user.email}</p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={signOut}
-                  className="text-red-600 focus:text-red-700 focus:bg-red-50 gap-2 cursor-pointer"
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10 gap-2 cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   Cerrar sesión
