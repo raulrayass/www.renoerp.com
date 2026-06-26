@@ -93,8 +93,22 @@ export function AttendeesClient({ userId }: Props) {
 
     startTransition(async () => {
       const amount = parseFloat(paymentForm.amount)
+      const attendee = attendeeList.find((a) => a.id === selectedAttendeeId)
+      if (!attendee) return
+
       if (isNaN(amount) || amount <= 0) {
         alert('El monto debe ser mayor a 0')
+        return
+      }
+
+      const totalAmount = parseFloat(attendee.totalAmount as string)
+      const alreadyPaid = parseFloat(attendee.amountPaid as string)
+      const remaining = totalAmount - alreadyPaid
+
+      if (amount > remaining) {
+        alert(
+          `No puedes registrar más de $${remaining.toFixed(2)}. El asistente aún debe $${remaining.toFixed(2)} de $${totalAmount.toFixed(2)}`
+        )
         return
       }
 
@@ -217,24 +231,26 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 px-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
+      <div className="flex flex-col gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Asistentes</h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">Asistentes</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
             Total: {attendeeList.length} | Pagados: {attendeeList.filter((a) => a.status === 'paid').length}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-2">
-            <Download className="w-4 h-4" />
-            Plantilla
+          <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs sm:text-sm">
+            <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Plantilla</span>
+            <span className="sm:hidden">Plantilla</span>
           </Button>
           <label className="relative inline-block">
-            <Button variant="outline" size="sm" className="gap-2 pointer-events-none">
-              <Upload className="w-4 h-4" />
-              Importar
+            <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm pointer-events-none">
+              <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Importar</span>
+              <span className="sm:hidden">Importar</span>
             </Button>
             <input
               type="file"
@@ -243,13 +259,15 @@ export function AttendeesClient({ userId }: Props) {
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </label>
-          <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-2">
-            <Download className="w-4 h-4" />
-            Exportar
+          <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1 text-xs sm:text-sm">
+            <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Exportar</span>
+            <span className="sm:hidden">Exportar</span>
           </Button>
-          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-2">
-            <Plus className="w-4 h-4" />
-            Agregar
+          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1 text-xs sm:text-sm ml-auto">
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Agregar</span>
+            <span className="sm:hidden">Agregar</span>
           </Button>
         </div>
       </div>
@@ -266,78 +284,91 @@ export function AttendeesClient({ userId }: Props) {
         </Card>
       ) : (
         <div className="space-y-3">
-          {attendeeList.map((attendee) => {
+          {attendeeList
+            .sort((a, b) => {
+              // First sort by status: paid → partial → pending
+              const statusOrder: { [key: string]: number } = { paid: 0, partial: 1, pending: 2 }
+              const statusDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3)
+              if (statusDiff !== 0) return statusDiff
+
+              // Then sort by name alphabetically
+              return a.name.localeCompare(b.name)
+            })
+            .map((attendee) => {
             const paid = parseFloat(attendee.amountPaid as string)
             const total = parseFloat(attendee.totalAmount as string)
             const percentage = (paid / total) * 100
             return (
-              <Card key={attendee.id}>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold truncate">{attendee.name}</h3>
-                        <Badge
-                          variant={attendee.status === 'paid' ? 'default' : attendee.status === 'partial' ? 'secondary' : 'outline'}
-                          className="shrink-0"
-                        >
-                          {attendee.status === 'paid' ? 'Pagado' : attendee.status === 'partial' ? 'Parcial' : 'Pendiente'}
-                        </Badge>
-                      </div>
-                      {attendee.email && <p className="text-xs text-muted-foreground">{attendee.email}</p>}
-                      <div className="mt-3 space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Progreso de pago</span>
-                          <span className="font-semibold">
-                            ${paid.toFixed(2)} / ${total.toFixed(2)}
-                          </span>
+              <Card key={attendee.id} className="overflow-hidden">
+                <CardContent className="p-3 sm:p-6">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h3 className="font-semibold text-sm sm:text-base truncate">{attendee.name}</h3>
+                          <Badge
+                            variant={attendee.status === 'paid' ? 'default' : attendee.status === 'partial' ? 'secondary' : 'outline'}
+                            className="shrink-0 text-xs"
+                          >
+                            {attendee.status === 'paid' ? 'Pagado' : attendee.status === 'partial' ? 'Parcial' : 'Pendiente'}
+                          </Badge>
                         </div>
-                        <Progress value={percentage} className="h-2" />
+                        {attendee.email && <p className="text-xs text-muted-foreground truncate">{attendee.email}</p>}
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button
+                          onClick={() => {
+                            setSelectedAttendeeId(attendee.id)
+                            setPaymentDialogOpen(true)
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0"
+                          title="Registrar pago"
+                        >
+                          <DollarSign className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setEditingId(attendee.id)
+                            setForm({
+                              name: attendee.name,
+                              email: attendee.email || '',
+                              phone: attendee.phone || '',
+                              totalAmount: total.toString(),
+                              notes: attendee.notes || '',
+                            })
+                            setDialogOpen(true)
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0"
+                          title="Editar asistente"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setDeletingId(attendee.id)
+                            setDeleteDialogOpen(true)
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                          title="Eliminar asistente"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2 shrink-0">
-                      <Button
-                        onClick={() => {
-                          setSelectedAttendeeId(attendee.id)
-                          setPaymentDialogOpen(true)
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="gap-1"
-                      >
-                        <DollarSign className="w-4 h-4" />
-                        <span className="hidden sm:inline">Pago</span>
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setEditingId(attendee.id)
-                          setForm({
-                            name: attendee.name,
-                            email: attendee.email || '',
-                            phone: attendee.phone || '',
-                            totalAmount: total.toString(),
-                            notes: attendee.notes || '',
-                          })
-                          setDialogOpen(true)
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="gap-1"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                        <span className="hidden sm:inline">Editar</span>
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setDeletingId(attendee.id)
-                          setDeleteDialogOpen(true)
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs sm:text-sm">
+                        <span className="text-muted-foreground">Progreso de pago</span>
+                        <span className="font-semibold">
+                          ${paid.toFixed(2)} / ${total.toFixed(2)}
+                        </span>
+                      </div>
+                      <Progress value={percentage} className="h-2" />
                     </div>
                   </div>
                 </CardContent>
@@ -411,10 +442,41 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Registrar Pago</DialogTitle>
+            {selectedAttendeeId && (
+              <DialogDescription className="pt-2">
+                {attendeeList.find((a) => a.id === selectedAttendeeId)?.name}
+              </DialogDescription>
+            )}
           </DialogHeader>
+          {selectedAttendeeId && attendeeList.find((a) => a.id === selectedAttendeeId) && (
+            <div className="bg-muted p-3 rounded-lg space-y-1 text-sm mb-4">
+              {(() => {
+                const att = attendeeList.find((a) => a.id === selectedAttendeeId)!
+                const total = parseFloat(att.totalAmount as string)
+                const paid = parseFloat(att.amountPaid as string)
+                const remaining = total - paid
+                return (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Monto Total:</span>
+                      <span className="font-semibold">${total.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Ya Pagado:</span>
+                      <span className="font-semibold">${paid.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-primary">
+                      <span className="font-medium">Falta Pagar:</span>
+                      <span className="font-bold">${remaining.toFixed(2)}</span>
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+          )}
           <form onSubmit={handleAddPayment} className="space-y-4">
             <div>
               <Label htmlFor="payment-amount">Monto del Pago ($) *</Label>

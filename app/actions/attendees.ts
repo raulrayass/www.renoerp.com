@@ -103,6 +103,17 @@ export async function addAttendeePayment(
 
   if (!attendee) throw new Error('Asistente no encontrado')
 
+  // Validate payment doesn't exceed remaining amount
+  const totalAmount = parseFloat(attendee.totalAmount as string)
+  const alreadyPaid = parseFloat(attendee.amountPaid as string)
+  const remaining = totalAmount - alreadyPaid
+
+  if (amount > remaining) {
+    throw new Error(
+      `El monto excede lo faltante. Debe: $${remaining.toFixed(2)} de $${totalAmount.toFixed(2)}`
+    )
+  }
+
   // Create payment record
   await db.insert(attendeePayments).values({
     attendeeId,
@@ -113,8 +124,7 @@ export async function addAttendeePayment(
   })
 
   // Update attendee paid amount and status
-  const newPaidAmount = parseFloat(attendee.amountPaid as string) + amount
-  const totalAmount = parseFloat(attendee.totalAmount as string)
+  const newPaidAmount = alreadyPaid + amount
   const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
 
   await db
