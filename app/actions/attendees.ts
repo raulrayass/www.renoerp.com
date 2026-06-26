@@ -286,35 +286,48 @@ export async function bulkCreateAttendees(
 }
 
 export async function getChurchDistribution(userId: string) {
-  const result = await db
-    .select({
-      church: attendees.church,
-      count: db.sql`count(*)`.as('count'),
+  try {
+    // Get all attendees with churches
+    const allAttendees = await db.query.attendees.findMany({
+      where: eq(attendees.userId, userId),
+      columns: {
+        church: true,
+      },
     })
-    .from(attendees)
-    .where(eq(attendees.userId, userId))
-    .groupBy(attendees.church)
 
-  const colors = [
-    '#3b82f6',
-    '#ef4444',
-    '#10b981',
-    '#f59e0b',
-    '#8b5cf6',
-    '#ec4899',
-    '#14b8a6',
-    '#f97316',
-    '#06b6d4',
-    '#84cc16',
-  ]
+    // Group and count by church
+    const churchMap = new Map<string | null, number>()
+    for (const attendee of allAttendees) {
+      const church = attendee.church || 'Sin iglesia asignada'
+      churchMap.set(church, (churchMap.get(church) || 0) + 1)
+    }
 
-  return result
-    .map((item, index) => ({
-      name: item.church || 'Sin iglesia asignada',
-      value: parseInt(item.count as string),
-      color: colors[index % colors.length],
-    }))
-    .sort((a, b) => b.value - a.value)
+    const colors = [
+      '#3b82f6',
+      '#ef4444',
+      '#10b981',
+      '#f59e0b',
+      '#8b5cf6',
+      '#ec4899',
+      '#14b8a6',
+      '#f97316',
+      '#06b6d4',
+      '#84cc16',
+    ]
+
+    const result = Array.from(churchMap.entries())
+      .map(([name, count], index) => ({
+        name: name || 'Sin iglesia asignada',
+        value: count,
+        color: colors[index % colors.length],
+      }))
+      .sort((a, b) => b.value - a.value)
+
+    return result
+  } catch (error) {
+    console.error('[v0] Error fetching church distribution:', error)
+    return []
+  }
 }
 
 export async function generateExcelTemplate() {
