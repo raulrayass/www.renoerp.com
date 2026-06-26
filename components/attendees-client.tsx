@@ -359,7 +359,22 @@ export function AttendeesClient({ userId }: Props) {
       </Card>
 
       {/* Dialogs */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (open) {
+            // Reset form when opening dialog for new attendee (not editing)
+            if (!editingId) {
+              setForm({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
+            }
+          } else {
+            // Reset form when closing dialog
+            setForm({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
+            setEditingId(null)
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingId ? 'Editar Asistente' : 'Agregar Asistente'}</DialogTitle>

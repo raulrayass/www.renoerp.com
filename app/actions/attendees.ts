@@ -31,20 +31,17 @@ export async function createAttendee(
     notes?: string
   }
 ) {
-  const [attendee] = await db
+  await db
     .insert(attendees)
     .values({
       userId,
       name: data.name,
-      email: data.email,
-      phone: data.phone,
-      totalAmount: data.totalAmount.toString(),
+      email: data.email || '',
+      phone: data.phone || '',
+      totalAmount: parseFloat(data.totalAmount.toString()),
       status: 'pending',
-      notes: data.notes,
+      notes: data.notes || '',
     })
-    .returning()
-
-  return attendee
 }
 
 export async function updateAttendee(
@@ -58,17 +55,17 @@ export async function updateAttendee(
     notes: string
   }>
 ) {
-  const [updated] = await db
+  const updateData: any = {
+    ...data,
+    updatedAt: new Date(),
+  }
+  if (data.totalAmount !== undefined) {
+    updateData.totalAmount = parseFloat(data.totalAmount.toString())
+  }
+  await db
     .update(attendees)
-    .set({
-      ...data,
-      totalAmount: data.totalAmount?.toString(),
-      updatedAt: new Date(),
-    })
+    .set(updateData)
     .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
-    .returning()
-
-  return updated
 }
 
 export async function deleteAttendee(userId: string, attendeeId: number) {
@@ -97,16 +94,15 @@ export async function addAttendeePayment(
   if (!attendee) throw new Error('Attendee not found')
 
   // Create payment record
-  const [payment] = await db
+  await db
     .insert(attendeePayments)
     .values({
       attendeeId,
       userId,
-      amount: amount.toString(),
+      amount: amount,
       paymentDate,
       notes,
     })
-    .returning()
 
   // Update attendee paid amount and status
   const newPaidAmount = parseFloat(attendee.amountPaid as string) + amount
@@ -117,15 +113,14 @@ export async function addAttendeePayment(
         ? 'partial'
         : 'pending'
 
-  const [updatedAttendee] = await db
+  await db
     .update(attendees)
     .set({
-      amountPaid: newPaidAmount.toString(),
+      amountPaid: newPaidAmount,
       status: newStatus,
       updatedAt: new Date(),
     })
     .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
-    .returning()
 
   // Get or create "Pago de Camperos" income category
   const [campPaymentCat] = await db
@@ -144,12 +139,10 @@ export async function addAttendeePayment(
       userId,
       categoryId: campPaymentCat.id,
       type: 'income',
-      amount: amount.toString(),
+      amount: amount,
       description: `Pago de ${attendee.name}`,
       date: paymentDate,
     })
-
-  return { payment, updatedAttendee }
 }
 
 export async function deleteAttendeePayment(userId: string, paymentId: number) {
@@ -194,7 +187,7 @@ export async function deleteAttendeePayment(userId: string, paymentId: number) {
   await db
     .update(attendees)
     .set({
-      amountPaid: newPaidAmount.toString(),
+      amountPaid: newPaidAmount,
       status: newStatus,
       updatedAt: new Date(),
     })
@@ -214,20 +207,17 @@ export async function bulkCreateAttendees(
     notes?: string
   }>
 ) {
-  const created = await db
+  await db
     .insert(attendees)
     .values(
       attendeesList.map((a) => ({
         userId,
         name: a.name,
-        email: a.email,
-        phone: a.phone,
-        totalAmount: a.totalAmount.toString(),
+        email: a.email || '',
+        phone: a.phone || '',
+        totalAmount: parseFloat(a.totalAmount.toString()),
         status: 'pending',
-        notes: a.notes,
+        notes: a.notes || '',
       }))
     )
-    .returning()
-
-  return created
 }
