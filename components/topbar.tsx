@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Tent, LayoutDashboard, ArrowLeftRight, Tag, LogOut, User } from 'lucide-react'
+import { Tent, LayoutDashboard, ArrowLeftRight, Tag, Users, LogOut, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,7 @@ import {
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/attendees', label: 'Asistentes', icon: Users },
   { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
   { href: '/categories', label: 'Categorias', icon: Tag },
 ]
@@ -66,13 +67,11 @@ export function Topbar() {
           {/* User area */}
           {user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2 text-sm font-normal max-w-[180px]">
-                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-primary" />
-                  </div>
-                  <span className="hidden sm:block truncate text-muted-foreground">{user.email}</span>
-                </Button>
+              <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-normal max-w-[180px] hover:bg-muted transition-colors">
+                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <User className="w-4 h-4 text-primary" />
+                </div>
+                <span className="hidden sm:block truncate text-muted-foreground text-xs">{user.email}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuGroup>

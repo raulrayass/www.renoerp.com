@@ -30,8 +30,36 @@ export const transactions = pgTable('transactions', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
+export const attendees = pgTable('attendees', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(),
+  name: text('name').notNull(),
+  email: text('email'),
+  phone: text('phone'),
+  totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
+  amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
+  status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
+  notes: text('notes'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const attendeePayments = pgTable('attendee_payments', {
+  id: serial('id').primaryKey(),
+  attendeeId: integer('attendeeId').notNull(),
+  userId: text('userId').notNull(),
+  amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
+  paymentDate: date('paymentDate').notNull(),
+  notes: text('notes'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
 export type AppUser = typeof appUsers.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
 export type Transaction = typeof transactions.$inferSelect
 export type NewTransaction = typeof transactions.$inferInsert
+export type Attendee = typeof attendees.$inferSelect
+export type NewAttendee = typeof attendees.$inferInsert
+export type AttendeePayment = typeof attendeePayments.$inferSelect
+export type NewAttendeePayment = typeof attendeePayments.$inferInsert
