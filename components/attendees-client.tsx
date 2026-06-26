@@ -10,19 +10,34 @@ import {
   deleteAttendeePayment,
   getAttendeePayments,
   bulkCreateAttendees,
-  generateExcelTemplate,
 } from '@/app/actions/attendees'
 import { Attendee, AttendeePayment } from '@/lib/db/schema'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Eye } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2 } from 'lucide-react'
 import * as XLSX from 'xlsx'
+
+const CHURCHES = [
+  'Iglesia Central',
+  'Iglesia del Calvario',
+  'Iglesia de la Paz',
+  'Iglesia Evangélica',
+  'Iglesia de la Gracia',
+  'Iglesia Nueva Vida',
+  'Iglesia Pentecostés',
+  'Iglesia Redención',
+  'Iglesia Santidad',
+  'Iglesia Esperanza',
+  'Iglesia Jesucristo',
+  'Iglesia Bendición',
+]
 
 interface Props {
   userId: string
@@ -37,8 +52,20 @@ export function AttendeesClient({ userId }: Props) {
   const [selectedAttendeeId, setSelectedAttendeeId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [form, setForm] = useState({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
-  const [paymentForm, setPaymentForm] = useState({ amount: '', date: new Date().toISOString().split('T')[0], notes: '' })
+  const [form, setForm] = useState({
+    name: '',
+    phone: '',
+    church: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    totalAmount: '',
+    notes: '',
+  })
+  const [paymentForm, setPaymentForm] = useState({
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+    notes: '',
+  })
 
   useEffect(() => {
     loadAttendees()
@@ -62,22 +89,34 @@ export function AttendeesClient({ userId }: Props) {
         if (editingId) {
           await updateAttendee(userId, editingId, {
             name: form.name,
-            email: form.email,
             phone: form.phone,
+            church: form.church,
+            emergencyContactName: form.emergencyContactName,
+            emergencyContactPhone: form.emergencyContactPhone,
             totalAmount: amount,
             notes: form.notes,
           })
         } else {
           await createAttendee(userId, {
             name: form.name,
-            email: form.email,
             phone: form.phone,
+            church: form.church,
+            emergencyContactName: form.emergencyContactName,
+            emergencyContactPhone: form.emergencyContactPhone,
             totalAmount: amount,
             notes: form.notes,
           })
         }
         setDialogOpen(false)
-        setForm({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
+        setForm({
+          name: '',
+          phone: '',
+          church: '',
+          emergencyContactName: '',
+          emergencyContactPhone: '',
+          totalAmount: '',
+          notes: '',
+        })
         setEditingId(null)
         await loadAttendees()
       } catch (error) {
@@ -115,7 +154,11 @@ export function AttendeesClient({ userId }: Props) {
       try {
         await addAttendeePayment(userId, selectedAttendeeId, amount, paymentForm.date, paymentForm.notes)
         setPaymentDialogOpen(false)
-        setPaymentForm({ amount: '', date: new Date().toISOString().split('T')[0], notes: '' })
+        setPaymentForm({
+          amount: '',
+          date: new Date().toISOString().split('T')[0],
+          notes: '',
+        })
         setSelectedAttendeeId(null)
         await loadAttendees()
       } catch (error) {
@@ -125,13 +168,10 @@ export function AttendeesClient({ userId }: Props) {
     })
   }
 
-  async function handleDelete() {
-    if (!deletingId) return
+  async function handleDelete(id: number) {
     startTransition(async () => {
       try {
-        await deleteAttendee(userId, deletingId)
-        setDeleteDialogOpen(false)
-        setDeletingId(null)
+        await deleteAttendee(userId, id)
         await loadAttendees()
       } catch (error) {
         alert('Error al eliminar asistente')
@@ -140,23 +180,38 @@ export function AttendeesClient({ userId }: Props) {
     })
   }
 
-  async function handleDeletePayment(paymentId: number) {
-    startTransition(async () => {
-      try {
-        await deleteAttendeePayment(userId, paymentId)
-        await loadAttendees()
-      } catch (error) {
-        alert('Error al eliminar pago')
-        console.error(error)
-      }
-    })
-  }
-
-  async function downloadTemplate() {
+  function downloadTemplate() {
     const ws = XLSX.utils.aoa_to_sheet([
-      ['Nombre', 'Correo', 'Teléfono', 'Monto Total ($)', 'Pago Inicial ($)', 'Notas'],
-      ['Juan García', 'juan@email.com', '5551234567', '2000', '0', 'Ejemplo'],
-      ['María López', 'maria@email.com', '5559876543', '1800', '500', 'Ejemplo con pago inicial'],
+      [
+        'Nombre',
+        'Teléfono',
+        'Iglesia',
+        'Contacto Emergencia',
+        'Teléfono Emergencia',
+        'Monto Total ($)',
+        'Pago Inicial ($)',
+        'Notas',
+      ],
+      [
+        'Juan García',
+        '5551234567',
+        'Iglesia Central',
+        'Maria García',
+        '5559876543',
+        '2000',
+        '0',
+        'Ejemplo',
+      ],
+      [
+        'María López',
+        '5559876543',
+        'Iglesia del Calvario',
+        'Carlos López',
+        '5551111111',
+        '1800',
+        '500',
+        'Con pago inicial',
+      ],
     ])
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Asistentes')
@@ -167,68 +222,66 @@ export function AttendeesClient({ userId }: Props) {
     const file = e.target.files?.[0]
     if (!file) return
 
-    startTransition(async () => {
-      try {
-        const reader = new FileReader()
-        reader.onload = async (event) => {
-          const data = event.target?.result
-          const workbook = XLSX.read(data, { type: 'binary' })
-          const sheetName = workbook.SheetNames[0]
-          const sheet = workbook.Sheets[sheetName]
-          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[]
+    try {
+      const reader = new FileReader()
+      reader.onload = async (event) => {
+        const workbook = XLSX.read(event.target?.result, { type: 'binary' })
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[]
 
-          if (rows.length < 2) {
-            alert('El archivo debe tener al menos una fila de datos')
-            return
-          }
-
-          const attendeesToImport = rows.slice(1).map((row) => ({
-            name: String(row[0] || '').trim(),
-            email: String(row[1] || '').trim(),
-            phone: String(row[2] || '').trim(),
-            totalAmount: parseFloat(String(row[3] || '0')),
-            initialPayment: parseFloat(String(row[4] || '0')) || 0,
-            notes: String(row[5] || '').trim(),
-          }))
-
-          const valid = attendeesToImport.filter((a) => a.name && a.totalAmount > 0)
-          if (valid.length === 0) {
-            alert('No hay asistentes válidos para importar')
-            return
-          }
-
-          await bulkCreateAttendees(userId, valid)
-          await loadAttendees()
-          alert(`Se importaron ${valid.length} asistentes correctamente`)
+        if (rows.length < 2) {
+          alert('El archivo debe contener al menos una fila de datos')
+          return
         }
-        reader.readAsBinaryString(file)
-      } catch (error) {
-        alert('Error al importar archivo')
-        console.error(error)
+
+        const attendeesToImport = rows.slice(1).map((row) => ({
+          name: String(row[0] || '').trim(),
+          phone: String(row[1] || '').trim(),
+          church: String(row[2] || '').trim(),
+          emergencyContactName: String(row[3] || '').trim(),
+          emergencyContactPhone: String(row[4] || '').trim(),
+          totalAmount: parseFloat(String(row[5] || '0')),
+          initialPayment: parseFloat(String(row[6] || '0')) || 0,
+          notes: String(row[7] || '').trim(),
+        }))
+
+        if (
+          attendeesToImport.every(
+            (a) =>
+              a.name &&
+              a.totalAmount > 0 &&
+              a.church &&
+              a.emergencyContactName &&
+              a.emergencyContactPhone
+          )
+        ) {
+          await bulkCreateAttendees(userId, attendeesToImport)
+          alert(`${attendeesToImport.length} asistentes importados exitosamente`)
+          await loadAttendees()
+        } else {
+          alert('Algunos registros están incompletos. Verifica todos los campos requeridos.')
+        }
       }
-    })
+      reader.readAsBinaryString(file)
+    } catch (error) {
+      alert('Error al procesar el archivo')
+      console.error(error)
+    }
   }
 
-  async function exportCurrentData() {
-    if (attendeeList.length === 0) {
-      alert('No hay asistentes para exportar')
-      return
-    }
-
-    const data = attendeeList.map((a) => [
-      a.name,
-      a.email || '',
-      a.phone || '',
-      parseFloat(a.totalAmount as string),
-      parseFloat(a.amountPaid as string),
-      a.status,
-      a.notes || '',
-    ])
-
-    const ws = XLSX.utils.aoa_to_sheet([
-      ['Nombre', 'Correo', 'Teléfono', 'Monto Total', 'Monto Pagado', 'Estado', 'Notas'],
-      ...data,
-    ])
+  function exportCurrentData() {
+    const data = attendeeList.map((a) => ({
+      Nombre: a.name,
+      Teléfono: a.phone,
+      Iglesia: a.church,
+      'Contacto Emergencia': a.emergencyContactName,
+      'Teléfono Emergencia': a.emergencyContactPhone,
+      'Monto Total ($)': parseFloat(a.totalAmount as string),
+      'Pagado ($)': parseFloat(a.amountPaid as string),
+      Estado: a.status === 'paid' ? 'Pagado' : a.status === 'partial' ? 'Parcial' : 'Pendiente',
+      Notas: a.notes,
+    }))
+    const ws = XLSX.utils.json_to_sheet(data)
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Asistentes')
     XLSX.writeFile(wb, `Asistentes_${new Date().toISOString().split('T')[0]}.xlsx`)
@@ -278,113 +331,141 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Attendees List */}
       {attendeeList.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <p className="text-muted-foreground">No hay asistentes registrados</p>
-            <Button onClick={() => setDialogOpen(true)} variant="link" className="mt-2">
-              Crear el primero
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="text-center py-12 text-muted-foreground">No hay asistentes registrados</div>
       ) : (
         <div className="space-y-3">
           {attendeeList
             .sort((a, b) => {
-              // First sort by status: paid → partial → pending
               const statusOrder: { [key: string]: number } = { paid: 0, partial: 1, pending: 2 }
               const statusDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3)
               if (statusDiff !== 0) return statusDiff
-
-              // Then sort by name alphabetically
               return a.name.localeCompare(b.name)
             })
             .map((attendee) => {
-            const paid = parseFloat(attendee.amountPaid as string)
-            const total = parseFloat(attendee.totalAmount as string)
-            const percentage = (paid / total) * 100
-            return (
-              <Card key={attendee.id} className="overflow-hidden">
-                <CardContent className="p-3 sm:p-6">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h3 className="font-semibold text-sm sm:text-base truncate">{attendee.name}</h3>
-                          <Badge
-                            variant={attendee.status === 'paid' ? 'default' : attendee.status === 'partial' ? 'secondary' : 'outline'}
-                            className="shrink-0 text-xs"
-                          >
-                            {attendee.status === 'paid' ? 'Pagado' : attendee.status === 'partial' ? 'Parcial' : 'Pendiente'}
-                          </Badge>
+              const total = parseFloat(attendee.totalAmount as string)
+              const paid = parseFloat(attendee.amountPaid as string)
+              const percentage = (paid / total) * 100
+
+              return (
+                <Card key={attendee.id} className="overflow-hidden">
+                  <CardContent className="p-3 sm:p-6">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="font-semibold text-sm sm:text-base truncate">{attendee.name}</h3>
+                            <Badge
+                              variant={attendee.status === 'paid' ? 'default' : attendee.status === 'partial' ? 'secondary' : 'outline'}
+                              className="shrink-0 text-xs"
+                            >
+                              {attendee.status === 'paid' ? 'Pagado' : attendee.status === 'partial' ? 'Parcial' : 'Pendiente'}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground space-y-0.5">
+                            {attendee.church && <p>Iglesia: {attendee.church}</p>}
+                            {attendee.phone && <p>Tel: {attendee.phone}</p>}
+                            {attendee.emergencyContactName && (
+                              <p>Emergencia: {attendee.emergencyContactName} ({attendee.emergencyContactPhone})</p>
+                            )}
+                          </div>
                         </div>
-                        {attendee.email && <p className="text-xs text-muted-foreground truncate">{attendee.email}</p>}
+                        <div className="flex gap-1 shrink-0">
+                          <Button
+                            onClick={() => {
+                              setSelectedAttendeeId(attendee.id)
+                              setPaymentDialogOpen(true)
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 p-0"
+                            title="Registrar pago"
+                          >
+                            <DollarSign className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setEditingId(attendee.id)
+                              setForm({
+                                name: attendee.name,
+                                phone: attendee.phone || '',
+                                church: attendee.church || '',
+                                emergencyContactName: attendee.emergencyContactName || '',
+                                emergencyContactPhone: attendee.emergencyContactPhone || '',
+                                totalAmount: total.toString(),
+                                notes: attendee.notes || '',
+                              })
+                              setDialogOpen(true)
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 p-0"
+                            title="Editar asistente"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setDeletingId(attendee.id)
+                              setDeleteDialogOpen(true)
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            title="Eliminar asistente"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex gap-1 shrink-0">
-                        <Button
-                          onClick={() => {
-                            setSelectedAttendeeId(attendee.id)
-                            setPaymentDialogOpen(true)
-                          }}
-                          size="sm"
-                          variant="outline"
-                          className="h-8 w-8 p-0"
-                          title="Registrar pago"
-                        >
-                          <DollarSign className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setEditingId(attendee.id)
-                            setForm({
-                              name: attendee.name,
-                              email: attendee.email || '',
-                              phone: attendee.phone || '',
-                              totalAmount: total.toString(),
-                              notes: attendee.notes || '',
-                            })
-                            setDialogOpen(true)
-                          }}
-                          size="sm"
-                          variant="outline"
-                          className="h-8 w-8 p-0"
-                          title="Editar asistente"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setDeletingId(attendee.id)
-                            setDeleteDialogOpen(true)
-                          }}
-                          size="sm"
-                          variant="outline"
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                          title="Eliminar asistente"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs sm:text-sm">
+                          <span className="text-muted-foreground">Progreso de pago</span>
+                          <span className="font-semibold">
+                            ${paid.toFixed(2)} / ${total.toFixed(2)}
+                          </span>
+                        </div>
+                        <Progress value={percentage} className="h-2" />
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs sm:text-sm">
-                        <span className="text-muted-foreground">Progreso de pago</span>
-                        <span className="font-semibold">
-                          ${paid.toFixed(2)} / ${total.toFixed(2)}
-                        </span>
-                      </div>
-                      <Progress value={percentage} className="h-2" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
+                  </CardContent>
+                </Card>
+              )
+            })}
         </div>
       )}
 
       {/* Add/Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (open) {
+            if (!editingId) {
+              setForm({
+                name: '',
+                phone: '',
+                church: '',
+                emergencyContactName: '',
+                emergencyContactPhone: '',
+                totalAmount: '',
+                notes: '',
+              })
+            }
+          } else {
+            setForm({
+              name: '',
+              phone: '',
+              church: '',
+              emergencyContactName: '',
+              emergencyContactPhone: '',
+              totalAmount: '',
+              notes: '',
+            })
+            setEditingId(null)
+          }
+        }}
+      >
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? 'Editar Asistente' : 'Agregar Asistente'}</DialogTitle>
           </DialogHeader>
@@ -399,16 +480,7 @@ export function AttendeesClient({ userId }: Props) {
               />
             </div>
             <div>
-              <Label htmlFor="email">Correo</Label>
-              <Input
-                id="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="juan@email.com"
-              />
-            </div>
-            <div>
-              <Label htmlFor="phone">Teléfono</Label>
+              <Label htmlFor="phone">Teléfono *</Label>
               <Input
                 id="phone"
                 value={form.phone}
@@ -417,9 +489,42 @@ export function AttendeesClient({ userId }: Props) {
               />
             </div>
             <div>
-              <Label htmlFor="amount">Monto Total ($) *</Label>
+              <Label htmlFor="church">Iglesia *</Label>
+              <Select value={form.church} onValueChange={(value) => setForm({ ...form, church: value })}>
+                <SelectTrigger id="church">
+                  <SelectValue placeholder="Selecciona una iglesia" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CHURCHES.map((church) => (
+                    <SelectItem key={church} value={church}>
+                      {church}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="emergencyContactName">Contacto de Emergencia (Nombre) *</Label>
               <Input
-                id="amount"
+                id="emergencyContactName"
+                value={form.emergencyContactName}
+                onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })}
+                placeholder="Maria García"
+              />
+            </div>
+            <div>
+              <Label htmlFor="emergencyContactPhone">Contacto de Emergencia (Teléfono) *</Label>
+              <Input
+                id="emergencyContactPhone"
+                value={form.emergencyContactPhone}
+                onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
+                placeholder="5559876543"
+              />
+            </div>
+            <div>
+              <Label htmlFor="totalAmount">Monto Total ($) *</Label>
+              <Input
+                id="totalAmount"
                 type="number"
                 step="0.01"
                 min="0"
@@ -434,12 +539,17 @@ export function AttendeesClient({ userId }: Props) {
                 id="notes"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Joven participante"
+                placeholder="Notas adicionales"
               />
             </div>
-            <Button type="submit" disabled={isPending} className="w-full">
-              {editingId ? 'Actualizar' : 'Guardar'}
-            </Button>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {editingId ? 'Guardar Cambios' : 'Agregar Asistente'}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
@@ -495,7 +605,7 @@ export function AttendeesClient({ userId }: Props) {
               />
             </div>
             <div>
-              <Label htmlFor="payment-date">Fecha de Pago</Label>
+              <Label htmlFor="payment-date">Fecha del Pago *</Label>
               <Input
                 id="payment-date"
                 type="date"
@@ -504,33 +614,46 @@ export function AttendeesClient({ userId }: Props) {
               />
             </div>
             <div>
-              <Label htmlFor="payment-notes">Notas</Label>
+              <Label htmlFor="payment-notes">Notas (opcional)</Label>
               <Input
                 id="payment-notes"
                 value={paymentForm.notes}
                 onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-                placeholder="Primera mitad del pago"
+                placeholder="Notas del pago"
               />
             </div>
-            <Button type="submit" disabled={isPending} className="w-full">
-              Registrar Pago
-            </Button>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button type="button" variant="outline" onClick={() => setPaymentDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                Registrar Pago
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar Asistente</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminarán todos los pagos registrados del asistente.
+              ¿Estás seguro que deseas eliminar este asistente y todos sus registros de pago? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-3">
+          <div className="flex gap-2 justify-end pt-4">
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isPending} className="bg-destructive hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={() => {
+                if (deletingId) {
+                  handleDelete(deletingId)
+                  setDeleteDialogOpen(false)
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Eliminar
             </AlertDialogAction>
           </div>

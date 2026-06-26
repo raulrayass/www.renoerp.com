@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { getDashboardData } from '@/app/actions/transactions'
+import { getChurchDistribution } from '@/app/actions/attendees'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -21,9 +22,11 @@ const EXPENSE_COLOR = '#f97316'
 
 export function DashboardClient({ userId }: { userId: string }) {
   const [data, setData] = useState<DashboardData | null>(null)
+  const [churchData, setChurchData] = useState<any[]>([])
 
   useEffect(() => {
     getDashboardData(userId).then(setData)
+    getChurchDistribution(userId).then(setChurchData)
   }, [userId])
 
   if (!data) {
@@ -233,45 +236,77 @@ export function DashboardClient({ userId }: { userId: string }) {
           )}
         </Card>
 
-        <Card className="lg:col-span-2 p-5">
-          <h2 className="font-semibold text-foreground mb-4">Movimientos recientes</h2>
-          {recentTransactions.length === 0 ? (
-            <p className="text-muted-foreground text-sm text-center py-8">
-              No hay transacciones aun. Ve a Transacciones para agregar.
-            </p>
+        <Card className="p-5">
+          <h2 className="font-semibold text-foreground mb-1">Asistentes por Iglesia</h2>
+          <p className="text-xs text-muted-foreground mb-4">Distribución de asistentes del campamento</p>
+          {churchData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie
+                  data={churchData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="42%"
+                  outerRadius={80}
+                  innerRadius={48}
+                >
+                  {churchData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number) => `${value} asistentes`}
+                  contentStyle={{ borderRadius: '8px', fontSize: '13px', border: '1px solid var(--border)' }}
+                />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
+              </PieChart>
+            </ResponsiveContainer>
           ) : (
-            <div className="flex flex-col divide-y divide-border">
-              {recentTransactions.map((t) => (
-                <div key={t.id} className="flex items-center justify-between py-3">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: (t.categoryColor ?? '#888') + '22' }}
-                    >
-                      {t.type === 'income'
-                        ? <ArrowUpRight className="w-4 h-4" style={{ color: INCOME_COLOR }} />
-                        : <ArrowDownRight className="w-4 h-4" style={{ color: EXPENSE_COLOR }} />
-                      }
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{t.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {t.categoryName ?? 'Sin categoria'} &middot; {t.date}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className="text-sm font-semibold shrink-0"
-                    style={{ color: t.type === 'income' ? INCOME_COLOR : EXPENSE_COLOR }}
-                  >
-                    {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <EmptyChart text="Agrega asistentes para ver la distribución por iglesia." />
           )}
         </Card>
       </div>
+
+      {/* Recent transactions */}
+      <Card className="p-5">
+        <h2 className="font-semibold text-foreground mb-4">Movimientos recientes</h2>
+        {recentTransactions.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center py-8">
+            No hay transacciones aun. Ve a Transacciones para agregar.
+          </p>
+        ) : (
+          <div className="flex flex-col divide-y divide-border">
+            {recentTransactions.map((t) => (
+              <div key={t.id} className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: (t.categoryColor ?? '#888') + '22' }}
+                  >
+                    {t.type === 'income'
+                      ? <ArrowUpRight className="w-4 h-4" style={{ color: INCOME_COLOR }} />
+                      : <ArrowDownRight className="w-4 h-4" style={{ color: EXPENSE_COLOR }} />
+                    }
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{t.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.categoryName ?? 'Sin categoria'} &middot; {t.date}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className="text-sm font-semibold shrink-0"
+                  style={{ color: t.type === 'income' ? INCOME_COLOR : EXPENSE_COLOR }}
+                >
+                  {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   )
 }

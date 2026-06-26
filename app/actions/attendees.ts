@@ -25,8 +25,10 @@ export async function createAttendee(
   userId: string,
   data: {
     name: string
-    email?: string
     phone?: string
+    church?: string
+    emergencyContactName?: string
+    emergencyContactPhone?: string
     totalAmount: number
     notes?: string
   }
@@ -34,8 +36,10 @@ export async function createAttendee(
   await db.insert(attendees).values({
     userId,
     name: data.name,
-    email: data.email || '',
     phone: data.phone || '',
+    church: data.church || '',
+    emergencyContactName: data.emergencyContactName || '',
+    emergencyContactPhone: data.emergencyContactPhone || '',
     totalAmount: parseFloat(data.totalAmount.toString()),
     status: 'pending',
     notes: data.notes || '',
@@ -47,19 +51,21 @@ export async function updateAttendee(
   attendeeId: number,
   data: Partial<{
     name: string
-    email: string
     phone: string
+    church: string
+    emergencyContactName: string
+    emergencyContactPhone: string
     totalAmount: number
     notes: string
   }>
 ) {
-  const updateData: any = { updatedAt: new Date() }
-  if (data.name) updateData.name = data.name
-  if (data.email) updateData.email = data.email
-  if (data.phone) updateData.phone = data.phone
-  if (data.notes) updateData.notes = data.notes
-  if (data.totalAmount !== undefined) updateData.totalAmount = parseFloat(data.totalAmount.toString())
-
+  const updateData: any = {
+    ...data,
+    updatedAt: new Date(),
+  }
+  if (data.totalAmount !== undefined) {
+    updateData.totalAmount = parseFloat(data.totalAmount.toString())
+  }
   await db
     .update(attendees)
     .set(updateData)
@@ -216,8 +222,10 @@ export async function bulkCreateAttendees(
   userId: string,
   attendeesList: Array<{
     name: string
-    email?: string
     phone?: string
+    church?: string
+    emergencyContactName?: string
+    emergencyContactPhone?: string
     totalAmount: number
     initialPayment?: number
     notes?: string
@@ -232,8 +240,10 @@ export async function bulkCreateAttendees(
       attendeesList.map((a) => ({
         userId,
         name: a.name.trim(),
-        email: (a.email || '').trim(),
         phone: (a.phone || '').trim(),
+        church: (a.church || '').trim(),
+        emergencyContactName: (a.emergencyContactName || '').trim(),
+        emergencyContactPhone: (a.emergencyContactPhone || '').trim(),
         totalAmount: parseFloat(a.totalAmount.toString()),
         amountPaid: parseFloat((a.initialPayment || 0).toString()),
         status:
@@ -273,6 +283,38 @@ export async function bulkCreateAttendees(
   if (transactionsToInsert.length > 0) {
     await db.insert(transactions).values(transactionsToInsert)
   }
+}
+
+export async function getChurchDistribution(userId: string) {
+  const result = await db
+    .select({
+      church: attendees.church,
+      count: db.sql`count(*)`.as('count'),
+    })
+    .from(attendees)
+    .where(eq(attendees.userId, userId))
+    .groupBy(attendees.church)
+
+  const colors = [
+    '#3b82f6',
+    '#ef4444',
+    '#10b981',
+    '#f59e0b',
+    '#8b5cf6',
+    '#ec4899',
+    '#14b8a6',
+    '#f97316',
+    '#06b6d4',
+    '#84cc16',
+  ]
+
+  return result
+    .filter((item) => item.church)
+    .map((item, index) => ({
+      name: item.church || 'Sin iglesia',
+      value: parseInt(item.count as string),
+      color: colors[index % colors.length],
+    }))
 }
 
 export async function generateExcelTemplate() {

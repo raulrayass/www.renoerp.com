@@ -34,8 +34,10 @@ export const attendees = pgTable('attendees', {
   id: serial('id').primaryKey(),
   userId: text('userId').notNull(),
   name: text('name').notNull(),
-  email: text('email'),
   phone: text('phone'),
+  church: text('church'),
+  emergencyContactName: text('emergencyContactName'),
+  emergencyContactPhone: text('emergencyContactPhone'),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
   amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
   status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
