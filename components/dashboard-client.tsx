@@ -1,44 +1,35 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import { getDashboardData } from '@/app/actions/transactions'
 import { Card } from '@/components/ui/card'
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 
-interface DashboardData {
-  totalIncome: number
-  totalExpense: number
-  balance: number
-  monthlyData: { month: string; income: number; expense: number }[]
-  expenseByCategory: { name: string; color: string; total: number }[]
-  recentTransactions: {
-    id: number
-    type: string
-    amount: string
-    date: string
-    description: string
-    categoryName: string | null
-    categoryColor: string | null
-    categoryIcon: string | null
-  }[]
-}
+type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value)
 }
 
-export function DashboardClient({ data }: { data: DashboardData }) {
+export function DashboardClient({ userId }: { userId: string }) {
+  const [data, setData] = useState<DashboardData | null>(null)
+
+  useEffect(() => {
+    getDashboardData(userId).then(setData)
+  }, [userId])
+
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center flex-1 min-h-64">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
   const { totalIncome, totalExpense, balance, monthlyData, expenseByCategory, recentTransactions } = data
 
   return (
@@ -71,12 +62,12 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Ingresos</p>
-              <p className="text-2xl font-bold mt-1 text-[oklch(0.55_0.17_160)]">
+              <p className="text-2xl font-bold mt-1" style={{ color: 'oklch(0.55 0.17 160)' }}>
                 {formatCurrency(totalIncome)}
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-[oklch(0.55_0.17_160)]/10 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-[oklch(0.55_0.17_160)]" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'oklch(0.55 0.17 160 / 0.1)' }}>
+              <TrendingUp className="w-5 h-5" style={{ color: 'oklch(0.55 0.17 160)' }} />
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-3">Acumulado total</p>
@@ -86,12 +77,12 @@ export function DashboardClient({ data }: { data: DashboardData }) {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Egresos</p>
-              <p className="text-2xl font-bold mt-1 text-[oklch(0.55_0.20_25)]">
+              <p className="text-2xl font-bold mt-1" style={{ color: 'oklch(0.55 0.20 25)' }}>
                 {formatCurrency(totalExpense)}
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-[oklch(0.55_0.20_25)]/10 flex items-center justify-center">
-              <TrendingDown className="w-5 h-5 text-[oklch(0.55_0.20_25)]" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'oklch(0.55 0.20 25 / 0.1)' }}>
+              <TrendingDown className="w-5 h-5" style={{ color: 'oklch(0.55 0.20 25)' }} />
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-3">Acumulado total</p>
@@ -100,47 +91,37 @@ export function DashboardClient({ data }: { data: DashboardData }) {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Bar chart */}
         <Card className="lg:col-span-2 p-5">
-          <h2 className="font-semibold text-foreground mb-4">Ingresos vs Egresos (últimos 6 meses)</h2>
-          {monthlyData.length > 0 ? (
+          <h2 className="font-semibold text-foreground mb-4">Ingresos vs Egresos (ultimos 6 meses)</h2>
+          {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={monthlyData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.88 0.01 240)" />
-                <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'oklch(0.52 0.02 240)' }} />
-                <YAxis tick={{ fontSize: 12, fill: 'oklch(0.52 0.02 240)' }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
+                <YAxis tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid oklch(0.88 0.01 240)', fontSize: '13px' }}
+                  contentStyle={{ borderRadius: '8px', fontSize: '13px' }}
                 />
                 <Bar dataKey="income" name="Ingresos" fill="oklch(0.55 0.17 160)" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="expense" name="Egresos" fill="oklch(0.55 0.20 25)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm">
-              No hay datos aún. Agrega transacciones para ver la gráfica.
+            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm text-center px-4">
+              No hay datos aun. Agrega transacciones para ver la grafica.
             </div>
           )}
         </Card>
 
-        {/* Pie chart */}
         <Card className="p-5">
-          <h2 className="font-semibold text-foreground mb-4">Egresos por categoría</h2>
+          <h2 className="font-semibold text-foreground mb-4">Egresos por categoria</h2>
           {expenseByCategory.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
-                <Pie
-                  data={expenseByCategory}
-                  dataKey="total"
-                  nameKey="name"
-                  cx="50%"
-                  cy="45%"
-                  outerRadius={80}
-                  innerRadius={48}
-                >
-                  {expenseByCategory.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
+                <Pie data={expenseByCategory} dataKey="total" nameKey="name" cx="50%" cy="45%" outerRadius={80} innerRadius={48}>
+                  {expenseByCategory.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip formatter={(value: number) => formatCurrency(value)} contentStyle={{ borderRadius: '8px', fontSize: '13px' }} />
@@ -149,7 +130,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
             </ResponsiveContainer>
           ) : (
             <div className="h-60 flex items-center justify-center text-muted-foreground text-sm text-center px-4">
-              No hay egresos registrados aún.
+              No hay egresos registrados aun.
             </div>
           )}
         </Card>
@@ -160,7 +141,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         <h2 className="font-semibold text-foreground mb-4">Transacciones recientes</h2>
         {recentTransactions.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">
-            No hay transacciones aún. Ve a la sección de Transacciones para agregar.
+            No hay transacciones aun. Ve a Transacciones para agregar.
           </p>
         ) : (
           <div className="flex flex-col divide-y divide-border">
@@ -171,21 +152,18 @@ export function DashboardClient({ data }: { data: DashboardData }) {
                     className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
                     style={{ backgroundColor: `${t.categoryColor ?? '#888'}20` }}
                   >
-                    {t.type === 'income' ? (
-                      <ArrowUpRight className="w-4 h-4" style={{ color: 'oklch(0.55 0.17 160)' }} />
-                    ) : (
-                      <ArrowDownRight className="w-4 h-4" style={{ color: 'oklch(0.55 0.20 25)' }} />
-                    )}
+                    {t.type === 'income'
+                      ? <ArrowUpRight className="w-4 h-4" style={{ color: 'oklch(0.55 0.17 160)' }} />
+                      : <ArrowDownRight className="w-4 h-4" style={{ color: 'oklch(0.55 0.20 25)' }} />
+                    }
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">{t.description}</p>
-                    <p className="text-xs text-muted-foreground">{t.categoryName ?? 'Sin categoría'} · {t.date}</p>
+                    <p className="text-xs text-muted-foreground">{t.categoryName ?? 'Sin categoria'} · {t.date}</p>
                   </div>
                 </div>
-                <span
-                  className={`text-sm font-semibold ${t.type === 'income' ? 'text-[oklch(0.55_0.17_160)]' : 'text-[oklch(0.55_0.20_25)]'}`}
-                >
-                  {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount))}
+                <span className="text-sm font-semibold" style={{ color: t.type === 'income' ? 'oklch(0.55 0.17 160)' : 'oklch(0.55 0.20 25)' }}>
+                  {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
                 </span>
               </div>
             ))}

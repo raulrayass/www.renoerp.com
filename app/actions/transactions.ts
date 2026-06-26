@@ -1,25 +1,14 @@
 'use server'
 
-import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { transactions, categories } from '@/lib/db/schema'
-import { and, eq, desc, gte, lte, sql } from 'drizzle-orm'
-import { headers } from 'next/headers'
+import { and, eq, desc, gte, lte } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 
-async function getUserId() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user) throw new Error('Unauthorized')
-  return session.user.id
-}
-
-export async function getTransactions(filters?: {
-  type?: string
-  categoryId?: number
-  from?: string
-  to?: string
-}) {
-  const userId = await getUserId()
+export async function getTransactions(
+  userId: string,
+  filters?: { type?: string; categoryId?: number; from?: string; to?: string }
+) {
   const conditions = [eq(transactions.userId, userId)]
 
   if (filters?.type && filters.type !== 'all') {
@@ -35,7 +24,7 @@ export async function getTransactions(filters?: {
     conditions.push(lte(transactions.date, filters.to))
   }
 
-  const rows = await db
+  return db
     .select({
       id: transactions.id,
       userId: transactions.userId,
@@ -54,13 +43,9 @@ export async function getTransactions(filters?: {
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .where(and(...conditions))
     .orderBy(desc(transactions.date), desc(transactions.createdAt))
-
-  return rows
 }
 
-export async function getDashboardData() {
-  const userId = await getUserId()
-
+export async function getDashboardData(userId: string) {
   const allTransactions = await db
     .select({
       id: transactions.id,
@@ -85,7 +70,7 @@ export async function getDashboardData() {
     .filter((t) => t.type === 'expense')
     .reduce((sum, t) => sum + parseFloat(t.amount as string), 0)
 
-  // Monthly data for chart (last 6 months)
+  // Last 6 months
   const monthlyMap: Record<string, { income: number; expense: number }> = {}
   for (let i = 5; i >= 0; i--) {
     const d = new Date()
@@ -93,7 +78,6 @@ export async function getDashboardData() {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     monthlyMap[key] = { income: 0, expense: 0 }
   }
-
   allTransactions.forEach((t) => {
     const key = t.date.substring(0, 7)
     if (monthlyMap[key]) {
@@ -101,14 +85,13 @@ export async function getDashboardData() {
       else monthlyMap[key].expense += parseFloat(t.amount as string)
     }
   })
-
   const monthlyData = Object.entries(monthlyMap).map(([month, data]) => ({
     month: new Date(month + '-01').toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }),
     income: data.income,
     expense: data.expense,
   }))
 
-  // Category breakdown for expenses
+  // Expense by category
   const expenseByCat: Record<string, { name: string; color: string; total: number }> = {}
   allTransactions
     .filter((t) => t.type === 'expense')
@@ -120,68 +103,39 @@ export async function getDashboardData() {
       expenseByCat[key].total += parseFloat(t.amount as string)
     })
 
-  const expenseByCategory = Object.values(expenseByCat).sort((a, b) => b.total - a.total)
-
-  const recentTransactions = allTransactions.slice(0, 5)
-
   return {
     totalIncome,
     totalExpense,
     balance: totalIncome - totalExpense,
     monthlyData,
-    expenseByCategory,
-    recentTransactions,
+    expenseByCategory: Object.values(expenseByCat).sort((a, b) => b.total - a.total),
+    recentTransactions: allTransactions.slice(0, 5),
   }
 }
 
-export async function createTransaction(data: {
-  categoryId: number
-  type: string
-  amount: string
-  description: string
-  date: string
-}) {
-  const userId = await getUserId()
-  await db.insert(transactions).values({
-    userId,
-    categoryId: data.categoryId,
-    type: data.type,
-    amount: data.amount,
-    description: data.description,
-    date: data.date,
-  })
+export async function createTransaction(
+  userId: string,
+  data: { categoryId: number; type: string; amount: string; description: string; date: string }
+) {
+  await db.insert(transactions).values({ userId, ...data })
   revalidatePath('/')
   revalidatePath('/transactions')
 }
 
 export async function updateTransaction(
+  userId: string,
   id: number,
-  data: {
-    categoryId: number
-    type: string
-    amount: string
-    description: string
-    date: string
-  }
+  data: { categoryId: number; type: string; amount: string; description: string; date: string }
 ) {
-  const userId = await getUserId()
   await db
     .update(transactions)
-    .set({
-      categoryId: data.categoryId,
-      type: data.type,
-      amount: data.amount,
-      description: data.description,
-      date: data.date,
-      updatedAt: new Date(),
-    })
+    .set({ ...data, updatedAt: new Date() })
     .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
   revalidatePath('/')
   revalidatePath('/transactions')
 }
 
-export async function deleteTransaction(id: number) {
-  const userId = await getUserId()
+export async function deleteTransaction(userId: string, id: number) {
   await db
     .delete(transactions)
     .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))

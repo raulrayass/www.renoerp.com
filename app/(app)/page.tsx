@@ -1,7 +1,10 @@
-import { getDashboardData } from '@/app/actions/transactions'
+'use client'
+
+import { useUser } from '@/components/user-provider'
 import { DashboardClient } from '@/components/dashboard-client'
 
-export default async function DashboardPage() {
-  const data = await getDashboardData()
-  return <DashboardClient data={data} />
+export default function DashboardPage() {
+  const { user } = useUser()
+  if (!user) return null
+  return <DashboardClient userId={user.id} />
 }

@@ -1,11 +1,10 @@
-import { getTransactions } from '@/app/actions/transactions'
-import { getCategories } from '@/app/actions/categories'
+'use client'
+
+import { useUser } from '@/components/user-provider'
 import { TransactionsClient } from '@/components/transactions-client'
 
-export default async function TransactionsPage() {
-  const [transactions, categories] = await Promise.all([
-    getTransactions(),
-    getCategories(),
-  ])
-  return <TransactionsClient transactions={transactions} categories={categories} />
+export default function TransactionsPage() {
+  const { user } = useUser()
+  if (!user) return null
+  return <TransactionsClient userId={user.id} />
 }
