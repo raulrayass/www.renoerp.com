@@ -74,19 +74,21 @@ export function Topbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>Navegación</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {navItems.map(({ href, label, icon: Icon }) => {
-                  const active = pathname === href
-                  return (
-                    <Link key={href} href={href}>
-                      <DropdownMenuItem className={cn('gap-2 cursor-pointer', active && 'bg-primary/10 text-primary')}>
-                        <Icon className="w-4 h-4" />
-                        {label}
-                      </DropdownMenuItem>
-                    </Link>
-                  )
-                })}
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Navegación</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {navItems.map(({ href, label, icon: Icon }) => {
+                    const active = pathname === href
+                    return (
+                      <Link key={href} href={href}>
+                        <DropdownMenuItem className={cn('gap-2 cursor-pointer', active && 'bg-primary/10 text-primary')}>
+                          <Icon className="w-4 h-4" />
+                          {label}
+                        </DropdownMenuItem>
+                      </Link>
+                    )
+                  })}
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -103,18 +105,22 @@ export function Topbar() {
                 </span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal py-2">
-                  <p className="text-xs text-muted-foreground">Sesión activa</p>
-                  <p className="text-sm font-semibold text-foreground truncate">{user.email}</p>
-                </DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="font-normal py-2">
+                    <p className="text-xs text-muted-foreground">Sesión activa</p>
+                    <p className="text-sm font-semibold text-foreground truncate">{user.email}</p>
+                  </DropdownMenuLabel>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={signOut}
-                  className="text-destructive focus:text-destructive focus:bg-destructive/10 gap-2 cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Cerrar sesión
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onClick={signOut}
+                    className="text-destructive focus:text-destructive focus:bg-destructive/10 gap-2 cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Cerrar sesión
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : null}
