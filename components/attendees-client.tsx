@@ -153,8 +153,11 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   async function downloadTemplate() {
-    const template = await generateExcelTemplate()
-    const ws = XLSX.utils.aoa_to_sheet([template.columns, ...template.data])
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['Nombre', 'Correo', 'Teléfono', 'Monto Total ($)', 'Pago Inicial ($)', 'Notas'],
+      ['Juan García', 'juan@email.com', '5551234567', '2000', '0', 'Ejemplo'],
+      ['María López', 'maria@email.com', '5559876543', '1800', '500', 'Ejemplo con pago inicial'],
+    ])
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Asistentes')
     XLSX.writeFile(wb, 'Plantilla_Asistentes.xlsx')
@@ -183,8 +186,9 @@ export function AttendeesClient({ userId }: Props) {
             name: String(row[0] || '').trim(),
             email: String(row[1] || '').trim(),
             phone: String(row[2] || '').trim(),
-            totalAmount: parseFloat(row[3]) || 0,
-            notes: String(row[4] || '').trim(),
+            totalAmount: parseFloat(String(row[3] || '0')),
+            initialPayment: parseFloat(String(row[4] || '0')) || 0,
+            notes: String(row[5] || '').trim(),
           }))
 
           const valid = attendeesToImport.filter((a) => a.name && a.totalAmount > 0)

@@ -219,22 +219,60 @@ export async function bulkCreateAttendees(
     email?: string
     phone?: string
     totalAmount: number
+    initialPayment?: number
     notes?: string
   }>
 ) {
   if (attendeesList.length === 0) return
 
-  await db.insert(attendees).values(
-    attendeesList.map((a) => ({
-      userId,
-      name: a.name.trim(),
-      email: (a.email || '').trim(),
-      phone: (a.phone || '').trim(),
-      totalAmount: parseFloat(a.totalAmount.toString()),
-      status: 'pending',
-      notes: (a.notes || '').trim(),
-    }))
-  )
+  // Insert attendees
+  const createdAttendees = await db
+    .insert(attendees)
+    .values(
+      attendeesList.map((a) => ({
+        userId,
+        name: a.name.trim(),
+        email: (a.email || '').trim(),
+        phone: (a.phone || '').trim(),
+        totalAmount: parseFloat(a.totalAmount.toString()),
+        amountPaid: parseFloat((a.initialPayment || 0).toString()),
+        status:
+          a.initialPayment && a.initialPayment > 0
+            ? a.initialPayment >= a.totalAmount
+              ? 'paid'
+              : 'partial'
+            : 'pending',
+        notes: (a.notes || '').trim(),
+      }))
+    )
+    .returning()
+
+  // Get category for payments
+  const campPaymentCat = await db.query.categories.findFirst({
+    where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Camperos')),
+  })
+
+  if (!campPaymentCat) return
+
+  // Create transactions for initial payments
+  const transactionsToInsert: any[] = []
+  for (let i = 0; i < createdAttendees.length; i++) {
+    const initialPayment = parseFloat((attendeesList[i].initialPayment || 0).toString())
+    if (initialPayment > 0) {
+      transactionsToInsert.push({
+        userId,
+        categoryId: campPaymentCat.id,
+        type: 'income',
+        amount: initialPayment,
+        description: `Pago inicial de ${attendeesList[i].name}`,
+        date: new Date().toISOString().split('T')[0],
+      })
+    }
+  }
+
+  if (transactionsToInsert.length > 0) {
+    await db.insert(transactions).values(transactionsToInsert)
+  }
 }
 
 export async function generateExcelTemplate() {

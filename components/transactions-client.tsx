@@ -146,17 +146,21 @@ export function TransactionsClient({ userId }: { userId: string }) {
   }
 
   function exportToExcel() {
-    const data = filtered.map((t) => ({
-      Fecha: t.date,
-      Tipo: t.type === 'income' ? 'Ingreso' : 'Egreso',
-      Categoria: t.categoryName ?? 'Sin categoria',
-      Descripcion: t.description,
-      Monto: parseFloat(t.amount as string),
-    }))
+    const data = filtered.map((t) => {
+      const amount = parseFloat(t.amount as string)
+      const signedAmount = t.type === 'income' ? amount : -amount
+      return {
+        Fecha: t.date,
+        Tipo: t.type === 'income' ? 'Ingreso' : 'Egreso',
+        Categoria: t.categoryName ?? 'Sin categoria',
+        Descripcion: t.description,
+        'Monto ($)': signedAmount,
+      }
+    })
     const ws = XLSX.utils.json_to_sheet(data)
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Transacciones')
-    XLSX.writeFile(wb, 'transacciones.xlsx')
+    XLSX.writeFile(wb, `Transacciones_${new Date().toISOString().split('T')[0]}.xlsx`)
   }
 
   if (loading) {
