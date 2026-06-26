@@ -56,6 +56,14 @@ export const attendeePayments = pgTable('attendee_payments', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
+export const churches = pgTable('churches', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(),
+  name: text('name').notNull(),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
 export type AppUser = typeof appUsers.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
@@ -65,3 +73,5 @@ export type Attendee = typeof attendees.$inferSelect
 export type NewAttendee = typeof attendees.$inferInsert
 export type AttendeePayment = typeof attendeePayments.$inferSelect
 export type NewAttendeePayment = typeof attendeePayments.$inferInsert
+export type Church = typeof churches.$inferSelect
+export type NewChurch = typeof churches.$inferInsert

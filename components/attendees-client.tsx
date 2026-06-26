@@ -11,7 +11,8 @@ import {
   getAttendeePayments,
   bulkCreateAttendees,
 } from '@/app/actions/attendees'
-import { Attendee, AttendeePayment } from '@/lib/db/schema'
+import { getChurches, initializeDefaultChurches } from '@/app/actions/churches'
+import { Attendee, AttendeePayment, Church } from '@/lib/db/schema'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,27 +25,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2, DollarSign, Upload, Download, Edit2 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
-const CHURCHES = [
-  'Iglesia Central',
-  'Iglesia del Calvario',
-  'Iglesia de la Paz',
-  'Iglesia Evangélica',
-  'Iglesia de la Gracia',
-  'Iglesia Nueva Vida',
-  'Iglesia Pentecostés',
-  'Iglesia Redención',
-  'Iglesia Santidad',
-  'Iglesia Esperanza',
-  'Iglesia Jesucristo',
-  'Iglesia Bendición',
-]
-
 interface Props {
   userId: string
 }
 
 export function AttendeesClient({ userId }: Props) {
   const [attendeeList, setAttendeeList] = useState<Attendee[]>([])
+  const [churches, setChurches] = useState<Church[]>([])
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
@@ -68,12 +55,27 @@ export function AttendeesClient({ userId }: Props) {
   })
 
   useEffect(() => {
-    loadAttendees()
+    initializeDefaults()
   }, [userId])
+
+  async function initializeDefaults() {
+    try {
+      await initializeDefaultChurches(userId)
+    } catch (error) {
+      console.error('Error initializing default churches:', error)
+    }
+    await loadAttendees()
+    await loadChurches()
+  }
 
   async function loadAttendees() {
     const data = await getAttendees(userId)
     setAttendeeList(data)
+  }
+
+  async function loadChurches() {
+    const data = await getChurches(userId)
+    setChurches(data)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -495,11 +497,17 @@ export function AttendeesClient({ userId }: Props) {
                   <SelectValue placeholder="Selecciona una iglesia" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CHURCHES.map((church) => (
-                    <SelectItem key={church} value={church}>
-                      {church}
-                    </SelectItem>
-                  ))}
+                  {churches.length > 0 ? (
+                    churches.map((church) => (
+                      <SelectItem key={church.id} value={church.name}>
+                        {church.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-xs text-muted-foreground text-center">
+                      Agrega iglesias en la sección de Iglesias
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>

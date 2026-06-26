@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Tent, LayoutDashboard, ArrowLeftRight, Tag, Users, LogOut, User } from 'lucide-react'
+import { Tent, LayoutDashboard, ArrowLeftRight, Tag, Users, LogOut, User, Church } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ import {
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/attendees', label: 'Asistentes', icon: Users },
+  { href: '/churches', label: 'Iglesias', icon: Church },
   { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
   { href: '/categories', label: 'Categorias', icon: Tag },
 ]

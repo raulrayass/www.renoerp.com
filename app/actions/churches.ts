@@ -1,0 +1,90 @@
+'use server'
+
+import { db } from '@/lib/db'
+import { churches } from '@/lib/db/schema'
+import { eq, and } from 'drizzle-orm'
+
+export async function getChurches(userId: string) {
+  return await db.query.churches.findMany({
+    where: eq(churches.userId, userId),
+    orderBy: (churches, { asc }) => [asc(churches.name)],
+  })
+}
+
+export async function createChurch(userId: string, name: string) {
+  if (!name.trim()) {
+    throw new Error('El nombre de la iglesia es requerido')
+  }
+
+  // Check if church already exists
+  const existing = await db.query.churches.findFirst({
+    where: and(eq(churches.userId, userId), eq(churches.name, name.trim())),
+  })
+
+  if (existing) {
+    throw new Error('Esta iglesia ya existe')
+  }
+
+  await db.insert(churches).values({
+    userId,
+    name: name.trim(),
+  })
+}
+
+export async function updateChurch(userId: string, churchId: number, name: string) {
+  if (!name.trim()) {
+    throw new Error('El nombre de la iglesia es requerido')
+  }
+
+  // Check if new name already exists (but allow same name)
+  const existing = await db.query.churches.findFirst({
+    where: and(eq(churches.userId, userId), eq(churches.name, name.trim())),
+  })
+
+  if (existing && existing.id !== churchId) {
+    throw new Error('Esta iglesia ya existe')
+  }
+
+  await db
+    .update(churches)
+    .set({
+      name: name.trim(),
+      updatedAt: new Date(),
+    })
+    .where(and(eq(churches.userId, userId), eq(churches.id, churchId)))
+}
+
+export async function deleteChurch(userId: string, churchId: number) {
+  await db.delete(churches).where(and(eq(churches.userId, userId), eq(churches.id, churchId)))
+}
+
+export async function initializeDefaultChurches(userId: string) {
+  const existing = await db.query.churches.findFirst({
+    where: eq(churches.userId, userId),
+  })
+
+  // If user already has churches, don't add defaults
+  if (existing) return
+
+  const defaultChurches = [
+    'Iglesia Central',
+    'Iglesia del Calvario',
+    'Iglesia de la Paz',
+    'Iglesia Evangélica',
+    'Iglesia de la Gracia',
+    'Iglesia Nueva Vida',
+    'Iglesia Pentecostés',
+    'Iglesia Redención',
+    'Iglesia Santidad',
+    'Iglesia Esperanza',
+    'Iglesia Jesucristo',
+    'Iglesia Bendición',
+  ]
+
+  await db.insert(churches).values(
+    defaultChurches.map((name) => ({
+      userId,
+      name,
+    }))
+  )
+}
