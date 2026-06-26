@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,9 +29,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { createCategory, updateCategory, deleteCategory } from '@/app/actions/categories'
+import { getCategories, createCategory, updateCategory, deleteCategory } from '@/app/actions/categories'
 import { Plus, Pencil, Trash2, Tag, TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react'
 import { Category } from '@/lib/db/schema'
+import { useEffect, useState, useTransition } from 'react'
 
 const PRESET_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
@@ -54,13 +54,18 @@ const defaultForm = {
 }
 
 interface Props {
-  categories: Category[]
+  userId: string
 }
 
-export function CategoriesClient({ categories }: Props) {
+export function CategoriesClient({ userId }: Props) {
   const router = useRouter()
+  const [categories, setCategories] = useState<Category[]>([])
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
+
+  useEffect(() => {
+    getCategories(userId).then(setCategories)
+  }, [userId])
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
@@ -87,21 +92,23 @@ export function CategoriesClient({ categories }: Props) {
     e.preventDefault()
     startTransition(async () => {
       if (editingId) {
-        await updateCategory(editingId, form)
+        await updateCategory(userId, editingId, form)
       } else {
-        await createCategory(form)
+        await createCategory(userId, form)
       }
       setDialogOpen(false)
-      router.refresh()
+      const updated = await getCategories(userId)
+      setCategories(updated)
     })
   }
 
   async function handleDelete() {
     if (!deletingId) return
     startTransition(async () => {
-      await deleteCategory(deletingId)
+      await deleteCategory(userId, deletingId)
       setDeleteDialogOpen(false)
-      router.refresh()
+      const updated = await getCategories(userId)
+      setCategories(updated)
     })
   }
 
