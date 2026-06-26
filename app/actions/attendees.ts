@@ -309,12 +309,12 @@ export async function getChurchDistribution(userId: string) {
   ]
 
   return result
-    .filter((item) => item.church)
     .map((item, index) => ({
-      name: item.church || 'Sin iglesia',
+      name: item.church || 'Sin iglesia asignada',
       value: parseInt(item.count as string),
       color: colors[index % colors.length],
     }))
+    .sort((a, b) => b.value - a.value)
 }
 
 export async function generateExcelTemplate() {

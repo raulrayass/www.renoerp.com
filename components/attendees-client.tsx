@@ -272,17 +272,23 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   function exportCurrentData() {
-    const data = attendeeList.map((a) => ({
-      Nombre: a.name,
-      Teléfono: a.phone,
-      Iglesia: a.church,
-      'Contacto Emergencia': a.emergencyContactName,
-      'Teléfono Emergencia': a.emergencyContactPhone,
-      'Monto Total ($)': parseFloat(a.totalAmount as string),
-      'Pagado ($)': parseFloat(a.amountPaid as string),
-      Estado: a.status === 'paid' ? 'Pagado' : a.status === 'partial' ? 'Parcial' : 'Pendiente',
-      Notas: a.notes,
-    }))
+    const data = attendeeList.map((a) => {
+      const total = parseFloat(a.totalAmount as string)
+      const paid = parseFloat(a.amountPaid as string)
+      const remaining = total - paid
+      return {
+        Nombre: a.name,
+        Teléfono: a.phone || '',
+        Iglesia: a.church || 'Sin iglesia',
+        'Contacto Emergencia': a.emergencyContactName || '',
+        'Teléfono Emergencia': a.emergencyContactPhone || '',
+        'Monto Total ($)': total.toFixed(2),
+        'Pagado ($)': paid.toFixed(2),
+        'Falta Pagar ($)': remaining.toFixed(2),
+        Estado: a.status === 'paid' ? 'Pagado' : a.status === 'partial' ? 'Parcial' : 'Pendiente',
+        Notas: a.notes || '',
+      }
+    })
     const ws = XLSX.utils.json_to_sheet(data)
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Asistentes')

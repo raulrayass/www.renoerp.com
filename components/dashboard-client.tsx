@@ -239,7 +239,7 @@ export function DashboardClient({ userId }: { userId: string }) {
         <Card className="p-5">
           <h2 className="font-semibold text-foreground mb-1">Asistentes por Iglesia</h2>
           <p className="text-xs text-muted-foreground mb-4">Distribución de asistentes del campamento</p>
-          {churchData.length > 0 ? (
+          {churchData && churchData.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
@@ -263,7 +263,9 @@ export function DashboardClient({ userId }: { userId: string }) {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <EmptyChart text="Agrega asistentes para ver la distribución por iglesia." />
+            <div className="text-center py-12 text-muted-foreground text-sm">
+              No hay datos de iglesias. Verifica que los asistentes tengan iglesia asignada.
+            </div>
           )}
         </Card>
       </div>
