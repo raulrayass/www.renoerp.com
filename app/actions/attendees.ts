@@ -31,17 +31,15 @@ export async function createAttendee(
     notes?: string
   }
 ) {
-  await db
-    .insert(attendees)
-    .values({
-      userId,
-      name: data.name,
-      email: data.email || '',
-      phone: data.phone || '',
-      totalAmount: parseFloat(data.totalAmount.toString()),
-      status: 'pending',
-      notes: data.notes || '',
-    })
+  await db.insert(attendees).values({
+    userId,
+    name: data.name,
+    email: data.email || '',
+    phone: data.phone || '',
+    totalAmount: parseFloat(data.totalAmount.toString()),
+    status: 'pending',
+    notes: data.notes || '',
+  })
 }
 
 export async function updateAttendee(
@@ -55,13 +53,13 @@ export async function updateAttendee(
     notes: string
   }>
 ) {
-  const updateData: any = {
-    ...data,
-    updatedAt: new Date(),
-  }
-  if (data.totalAmount !== undefined) {
-    updateData.totalAmount = parseFloat(data.totalAmount.toString())
-  }
+  const updateData: any = { updatedAt: new Date() }
+  if (data.name) updateData.name = data.name
+  if (data.email) updateData.email = data.email
+  if (data.phone) updateData.phone = data.phone
+  if (data.notes) updateData.notes = data.notes
+  if (data.totalAmount !== undefined) updateData.totalAmount = parseFloat(data.totalAmount.toString())
+
   await db
     .update(attendees)
     .set(updateData)
@@ -69,13 +67,26 @@ export async function updateAttendee(
 }
 
 export async function deleteAttendee(userId: string, attendeeId: number) {
-  await db
-    .delete(attendeePayments)
+  // Delete all payments and transactions for this attendee
+  const payments = await db
+    .select()
+    .from(attendeePayments)
     .where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, attendeeId)))
 
-  await db
-    .delete(attendees)
-    .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
+  for (const payment of payments) {
+    await db
+      .delete(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          eq(transactions.type, 'income'),
+          eq(transactions.amount, payment.amount)
+        )
+      )
+  }
+
+  await db.delete(attendeePayments).where(eq(attendeePayments.attendeeId, attendeeId))
+  await db.delete(attendees).where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
 }
 
 export async function addAttendeePayment(
@@ -85,33 +96,26 @@ export async function addAttendeePayment(
   paymentDate: string,
   notes?: string
 ) {
-  // Get the attendee
   const [attendee] = await db
     .select()
     .from(attendees)
     .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
 
-  if (!attendee) throw new Error('Attendee not found')
+  if (!attendee) throw new Error('Asistente no encontrado')
 
   // Create payment record
-  await db
-    .insert(attendeePayments)
-    .values({
-      attendeeId,
-      userId,
-      amount: amount,
-      paymentDate,
-      notes,
-    })
+  await db.insert(attendeePayments).values({
+    attendeeId,
+    userId,
+    amount,
+    paymentDate,
+    notes: notes || '',
+  })
 
   // Update attendee paid amount and status
   const newPaidAmount = parseFloat(attendee.amountPaid as string) + amount
-  const newStatus =
-    newPaidAmount >= parseFloat(attendee.totalAmount as string)
-      ? 'paid'
-      : newPaidAmount > 0
-        ? 'partial'
-        : 'pending'
+  const totalAmount = parseFloat(attendee.totalAmount as string)
+  const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
 
   await db
     .update(attendees)
@@ -122,67 +126,68 @@ export async function addAttendeePayment(
     })
     .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
 
-  // Get or create "Pago de Camperos" income category
-  const [campPaymentCat] = await db
+  // Find or create "Pago de Camperos" category
+  let [campPaymentCat] = await db
     .select()
     .from(categories)
     .where(and(eq(categories.userId, userId), eq(categories.name, 'Pago de Camperos')))
 
   if (!campPaymentCat) {
-    throw new Error('Pago de Camperos category not found')
+    const [newCat] = await db
+      .insert(categories)
+      .values({
+        userId,
+        name: 'Pago de Camperos',
+        type: 'income',
+        color: '#22c55e',
+        icon: 'users',
+      })
+      .returning()
+    campPaymentCat = newCat
   }
 
   // Create transaction for this payment
-  await db
-    .insert(transactions)
-    .values({
-      userId,
-      categoryId: campPaymentCat.id,
-      type: 'income',
-      amount: amount,
-      description: `Pago de ${attendee.name}`,
-      date: paymentDate,
-    })
+  await db.insert(transactions).values({
+    userId,
+    categoryId: campPaymentCat!.id,
+    type: 'income',
+    amount,
+    description: `Pago de ${attendee.name}`,
+    date: paymentDate,
+  })
 }
 
 export async function deleteAttendeePayment(userId: string, paymentId: number) {
-  // Get payment to know attendee and amount
   const [payment] = await db
     .select()
     .from(attendeePayments)
     .where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.id, paymentId)))
 
-  if (!payment) throw new Error('Payment not found')
+  if (!payment) throw new Error('Pago no encontrado')
 
-  // Delete corresponding transaction
-  const [transactionToDelete] = await db
-    .select()
-    .from(transactions)
-    .where(
-      and(
-        eq(transactions.userId, userId),
-        eq(transactions.description, `Pago de ${(await db.select().from(attendees).where(eq(attendees.id, payment.attendeeId)))[0]?.name || 'Unknown'}`),
-        eq(transactions.amount, payment.amount)
-      )
-    )
-
-  if (transactionToDelete) {
-    await db.delete(transactions).where(eq(transactions.id, transactionToDelete.id))
-  }
-
-  // Update attendee paid amount
   const [attendee] = await db
     .select()
     .from(attendees)
     .where(eq(attendees.id, payment.attendeeId))
 
-  const newPaidAmount = Math.max(0, parseFloat(attendee!.amountPaid as string) - parseFloat(payment.amount as string))
-  const newStatus =
-    newPaidAmount >= parseFloat(attendee!.totalAmount as string)
-      ? 'paid'
-      : newPaidAmount > 0
-        ? 'partial'
-        : 'pending'
+  if (!attendee) throw new Error('Asistente no encontrado')
+
+  // Delete corresponding transaction
+  await db
+    .delete(transactions)
+    .where(
+      and(
+        eq(transactions.userId, userId),
+        eq(transactions.type, 'income'),
+        eq(transactions.amount, payment.amount),
+        eq(transactions.description, `Pago de ${attendee.name}`)
+      )
+    )
+
+  // Update attendee paid amount
+  const newPaidAmount = Math.max(0, parseFloat(attendee.amountPaid as string) - parseFloat(payment.amount as string))
+  const totalAmount = parseFloat(attendee.totalAmount as string)
+  const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
 
   await db
     .update(attendees)
@@ -207,17 +212,29 @@ export async function bulkCreateAttendees(
     notes?: string
   }>
 ) {
-  await db
-    .insert(attendees)
-    .values(
-      attendeesList.map((a) => ({
-        userId,
-        name: a.name,
-        email: a.email || '',
-        phone: a.phone || '',
-        totalAmount: parseFloat(a.totalAmount.toString()),
-        status: 'pending',
-        notes: a.notes || '',
-      }))
-    )
+  if (attendeesList.length === 0) return
+
+  await db.insert(attendees).values(
+    attendeesList.map((a) => ({
+      userId,
+      name: a.name.trim(),
+      email: (a.email || '').trim(),
+      phone: (a.phone || '').trim(),
+      totalAmount: parseFloat(a.totalAmount.toString()),
+      status: 'pending',
+      notes: (a.notes || '').trim(),
+    }))
+  )
+}
+
+export async function generateExcelTemplate() {
+  // Returns data for creating an Excel template file
+  return {
+    columns: ['Nombre', 'Correo', 'Teléfono', 'Monto Total ($)', 'Notas'],
+    data: [
+      ['Juan García', 'juan@email.com', '5551234567', 2000, 'Joven participante'],
+      ['María López', 'maria@email.com', '5559876543', 1800, ''],
+      ['Carlos Sánchez', 'carlos@email.com', '5552222222', 2500, 'Campista'],
+    ],
+  }
 }

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   getAttendees,
   createAttendee,
@@ -11,6 +10,7 @@ import {
   deleteAttendeePayment,
   getAttendeePayments,
   bulkCreateAttendees,
+  generateExcelTemplate,
 } from '@/app/actions/attendees'
 import { Attendee, AttendeePayment } from '@/lib/db/schema'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Eye } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
@@ -28,60 +29,65 @@ interface Props {
 }
 
 export function AttendeesClient({ userId }: Props) {
-  const router = useRouter()
-  const [attendees, setAttendees] = useState<Attendee[]>([])
-  const [payments, setPayments] = useState<Record<number, AttendeePayment[]>>({})
+  const [attendeeList, setAttendeeList] = useState<Attendee[]>([])
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [viewPaymentsDialogOpen, setViewPaymentsDialogOpen] = useState(false)
-  const [editingId, setEditingId] = useState<number | null>(null)
   const [selectedAttendeeId, setSelectedAttendeeId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [form, setForm] = useState({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
-  const [paymentForm, setPaymentForm] = useState({ amount: '', paymentDate: new Date().toISOString().split('T')[0], notes: '' })
+  const [paymentForm, setPaymentForm] = useState({ amount: '', date: new Date().toISOString().split('T')[0], notes: '' })
 
   useEffect(() => {
-    getAttendees(userId).then(setAttendees)
+    loadAttendees()
   }, [userId])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function loadAttendees() {
+    const data = await getAttendees(userId)
+    setAttendeeList(data)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     startTransition(async () => {
-      const totalAmount = parseFloat(form.totalAmount)
-      if (isNaN(totalAmount) || totalAmount <= 0) {
-        alert('El monto debe ser mayor a 0')
+      const amount = parseFloat(form.totalAmount)
+      if (!form.name.trim() || isNaN(amount) || amount <= 0) {
+        alert('Por favor completa los campos correctamente')
         return
       }
 
-      if (editingId) {
-        await updateAttendee(userId, editingId, {
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          totalAmount,
-          notes: form.notes,
-        })
-      } else {
-        await createAttendee(userId, {
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          totalAmount,
-          notes: form.notes,
-        })
+      try {
+        if (editingId) {
+          await updateAttendee(userId, editingId, {
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            totalAmount: amount,
+            notes: form.notes,
+          })
+        } else {
+          await createAttendee(userId, {
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            totalAmount: amount,
+            notes: form.notes,
+          })
+        }
+        setDialogOpen(false)
+        setForm({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
+        setEditingId(null)
+        await loadAttendees()
+      } catch (error) {
+        alert('Error al guardar asistente')
+        console.error(error)
       }
-
-      setDialogOpen(false)
-      setForm({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
-      setEditingId(null)
-      const updated = await getAttendees(userId)
-      setAttendees(updated)
     })
   }
 
-  const handleAddPayment = async (e: React.FormEvent) => {
+  async function handleAddPayment(e: React.FormEvent) {
     e.preventDefault()
     if (!selectedAttendeeId) return
 
@@ -92,464 +98,376 @@ export function AttendeesClient({ userId }: Props) {
         return
       }
 
-      await addAttendeePayment(userId, selectedAttendeeId, amount, paymentForm.paymentDate, paymentForm.notes)
-
-      setPaymentDialogOpen(false)
-      setPaymentForm({ amount: '', paymentDate: new Date().toISOString().split('T')[0], notes: '' })
-      const updated = await getAttendees(userId)
-      setAttendees(updated)
-
-      const attendeePayments = await getAttendeePayments(userId, selectedAttendeeId)
-      setPayments((prev) => ({ ...prev, [selectedAttendeeId]: attendeePayments }))
+      try {
+        await addAttendeePayment(userId, selectedAttendeeId, amount, paymentForm.date, paymentForm.notes)
+        setPaymentDialogOpen(false)
+        setPaymentForm({ amount: '', date: new Date().toISOString().split('T')[0], notes: '' })
+        setSelectedAttendeeId(null)
+        await loadAttendees()
+      } catch (error) {
+        alert('Error al registrar pago')
+        console.error(error)
+      }
     })
   }
 
-  const handleDelete = async () => {
+  async function handleDelete() {
     if (!deletingId) return
     startTransition(async () => {
-      await deleteAttendee(userId, deletingId)
-      setDeleteDialogOpen(false)
-      setDeletingId(null)
-      const updated = await getAttendees(userId)
-      setAttendees(updated)
+      try {
+        await deleteAttendee(userId, deletingId)
+        setDeleteDialogOpen(false)
+        setDeletingId(null)
+        await loadAttendees()
+      } catch (error) {
+        alert('Error al eliminar asistente')
+        console.error(error)
+      }
     })
   }
 
-  const handleEdit = (attendee: Attendee) => {
-    setEditingId(attendee.id)
-    setForm({
-      name: attendee.name,
-      email: attendee.email || '',
-      phone: attendee.phone || '',
-      totalAmount: attendee.totalAmount as string,
-      notes: attendee.notes || '',
+  async function handleDeletePayment(paymentId: number) {
+    startTransition(async () => {
+      try {
+        await deleteAttendeePayment(userId, paymentId)
+        await loadAttendees()
+      } catch (error) {
+        alert('Error al eliminar pago')
+        console.error(error)
+      }
     })
-    setDialogOpen(true)
   }
 
-  const handleExportExcel = () => {
-    const data = attendees.map((a) => ({
-      Nombre: a.name,
-      Email: a.email || '',
-      Teléfono: a.phone || '',
-      'Monto Total': parseFloat(a.totalAmount as string),
-      'Monto Pagado': parseFloat(a.amountPaid as string),
-      'Monto Faltante': Math.max(0, parseFloat(a.totalAmount as string) - parseFloat(a.amountPaid as string)),
-      Estatus: a.status,
-      Notas: a.notes || '',
-    }))
-
+  async function downloadTemplate() {
+    const template = await generateExcelTemplate()
+    const ws = XLSX.utils.aoa_to_sheet([template.columns, ...template.data])
     const wb = XLSX.utils.book_new()
-    const ws = XLSX.utils.json_to_sheet(data)
     XLSX.utils.book_append_sheet(wb, ws, 'Asistentes')
-
-    // Format currency columns
-    ws['D1'].z = '$#,##0.00'
-    ws['E1'].z = '$#,##0.00'
-    ws['F1'].z = '$#,##0.00'
-
-    XLSX.writeFile(wb, `asistentes-${new Date().toISOString().split('T')[0]}.xlsx`)
+    XLSX.writeFile(wb, 'Plantilla_Asistentes.xlsx')
   }
 
-  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = async (event) => {
+    startTransition(async () => {
       try {
-        const data = event.target?.result as ArrayBuffer
-        const workbook = XLSX.read(data, { type: 'array' })
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-        const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[]
+        const reader = new FileReader()
+        reader.onload = async (event) => {
+          const data = event.target?.result
+          const workbook = XLSX.read(data, { type: 'binary' })
+          const sheetName = workbook.SheetNames[0]
+          const sheet = workbook.Sheets[sheetName]
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[]
 
-        const attendeesList = jsonData.map((row) => ({
-          name: row.Nombre || '',
-          email: row.Email || '',
-          phone: row.Teléfono || '',
-          totalAmount: parseFloat(row['Monto Total'] || 0),
-          notes: row.Notas || '',
-        })).filter((a) => a.name && a.totalAmount > 0)
+          if (rows.length < 2) {
+            alert('El archivo debe tener al menos una fila de datos')
+            return
+          }
 
-        if (attendeesList.length === 0) {
-          alert('No se encontraron asistentes válidos en el archivo')
-          return
+          const attendeesToImport = rows.slice(1).map((row) => ({
+            name: String(row[0] || '').trim(),
+            email: String(row[1] || '').trim(),
+            phone: String(row[2] || '').trim(),
+            totalAmount: parseFloat(row[3]) || 0,
+            notes: String(row[4] || '').trim(),
+          }))
+
+          const valid = attendeesToImport.filter((a) => a.name && a.totalAmount > 0)
+          if (valid.length === 0) {
+            alert('No hay asistentes válidos para importar')
+            return
+          }
+
+          await bulkCreateAttendees(userId, valid)
+          await loadAttendees()
+          alert(`Se importaron ${valid.length} asistentes correctamente`)
         }
-
-        startTransition(async () => {
-          const created = await bulkCreateAttendees(userId, attendeesList)
-          const updated = await getAttendees(userId)
-          setAttendees(updated)
-          alert(`Se agregaron ${created.length} asistentes exitosamente`)
-        })
+        reader.readAsBinaryString(file)
       } catch (error) {
-        alert('Error al procesar el archivo Excel')
+        alert('Error al importar archivo')
         console.error(error)
       }
-    }
-    reader.readAsArrayBuffer(file)
+    })
   }
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      pending: 'destructive',
-      partial: 'secondary',
-      paid: 'default',
+  async function exportCurrentData() {
+    if (attendeeList.length === 0) {
+      alert('No hay asistentes para exportar')
+      return
     }
-    const labels: Record<string, string> = {
-      pending: 'Pendiente',
-      partial: 'Parcial',
-      paid: 'Pagado',
-    }
-    return <Badge variant={variants[status] || 'outline'}>{labels[status] || status}</Badge>
-  }
 
-  const getProgressPercent = (attendee: Attendee) => {
-    const total = parseFloat(attendee.totalAmount as string)
-    if (total === 0) return 0
-    return Math.min(100, (parseFloat(attendee.amountPaid as string) / total) * 100)
+    const data = attendeeList.map((a) => [
+      a.name,
+      a.email || '',
+      a.phone || '',
+      parseFloat(a.totalAmount as string),
+      parseFloat(a.amountPaid as string),
+      a.status,
+      a.notes || '',
+    ])
+
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['Nombre', 'Correo', 'Teléfono', 'Monto Total', 'Monto Pagado', 'Estado', 'Notas'],
+      ...data,
+    ])
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Asistentes')
+    XLSX.writeFile(wb, `Asistentes_${new Date().toISOString().split('T')[0]}.xlsx`)
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Asistentes</h1>
-          <p className="text-muted-foreground">Gestiona los asistentes y su control de pagos</p>
+          <h1 className="text-3xl font-bold">Asistentes</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Total: {attendeeList.length} | Pagados: {attendeeList.filter((a) => a.status === 'paid').length}
+          </p>
         </div>
-
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportExcel}
-            className="flex items-center gap-2"
-          >
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-2">
             <Download className="w-4 h-4" />
-            Exportar Excel
+            Plantilla
           </Button>
-
           <label className="relative inline-block">
-            <Button variant="outline" size="sm" className="flex items-center gap-2 pointer-events-none">
+            <Button variant="outline" size="sm" className="gap-2 pointer-events-none">
               <Upload className="w-4 h-4" />
-              Importar Excel
+              Importar
             </Button>
             <input
               type="file"
-              accept=".xlsx,.xls,.csv"
+              accept=".xlsx,.xls"
               onChange={handleImportExcel}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </label>
-
-          <Button onClick={() => {
-            setEditingId(null)
-            setForm({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
-            setDialogOpen(true)
-          }} className="flex items-center gap-2">
+          <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-2">
+            <Download className="w-4 h-4" />
+            Exportar
+          </Button>
+          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-2">
             <Plus className="w-4 h-4" />
             Agregar
           </Button>
         </div>
       </div>
 
-      {/* Tabla de asistentes */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Registro de Asistentes</CardTitle>
-          <CardDescription>Total: {attendees.length} | Pagados: {attendees.filter(a => a.status === 'paid').length}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {attendees.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">No hay asistentes registrados</p>
-            ) : (
-              <div className="space-y-3">
-                {attendees.map((attendee) => (
-                  <div key={attendee.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-foreground">{attendee.name}</h3>
-                          {getStatusBadge(attendee.status)}
-                        </div>
-                        {attendee.email && <p className="text-xs text-muted-foreground">{attendee.email}</p>}
-                        {attendee.notes && <p className="text-xs text-muted-foreground italic">{attendee.notes}</p>}
+      {/* Attendees List */}
+      {attendeeList.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <p className="text-muted-foreground">No hay asistentes registrados</p>
+            <Button onClick={() => setDialogOpen(true)} variant="link" className="mt-2">
+              Crear el primero
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {attendeeList.map((attendee) => {
+            const paid = parseFloat(attendee.amountPaid as string)
+            const total = parseFloat(attendee.totalAmount as string)
+            const percentage = (paid / total) * 100
+            return (
+              <Card key={attendee.id}>
+                <CardContent className="pt-6">
+                  <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold truncate">{attendee.name}</h3>
+                        <Badge
+                          variant={attendee.status === 'paid' ? 'default' : attendee.status === 'partial' ? 'secondary' : 'outline'}
+                          className="shrink-0"
+                        >
+                          {attendee.status === 'paid' ? 'Pagado' : attendee.status === 'partial' ? 'Parcial' : 'Pendiente'}
+                        </Badge>
                       </div>
-
-                      <div className="flex gap-2 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={async () => {
-                            setSelectedAttendeeId(attendee.id)
-                            const attnPayments = await getAttendeePayments(userId, attendee.id)
-                            setPayments((prev) => ({ ...prev, [attendee.id]: attnPayments }))
-                            setViewPaymentsDialogOpen(true)
-                          }}
-                          className="gap-1"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(attendee)}
-                          className="gap-1"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedAttendeeId(attendee.id)
-                            setPaymentForm({
-                              amount: '',
-                              paymentDate: new Date().toISOString().split('T')[0],
-                              notes: '',
-                            })
-                            setPaymentDialogOpen(true)
-                          }}
-                          className="gap-1"
-                        >
-                          <DollarSign className="w-4 h-4" />
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setDeletingId(attendee.id)
-                            setDeleteDialogOpen(true)
-                          }}
-                          className="gap-1 text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                      {attendee.email && <p className="text-xs text-muted-foreground">{attendee.email}</p>}
+                      <div className="mt-3 space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Progreso de pago</span>
+                          <span className="font-semibold">
+                            ${paid.toFixed(2)} / ${total.toFixed(2)}
+                          </span>
+                        </div>
+                        <Progress value={percentage} className="h-2" />
                       </div>
                     </div>
-
-                    {/* Barra de progreso */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Progreso de Pago</span>
-                        <span className="font-medium">
-                          ${parseFloat(attendee.amountPaid as string).toFixed(2)} / ${parseFloat(attendee.totalAmount as string).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="w-full bg-secondary rounded-full h-2">
-                        <div
-                          className="bg-primary rounded-full h-2 transition-all"
-                          style={{ width: `${getProgressPercent(attendee)}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Faltante: ${Math.max(0, parseFloat(attendee.totalAmount as string) - parseFloat(attendee.amountPaid as string)).toFixed(2)}
-                      </p>
+                    <div className="flex gap-2 shrink-0">
+                      <Button
+                        onClick={() => {
+                          setSelectedAttendeeId(attendee.id)
+                          setPaymentDialogOpen(true)
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="gap-1"
+                      >
+                        <DollarSign className="w-4 h-4" />
+                        <span className="hidden sm:inline">Pago</span>
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setEditingId(attendee.id)
+                          setForm({
+                            name: attendee.name,
+                            email: attendee.email || '',
+                            phone: attendee.phone || '',
+                            totalAmount: total.toString(),
+                            notes: attendee.notes || '',
+                          })
+                          setDialogOpen(true)
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="gap-1"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        <span className="hidden sm:inline">Editar</span>
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setDeletingId(attendee.id)
+                          setDeleteDialogOpen(true)
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
 
-      {/* Dialogs */}
-      <Dialog
-        open={dialogOpen}
-        onOpenChange={(open) => {
-          setDialogOpen(open)
-          if (open) {
-            // Reset form when opening dialog for new attendee (not editing)
-            if (!editingId) {
-              setForm({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
-            }
-          } else {
-            // Reset form when closing dialog
-            setForm({ name: '', email: '', phone: '', totalAmount: '', notes: '' })
-            setEditingId(null)
-          }
-        }}
-      >
+      {/* Add/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingId ? 'Editar Asistente' : 'Agregar Asistente'}</DialogTitle>
           </DialogHeader>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name">Nombre</Label>
+              <Label htmlFor="name">Nombre *</Label>
               <Input
                 id="name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
+                placeholder="Juan García"
               />
             </div>
-
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Correo</Label>
               <Input
                 id="email"
-                type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="juan@email.com"
               />
             </div>
-
             <div>
               <Label htmlFor="phone">Teléfono</Label>
               <Input
                 id="phone"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                placeholder="5551234567"
               />
             </div>
-
             <div>
-              <Label htmlFor="totalAmount">Monto Total (MXN)</Label>
+              <Label htmlFor="amount">Monto Total ($) *</Label>
               <Input
-                id="totalAmount"
+                id="amount"
                 type="number"
                 step="0.01"
+                min="0"
                 value={form.totalAmount}
                 onChange={(e) => setForm({ ...form, totalAmount: e.target.value })}
-                required
+                placeholder="2000"
               />
             </div>
-
             <div>
               <Label htmlFor="notes">Notas</Label>
               <Input
                 id="notes"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Información adicional"
+                placeholder="Joven participante"
               />
             </div>
-
             <Button type="submit" disabled={isPending} className="w-full">
-              {isPending ? 'Guardando...' : 'Guardar'}
+              {editingId ? 'Actualizar' : 'Guardar'}
             </Button>
           </form>
         </DialogContent>
       </Dialog>
 
+      {/* Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Registrar Pago</DialogTitle>
-            {selectedAttendeeId && (
-              <DialogDescription>
-                {attendees.find((a) => a.id === selectedAttendeeId)?.name}
-              </DialogDescription>
-            )}
           </DialogHeader>
-
           <form onSubmit={handleAddPayment} className="space-y-4">
             <div>
-              <Label htmlFor="amount">Monto del Pago (MXN)</Label>
+              <Label htmlFor="payment-amount">Monto del Pago ($) *</Label>
               <Input
-                id="amount"
+                id="payment-amount"
                 type="number"
                 step="0.01"
+                min="0"
                 value={paymentForm.amount}
                 onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                required
+                placeholder="0"
               />
             </div>
-
             <div>
-              <Label htmlFor="paymentDate">Fecha de Pago</Label>
+              <Label htmlFor="payment-date">Fecha de Pago</Label>
               <Input
-                id="paymentDate"
+                id="payment-date"
                 type="date"
-                value={paymentForm.paymentDate}
-                onChange={(e) => setPaymentForm({ ...paymentForm, paymentDate: e.target.value })}
-                required
+                value={paymentForm.date}
+                onChange={(e) => setPaymentForm({ ...paymentForm, date: e.target.value })}
               />
             </div>
-
             <div>
-              <Label htmlFor="paymentNotes">Notas</Label>
+              <Label htmlFor="payment-notes">Notas</Label>
               <Input
-                id="paymentNotes"
+                id="payment-notes"
                 value={paymentForm.notes}
                 onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-                placeholder="Referencia, método de pago, etc."
+                placeholder="Primera mitad del pago"
               />
             </div>
-
             <Button type="submit" disabled={isPending} className="w-full">
-              {isPending ? 'Registrando...' : 'Registrar Pago'}
+              Registrar Pago
             </Button>
           </form>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={viewPaymentsDialogOpen} onOpenChange={setViewPaymentsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Historial de Pagos</DialogTitle>
-            {selectedAttendeeId && (
-              <DialogDescription>
-                {attendees.find((a) => a.id === selectedAttendeeId)?.name}
-              </DialogDescription>
-            )}
-          </DialogHeader>
-
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {selectedAttendeeId && payments[selectedAttendeeId]?.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No hay pagos registrados</p>
-            ) : (
-              selectedAttendeeId && payments[selectedAttendeeId]?.map((payment) => (
-                <div key={payment.id} className="border rounded-lg p-3 flex justify-between items-start gap-2">
-                  <div>
-                    <p className="font-medium">${parseFloat(payment.amount as string).toFixed(2)}</p>
-                    <p className="text-xs text-muted-foreground">{payment.paymentDate}</p>
-                    {payment.notes && <p className="text-xs text-muted-foreground">{payment.notes}</p>}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      startTransition(async () => {
-                        await deleteAttendeePayment(userId, payment.id)
-                        const updated = await getAttendees(userId)
-                        setAttendees(updated)
-                        if (selectedAttendeeId) {
-                          const attnPayments = await getAttendeePayments(userId, selectedAttendeeId)
-                          setPayments((prev) => ({ ...prev, [selectedAttendeeId]: attnPayments }))
-                        }
-                      })
-                    }}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
+      {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
+            <AlertDialogTitle>Eliminar Asistente</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro de que deseas eliminar este asistente? Se eliminarán todos sus pagos también.
+              Esta acción no se puede deshacer. Se eliminarán todos los pagos registrados del asistente.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogAction onClick={handleDelete} disabled={isPending}>
-            Eliminar
-          </AlertDialogAction>
-          <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+          <div className="flex gap-3">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isPending} className="bg-destructive hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>
