@@ -38,7 +38,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       console.log('[v0] Starting Google OAuth flow...')
       const result = await authClient.signIn.social({
         provider: 'google',
-        callbackURL: '/',
+        callbackURL: typeof window !== 'undefined' ? `${window.location.origin}/` : '/',
       })
       console.log('[v0] OAuth result:', result)
       
@@ -47,15 +47,27 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         window.location.href = result.data.url
       } else if (result?.error) {
         console.error('[v0] OAuth error:', result.error)
-        setOAuthError(result.error.message || 'Error en la autenticación. Por favor, intenta de nuevo.')
+        const errorMessage = result.error.message || 'Error en la autenticación'
+        
+        if (errorMessage.includes('redirect_uri_mismatch')) {
+          setOAuthError('Error de configuración de Google. Verifica que la URI de redirección está registrada en Google Cloud Console.')
+        } else {
+          setOAuthError(errorMessage)
+        }
         setIsLoading(false)
       } else {
         console.log('[v0] No URL or error in result, checking session...')
         setIsLoading(false)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[v0] Exception in Google OAuth:', err)
-      setOAuthError('Error conectando con Google. Verifica tu conexión e intenta de nuevo.')
+      const errorMsg = err?.message || String(err)
+      
+      if (errorMsg.includes('redirect_uri')) {
+        setOAuthError('Error de configuración. Por favor, verifica que la URI de redirección está registrada en Google Cloud Console: http://localhost:3000/api/auth/callback/google')
+      } else {
+        setOAuthError('Error conectando con Google. Verifica tu conexión e intenta de nuevo.')
+      }
       setIsLoading(false)
     }
   }
