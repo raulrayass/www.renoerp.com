@@ -35,39 +35,24 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true)
     setOAuthError(null)
     try {
-      console.log('[v0] Starting Google OAuth flow...')
+      console.log('[v0] Starting Google OAuth...')
       const result = await authClient.signIn.social({
         provider: 'google',
-        callbackURL: typeof window !== 'undefined' ? `${window.location.origin}/` : '/',
+        callbackURL: '/',
       })
-      console.log('[v0] OAuth result:', result)
+      
+      console.log('[v0] Google OAuth response:', { url: result?.data?.url, error: result?.error })
       
       if (result?.data?.url) {
-        console.log('[v0] Redirecting to:', result.data.url)
+        console.log('[v0] Redirecting to Google...')
         window.location.href = result.data.url
       } else if (result?.error) {
-        console.error('[v0] OAuth error:', result.error)
-        const errorMessage = result.error.message || 'Error en la autenticación'
-        
-        if (errorMessage.includes('redirect_uri_mismatch')) {
-          setOAuthError('Error de configuración de Google. Verifica que la URI de redirección está registrada en Google Cloud Console.')
-        } else {
-          setOAuthError(errorMessage)
-        }
-        setIsLoading(false)
-      } else {
-        console.log('[v0] No URL or error in result, checking session...')
+        setOAuthError(result.error.message || 'Error en autenticación')
         setIsLoading(false)
       }
     } catch (err: any) {
-      console.error('[v0] Exception in Google OAuth:', err)
-      const errorMsg = err?.message || String(err)
-      
-      if (errorMsg.includes('redirect_uri')) {
-        setOAuthError('Error de configuración. Por favor, verifica que la URI de redirección está registrada en Google Cloud Console: http://localhost:3000/api/auth/callback/google')
-      } else {
-        setOAuthError('Error conectando con Google. Verifica tu conexión e intenta de nuevo.')
-      }
+      console.error('[v0] Google OAuth error:', err)
+      setOAuthError(err?.message || 'Error conectando con Google')
       setIsLoading(false)
     }
   }
