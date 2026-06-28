@@ -1,8 +1,9 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Tent, LayoutDashboard, ArrowLeftRight, Tag, Users, LogOut, User, Church } from 'lucide-react'
+import { LayoutDashboard, ArrowLeftRight, Tag, Users, LogOut, User, Church } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { Button } from '@/components/ui/button'
@@ -34,9 +35,14 @@ export function Topbar() {
         <div className="flex items-center justify-between h-16 gap-3 sm:gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
-              <Tent className="w-5 h-5 text-white" />
-            </div>
+            <Image
+              src="/permanece-camp-logo.png"
+              alt="Permanece Camp"
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-lg object-contain"
+              priority
+            />
             <div className="hidden sm:flex flex-col leading-tight">
               <span className="font-bold text-foreground text-sm">Permanece Camp</span>
               <span className="text-xs text-muted-foreground leading-none">Nueva Creación</span>
