@@ -74,10 +74,10 @@ export function ChurchesClient({ userId }: Props) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold">Iglesias</h1>
-          <p className="text-muted-foreground text-sm mt-1">Total: {churches.length}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Iglesias</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Total: {churches.length}</p>
         </div>
-        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-2">
+        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-2 bg-green-600 hover:bg-green-700 text-white">
           <Plus className="w-4 h-4" />
           Agregar Iglesia
         </Button>

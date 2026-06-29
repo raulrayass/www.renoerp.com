@@ -43,9 +43,9 @@ export function Topbar() {
               className="w-10 h-10 rounded-lg object-contain"
               priority
             />
-            <div className="hidden sm:flex flex-col leading-tight">
-              <span className="font-bold text-foreground text-sm">Permanece Camp</span>
-              <span className="text-xs text-muted-foreground leading-none">Nueva Creación</span>
+            <div className="flex flex-col leading-tight min-w-0">
+              <span className="font-bold text-foreground text-xs sm:text-sm truncate">Permanece Camp</span>
+              <span className="text-xs text-muted-foreground leading-none truncate hidden xs:inline">Nueva Creación</span>
             </div>
           </Link>
 
