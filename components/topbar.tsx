@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ArrowLeftRight, Tag, Users, LogOut, User, Church } from 'lucide-react'
+import { LayoutDashboard, ArrowLeftRight, Tag, Users, LogOut, User, Church } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { Button } from '@/components/ui/button'
@@ -71,7 +71,33 @@ export function Topbar() {
             })}
           </nav>
 
-
+          {/* Mobile nav dropdown - shown on md and below */}
+          <div className="lg:hidden flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <LayoutDashboard className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Navegación</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {navItems.map(({ href, label, icon: Icon }) => {
+                    const active = pathname === href
+                    return (
+                      <Link key={href} href={href}>
+                        <DropdownMenuItem className={cn('gap-2 cursor-pointer', active && 'bg-primary/10 text-primary')}>
+                          <Icon className="w-4 h-4" />
+                          {label}
+                        </DropdownMenuItem>
+                      </Link>
+                    )
+                  })}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
           {/* User area */}
           {user ? (
