@@ -487,7 +487,7 @@ export function AttendeesClient({ userId }: Props) {
       >
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar Asistente' : 'Agregar Asistente'}</DialogTitle>
+            <DialogTitle>{editingId ? 'Editar asistente' : 'Agregar asistente'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -530,7 +530,7 @@ export function AttendeesClient({ userId }: Props) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="emergencyContactName">Contacto de Emergencia (Nombre) *</Label>
+              <Label htmlFor="emergencyContactName">Contacto de emergencia (Nombre) *</Label>
               <Input
                 id="emergencyContactName"
                 value={form.emergencyContactName}
@@ -539,7 +539,7 @@ export function AttendeesClient({ userId }: Props) {
               />
             </div>
             <div>
-              <Label htmlFor="emergencyContactPhone">Contacto de Emergencia (Teléfono) *</Label>
+              <Label htmlFor="emergencyContactPhone">Contacto de emergencia (Teléfono) *</Label>
               <Input
                 id="emergencyContactPhone"
                 value={form.emergencyContactPhone}
