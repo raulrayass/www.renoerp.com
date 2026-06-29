@@ -36,6 +36,8 @@ export const auth = betterAuth({
       ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
       : []),
     'https://v0-nccamp.vercel.app',
+    // Support v0 sandbox environments (vusercontent.net domains vary)
+    ...(process.env.NODE_ENV !== 'production' ? ['https://vm-v0-raulrayas-a9db9d99-68.vusercontent.net', 'https://vm-v0-raulrayas-a9db9d99.vusercontent.net'] : []),
   ],
   session: {
     expiresIn: 60 * 60 * 24 * 7,
