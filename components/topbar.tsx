@@ -30,7 +30,7 @@ export function Topbar() {
   const { user, signOut } = useUser()
 
   return (
-    <header className="sticky top-0 z-40 bg-card border-b border-border shadow-sm hidden lg:block">
+    <header className="sticky top-0 z-40 bg-card border-b border-border shadow-sm">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-0">
         <div className="flex items-center justify-between h-16 gap-3 sm:gap-4">
           {/* Logo */}
@@ -71,33 +71,7 @@ export function Topbar() {
             })}
           </nav>
 
-          {/* Mobile nav dropdown - shown on md and below */}
-          <div className="lg:hidden flex items-center gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <LayoutDashboard className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>Navegación</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {navItems.map(({ href, label, icon: Icon }) => {
-                    const active = pathname === href
-                    return (
-                      <Link key={href} href={href}>
-                        <DropdownMenuItem className={cn('gap-2 cursor-pointer', active && 'bg-primary/10 text-primary')}>
-                          <Icon className="w-4 h-4" />
-                          {label}
-                        </DropdownMenuItem>
-                      </Link>
-                    )
-                  })}
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+
 
           {/* User area */}
           {user ? (
