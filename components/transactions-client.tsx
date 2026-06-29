@@ -219,10 +219,10 @@ export function TransactionsClient({ userId }: { userId: string }) {
             placeholder="Buscar descripción..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 text-sm"
+            className="h-9"
           />
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="h-9 text-sm">
+            <SelectTrigger className="h-9">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -232,7 +232,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
             </SelectContent>
           </Select>
           <Select value={filterCat} onValueChange={setFilterCat}>
-            <SelectTrigger className="h-9 text-sm">
+            <SelectTrigger className="h-9">
               <SelectValue placeholder="Categoría" />
             </SelectTrigger>
             <SelectContent>
