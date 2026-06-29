@@ -119,8 +119,8 @@ export function CategoriesClient({ userId }: Props) {
   }
 
   return (
-    <div className="p-6 md:p-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Categorías</h1>
           <p className="text-muted-foreground text-sm mt-1">Administra las categorías de tus transacciones</p>
