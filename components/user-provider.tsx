@@ -28,6 +28,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   } : null
 
   const signOut = async () => {
+    setOAuthError(null)
+    setIsLoading(false)
     await authClient.signOut()
   }
 
@@ -45,7 +47,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       
       if (result?.data?.url) {
         console.log('[v0] Redirecting to Google...')
-        window.location.href = result.data.url
+        // Add prompt=select_account to force account selection on every login
+        const googleAuthUrl = result.data.url + (result.data.url.includes('?') ? '&' : '?') + 'prompt=select_account'
+        window.location.href = googleAuthUrl
       } else if (result?.error) {
         setOAuthError(result.error.message || 'Error en autenticación')
         setIsLoading(false)

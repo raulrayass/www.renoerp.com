@@ -22,7 +22,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2 } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
 interface Props {
@@ -306,16 +306,14 @@ export function AttendeesClient({ userId }: Props) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs sm:text-sm">
+          <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs sm:text-sm hover:bg-slate-100">
             <Download className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Plantilla</span>
-            <span className="sm:hidden">Plantilla</span>
           </Button>
           <label className="relative inline-block">
-            <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm pointer-events-none">
+            <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm hover:bg-slate-100 pointer-events-none">
               <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Importar</span>
-              <span className="sm:hidden">Importar</span>
             </Button>
             <input
               type="file"
@@ -324,15 +322,13 @@ export function AttendeesClient({ userId }: Props) {
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </label>
-          <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1 text-xs sm:text-sm">
+          <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1 text-xs sm:text-sm hover:bg-slate-100">
             <Download className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Exportar</span>
-            <span className="sm:hidden">Exportar</span>
           </Button>
-          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1 text-xs sm:text-sm ml-auto">
+          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1 text-xs sm:text-sm ml-auto bg-green-600 hover:bg-green-700 text-white">
             <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Agregar</span>
-            <span className="sm:hidden">Agregar</span>
           </Button>
         </div>
       </div>
@@ -417,11 +413,11 @@ export function AttendeesClient({ userId }: Props) {
                               setDialogOpen(true)
                             }}
                             size="sm"
-                            variant="outline"
-                            className="h-8 w-8 p-0"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 hover:bg-blue-100"
                             title="Editar asistente"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="w-4 h-4 text-blue-600" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -429,11 +425,11 @@ export function AttendeesClient({ userId }: Props) {
                               setDeleteDialogOpen(true)
                             }}
                             size="sm"
-                            variant="outline"
-                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 hover:bg-red-100"
                             title="Eliminar asistente"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
                         </div>
                       </div>
@@ -569,10 +565,10 @@ export function AttendeesClient({ userId }: Props) {
               />
             </div>
             <div className="flex gap-2 justify-end pt-4">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="hover:bg-slate-100">
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-400">
                 {editingId ? 'Guardar Cambios' : 'Agregar Asistente'}
               </Button>
             </div>
@@ -649,10 +645,10 @@ export function AttendeesClient({ userId }: Props) {
               />
             </div>
             <div className="flex gap-2 justify-end pt-4">
-              <Button type="button" variant="outline" onClick={() => setPaymentDialogOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setPaymentDialogOpen(false)} className="hover:bg-slate-100">
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-400">
                 Registrar Pago
               </Button>
             </div>

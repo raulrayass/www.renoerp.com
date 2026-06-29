@@ -179,11 +179,11 @@ export function TransactionsClient({ userId }: { userId: string }) {
           <p className="text-muted-foreground text-sm mt-1">Registra y gestiona tus ingresos y egresos</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={exportToExcel} className="gap-2">
+          <Button variant="outline" onClick={exportToExcel} className="gap-2 hover:bg-slate-100">
             <FileDown className="w-4 h-4" />
-            <span className="hidden sm:inline">Exportar Excel</span>
+            <span className="hidden sm:inline">Exportar</span>
           </Button>
-          <Button onClick={openCreate} className="gap-2">
+          <Button onClick={openCreate} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
             <Plus className="w-4 h-4" />
             Nueva
           </Button>
@@ -191,18 +191,18 @@ export function TransactionsClient({ userId }: { userId: string }) {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="p-4 border-l-4 border-l-green-600">
           <p className="text-xs text-muted-foreground">Ingresos</p>
-          <p className="text-lg font-bold mt-0.5" style={{ color: 'oklch(0.55 0.17 160)' }}>{formatCurrency(totals.income)}</p>
+          <p className="text-lg font-bold mt-0.5 text-green-600">{formatCurrency(totals.income)}</p>
         </Card>
-        <Card className="p-4">
+        <Card className="p-4 border-l-4 border-l-orange-600">
           <p className="text-xs text-muted-foreground">Egresos</p>
-          <p className="text-lg font-bold mt-0.5" style={{ color: 'oklch(0.55 0.20 25)' }}>{formatCurrency(totals.expense)}</p>
+          <p className="text-lg font-bold mt-0.5 text-orange-600">{formatCurrency(totals.expense)}</p>
         </Card>
-        <Card className="p-4">
+        <Card className="p-4 border-l-4 border-l-slate-600">
           <p className="text-xs text-muted-foreground">Balance</p>
-          <p className={`text-lg font-bold mt-0.5 ${totals.income - totals.expense >= 0 ? 'text-foreground' : 'text-destructive'}`}>
+          <p className={`text-lg font-bold mt-0.5 ${totals.income - totals.expense >= 0 ? 'text-slate-700' : 'text-red-600'}`}>
             {formatCurrency(totals.income - totals.expense)}
           </p>
         </Card>
@@ -283,29 +283,24 @@ export function TransactionsClient({ userId }: { userId: string }) {
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">
-                      <Badge variant="secondary" className="text-xs gap-1"
-                        style={{
-                          backgroundColor: t.type === 'income' ? 'oklch(0.55 0.17 160 / 0.1)' : 'oklch(0.55 0.20 25 / 0.1)',
-                          color: t.type === 'income' ? 'oklch(0.45 0.17 160)' : 'oklch(0.45 0.20 25)',
-                        }}
-                      >
+                      <Badge className={`text-xs gap-1 ${t.type === 'income' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
                         {t.type === 'income'
                           ? <><ArrowUpRight className="w-3 h-3" /> Ingreso</>
                           : <><ArrowDownRight className="w-3 h-3" /> Egreso</>}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="text-sm font-semibold" style={{ color: t.type === 'income' ? 'oklch(0.55 0.17 160)' : 'oklch(0.55 0.20 25)' }}>
+                      <span className={`text-sm font-semibold ${t.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
                         {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => openEdit(t)}>
-                          <Pencil className="w-3.5 h-3.5" />
+                        <Button variant="ghost" size="icon" className="w-8 h-8 hover:bg-blue-100" onClick={() => openEdit(t)}>
+                          <Pencil className="w-3.5 h-3.5 text-blue-600" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="w-8 h-8 text-destructive hover:text-destructive" onClick={() => openDelete(t.id)}>
-                          <Trash2 className="w-3.5 h-3.5" />
+                        <Button variant="ghost" size="icon" className="w-8 h-8 hover:bg-red-100" onClick={() => openDelete(t.id)}>
+                          <Trash2 className="w-3.5 h-3.5 text-red-600" />
                         </Button>
                       </div>
                     </td>
@@ -380,8 +375,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={isPending || !form.categoryId || form.categoryId === 'none'}>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="hover:bg-slate-100">Cancelar</Button>
+              <Button type="submit" disabled={isPending || !form.categoryId || form.categoryId === 'none'} className="bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-400">
                 {isPending ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
               </Button>
             </div>

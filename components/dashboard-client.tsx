@@ -83,12 +83,12 @@ export function DashboardClient({ userId }: { userId: string }) {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Ingresos</p>
-              <p className="text-2xl font-bold mt-1" style={{ color: INCOME_COLOR }}>
+              <p className="text-2xl font-bold mt-1 text-green-600">
                 {formatCurrency(totalIncome)}
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: INCOME_COLOR + '18' }}>
-              <TrendingUp className="w-5 h-5" style={{ color: INCOME_COLOR }} />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-green-50">
+              <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-3">Acumulado total</p>
@@ -98,12 +98,12 @@ export function DashboardClient({ userId }: { userId: string }) {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Egresos</p>
-              <p className="text-2xl font-bold mt-1" style={{ color: EXPENSE_COLOR }}>
+              <p className="text-2xl font-bold mt-1 text-orange-600">
                 {formatCurrency(totalExpense)}
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: EXPENSE_COLOR + '18' }}>
-              <TrendingDown className="w-5 h-5" style={{ color: EXPENSE_COLOR }} />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-orange-50">
+              <TrendingDown className="w-5 h-5 text-orange-600" />
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-3">Acumulado total</p>
