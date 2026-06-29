@@ -353,7 +353,22 @@ export function TransactionsClient({ userId }: { userId: string }) {
               <div className="flex flex-col gap-2">
                 <Label>Categoría</Label>
                 <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
-                  <SelectTrigger><SelectValue placeholder="Selecciona una categoría" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue>
+                      {form.categoryId && form.categoryId !== 'none' 
+                        ? (() => {
+                            const selected = filteredCategories.find(c => String(c.id) === form.categoryId)
+                            return selected ? (
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: selected.color }} />
+                                {selected.name}
+                              </div>
+                            ) : 'Selecciona una categoría'
+                          })()
+                        : 'Selecciona una categoría'
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
                   <SelectContent>
                     {filteredCategories.length === 0
                       ? <SelectItem value="none" disabled>Sin categorías disponibles</SelectItem>
