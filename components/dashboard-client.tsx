@@ -55,8 +55,8 @@ export function DashboardClient({ userId }: { userId: string }) {
           <Tent className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground leading-tight">Permanece Camp</h1>
-          <p className="text-muted-foreground text-sm">Nueva Creacion &mdash; Resumen general de finanzas</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight">Permanece Camp</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm">Nueva Creación — Resumen general de finanzas</p>
         </div>
       </div>
 

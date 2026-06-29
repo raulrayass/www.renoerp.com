@@ -122,10 +122,10 @@ export function CategoriesClient({ userId }: Props) {
     <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Categorías</h1>
-          <p className="text-muted-foreground text-sm mt-1">Administra las categorías de tus transacciones</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Categorías</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Administra las categorías de tus transacciones</p>
         </div>
-        <Button onClick={openCreate} className="gap-2">
+        <Button onClick={openCreate} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
           <Plus className="w-4 h-4" />
           Nueva categoría
         </Button>
