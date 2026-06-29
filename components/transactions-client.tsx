@@ -210,16 +210,19 @@ export function TransactionsClient({ userId }: { userId: string }) {
 
       {/* Filters */}
       <Card className="p-4">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 mb-3">
           <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="text-xs font-medium text-muted-foreground">Filtros</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Input
-            placeholder="Buscar descripcion..."
+            placeholder="Buscar descripción..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-48 h-8 text-sm"
+            className="h-9 text-sm"
           />
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-36 h-8 text-sm">
+            <SelectTrigger className="h-9 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -229,19 +232,19 @@ export function TransactionsClient({ userId }: { userId: string }) {
             </SelectContent>
           </Select>
           <Select value={filterCat} onValueChange={setFilterCat}>
-            <SelectTrigger className="w-44 h-8 text-sm">
-              <SelectValue placeholder="Categoria" />
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder="Categoría" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todas las categorias</SelectItem>
+              <SelectItem value="all">Todas las categorías</SelectItem>
               {categories.map((c) => (
                 <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           {(filterType !== 'all' || filterCat !== 'all' || search) && (
-            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setFilterType('all'); setFilterCat('all'); setSearch('') }}>
-              Limpiar
+            <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={() => { setFilterType('all'); setFilterCat('all'); setSearch('') }}>
+              Limpiar filtros
             </Button>
           )}
         </div>
@@ -318,7 +321,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar transaccion' : 'Nueva transaccion'}</DialogTitle>
+            <DialogTitle>{editingId ? 'Editar transacción' : 'Nueva transacción'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
             <div className="grid grid-cols-2 gap-3">
@@ -343,9 +346,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="desc">Descripcion</Label>
+              <Label htmlFor="desc">Descripción</Label>
               <Input
-                id="desc" placeholder="Descripcion de la transaccion"
+                id="desc" placeholder="Descripción de la transacción"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 required
@@ -353,12 +356,12 @@ export function TransactionsClient({ userId }: { userId: string }) {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
-                <Label>Categoria</Label>
+                <Label>Categoría</Label>
                 <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
                   <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                   <SelectContent>
                     {filteredCategories.length === 0
-                      ? <SelectItem value="none" disabled>Sin categorias disponibles</SelectItem>
+                      ? <SelectItem value="none" disabled>Sin categorías disponibles</SelectItem>
                       : filteredCategories.map((c) => (
                         <SelectItem key={c.id} value={String(c.id)}>
                           <div className="flex items-center gap-2">
@@ -390,9 +393,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar transaccion</AlertDialogTitle>
+            <AlertDialogTitle>Eliminar transacción</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta accion no se puede deshacer. La transaccion sera eliminada permanentemente.
+              Esta acción no se puede deshacer. La transacción será eliminada permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

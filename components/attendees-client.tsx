@@ -339,7 +339,19 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Attendees List */}
       {attendeeList.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">No hay asistentes registrados</div>
+        <Card className="p-12 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <Users className="w-12 h-12 text-muted-foreground/40" />
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Sin asistentes registrados</h3>
+              <p className="text-sm text-muted-foreground">Comienza agregando asistentes usando el botón "Agregar" o importando un archivo Excel</p>
+            </div>
+            <Button onClick={() => setDialogOpen(true)} className="mt-2 gap-2">
+              <Plus className="w-4 h-4" />
+              Agregar primer asistente
+            </Button>
+          </div>
+        </Card>
       ) : (
         <div className="space-y-3">
           {attendeeList
@@ -475,7 +487,7 @@ export function AttendeesClient({ userId }: Props) {
       >
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar Asistente' : 'Agregar Asistente'}</DialogTitle>
+            <DialogTitle>{editingId ? 'Editar asistente' : 'Agregar asistente'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -518,7 +530,7 @@ export function AttendeesClient({ userId }: Props) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="emergencyContactName">Contacto de Emergencia (Nombre) *</Label>
+              <Label htmlFor="emergencyContactName">Contacto de emergencia (Nombre) *</Label>
               <Input
                 id="emergencyContactName"
                 value={form.emergencyContactName}
@@ -527,7 +539,7 @@ export function AttendeesClient({ userId }: Props) {
               />
             </div>
             <div>
-              <Label htmlFor="emergencyContactPhone">Contacto de Emergencia (Teléfono) *</Label>
+              <Label htmlFor="emergencyContactPhone">Contacto de emergencia (Teléfono) *</Label>
               <Input
                 id="emergencyContactPhone"
                 value={form.emergencyContactPhone}
