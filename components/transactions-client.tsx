@@ -210,19 +210,16 @@ export function TransactionsClient({ userId }: { userId: string }) {
 
       {/* Filters */}
       <Card className="p-4">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-          <span className="text-xs font-medium text-muted-foreground">Filtros</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Input
             placeholder="Buscar descripcion..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 text-sm"
+            className="w-48 h-8 text-sm"
           />
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="h-9 text-sm">
+            <SelectTrigger className="w-36 h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -232,7 +229,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
             </SelectContent>
           </Select>
           <Select value={filterCat} onValueChange={setFilterCat}>
-            <SelectTrigger className="h-9 text-sm">
+            <SelectTrigger className="w-44 h-8 text-sm">
               <SelectValue placeholder="Categoria" />
             </SelectTrigger>
             <SelectContent>
@@ -243,8 +240,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
             </SelectContent>
           </Select>
           {(filterType !== 'all' || filterCat !== 'all' || search) && (
-            <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={() => { setFilterType('all'); setFilterCat('all'); setSearch('') }}>
-              Limpiar filtros
+            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setFilterType('all'); setFilterCat('all'); setSearch('') }}>
+              Limpiar
             </Button>
           )}
         </div>
