@@ -22,7 +22,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2 } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
 interface Props {
