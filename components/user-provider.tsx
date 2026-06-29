@@ -1,8 +1,9 @@
 'use client'
 
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import { useSession } from '@/lib/auth-client'
 import { authClient } from '@/lib/auth-client'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 
 interface UserCtx {
@@ -18,8 +19,22 @@ export function useUser() {
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession()
+  const searchParams = useSearchParams()
   const [oauthError, setOAuthError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  
+  // Check for OAuth errors in URL
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error === 'state_mismatch') {
+      console.error('[v0] OAuth state_mismatch detected - retrying...')
+      setOAuthError('Hubo un problema con la autenticación. Por favor intenta de nuevo.')
+      // Clear the error from URL
+      if (typeof window !== 'undefined') {
+        window.history.replaceState({}, '', window.location.pathname)
+      }
+    }
+  }, [searchParams])
   
   const user = session?.user ? {
     id: session.user.id,
