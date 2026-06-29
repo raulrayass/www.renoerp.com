@@ -30,7 +30,7 @@ export function Topbar() {
   const { user, signOut } = useUser()
 
   return (
-    <header className="sticky top-0 z-40 bg-card border-b border-border shadow-sm">
+    <header className="sticky top-0 z-40 bg-card border-b border-border shadow-sm hidden lg:block">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-0">
         <div className="flex items-center justify-between h-16 gap-3 sm:gap-4">
           {/* Logo */}

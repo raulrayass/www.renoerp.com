@@ -210,16 +210,19 @@ export function TransactionsClient({ userId }: { userId: string }) {
 
       {/* Filters */}
       <Card className="p-4">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 mb-3">
           <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="text-xs font-medium text-muted-foreground">Filtros</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Input
-            placeholder="Buscar descripcion..."
+            placeholder="Buscar descripción..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-48 h-8 text-sm"
+            className="h-9 text-sm"
           />
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-36 h-8 text-sm">
+            <SelectTrigger className="h-9 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -229,19 +232,19 @@ export function TransactionsClient({ userId }: { userId: string }) {
             </SelectContent>
           </Select>
           <Select value={filterCat} onValueChange={setFilterCat}>
-            <SelectTrigger className="w-44 h-8 text-sm">
-              <SelectValue placeholder="Categoria" />
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder="Categoría" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todas las categorias</SelectItem>
+              <SelectItem value="all">Todas las categorías</SelectItem>
               {categories.map((c) => (
                 <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           {(filterType !== 'all' || filterCat !== 'all' || search) && (
-            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setFilterType('all'); setFilterCat('all'); setSearch('') }}>
-              Limpiar
+            <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={() => { setFilterType('all'); setFilterCat('all'); setSearch('') }}>
+              Limpiar filtros
             </Button>
           )}
         </div>
