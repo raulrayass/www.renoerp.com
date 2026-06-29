@@ -353,7 +353,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
               <div className="flex flex-col gap-2">
                 <Label>Categoría</Label>
                 <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
-                  <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Selecciona una categoría" /></SelectTrigger>
                   <SelectContent>
                     {filteredCategories.length === 0
                       ? <SelectItem value="none" disabled>Sin categorías disponibles</SelectItem>
