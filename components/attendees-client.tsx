@@ -518,7 +518,7 @@ export function AttendeesClient({ userId }: Props) {
                       </SelectItem>
                     ))
                   ) : (
-                    <div className="p-2 text-xs text-muted-foreground text-center">
+                    <div className="p-2 text-sm text-muted-foreground text-center">
                       Agrega iglesias en la sección de Iglesias
                     </div>
                   )}
