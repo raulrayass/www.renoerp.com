@@ -170,4 +170,12 @@
   html {
     @apply font-sans;
   }
+  /* Prevent iOS Safari auto-zoom on form focus */
+  input,
+  select,
+  textarea,
+  [role="combobox"],
+  [role="option"] {
+    font-size: 16px !important;
+  }
 }
