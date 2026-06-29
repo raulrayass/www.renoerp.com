@@ -22,7 +22,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2 } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
 interface Props {
@@ -339,7 +339,19 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Attendees List */}
       {attendeeList.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">No hay asistentes registrados</div>
+        <Card className="p-12 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <Users className="w-12 h-12 text-muted-foreground/40" />
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Sin asistentes registrados</h3>
+              <p className="text-sm text-muted-foreground">Comienza agregando asistentes usando el botón "Agregar" o importando un archivo Excel</p>
+            </div>
+            <Button onClick={() => setDialogOpen(true)} className="mt-2 gap-2">
+              <Plus className="w-4 h-4" />
+              Agregar primer asistente
+            </Button>
+          </div>
+        </Card>
       ) : (
         <div className="space-y-3">
           {attendeeList
