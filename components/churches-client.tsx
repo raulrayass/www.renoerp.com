@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Plus, Trash2, Edit2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface Props {
   userId: string
@@ -35,24 +36,25 @@ export function ChurchesClient({ userId }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!churchName.trim()) {
+      toast.error('El nombre de la iglesia es obligatorio')
+      return
+    }
     startTransition(async () => {
-      if (!churchName.trim()) {
-        alert('El nombre de la iglesia es requerido')
-        return
-      }
-
       try {
         if (editingId) {
           await updateChurch(userId, editingId, churchName)
+          toast.success('Iglesia actualizada')
         } else {
           await createChurch(userId, churchName)
+          toast.success('Iglesia agregada')
         }
         setDialogOpen(false)
         setChurchName('')
         setEditingId(null)
         await loadChurches()
       } catch (error: any) {
-        alert(error.message || 'Error al guardar iglesia')
+        toast.error(error.message || 'Error al guardar la iglesia')
       }
     })
   }
@@ -61,10 +63,11 @@ export function ChurchesClient({ userId }: Props) {
     startTransition(async () => {
       try {
         await deleteChurch(userId, id)
+        toast.success('Iglesia eliminada')
         setDeleteDialogOpen(false)
         await loadChurches()
       } catch (error: any) {
-        alert(error.message || 'Error al eliminar iglesia')
+        toast.error(error.message || 'Error al eliminar la iglesia')
       }
     })
   }

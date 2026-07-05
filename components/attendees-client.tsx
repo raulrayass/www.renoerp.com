@@ -22,8 +22,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search } from 'lucide-react'
 import * as XLSX from 'xlsx'
+import { toast } from 'sonner'
 
 interface Props {
   userId: string
@@ -53,12 +54,20 @@ export function AttendeesClient({ userId }: Props) {
     date: new Date().toISOString().split('T')[0],
     notes: '',
   })
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [historyAttendeeId, setHistoryAttendeeId] = useState<number | null>(null)
+  const [paymentHistory, setPaymentHistory] = useState<AttendeePayment[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
     initializeDefaults()
   }, [userId])
 
   async function initializeDefaults() {
+    setLoading(true)
     try {
       await initializeDefaultChurches(userId)
     } catch (error) {
@@ -66,6 +75,7 @@ export function AttendeesClient({ userId }: Props) {
     }
     await loadAttendees()
     await loadChurches()
+    setLoading(false)
   }
 
   async function loadAttendees() {
@@ -80,13 +90,25 @@ export function AttendeesClient({ userId }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    startTransition(async () => {
-      const amount = parseFloat(form.totalAmount)
-      if (!form.name.trim() || isNaN(amount) || amount <= 0) {
-        alert('Por favor completa los campos correctamente')
-        return
-      }
+    const amount = parseFloat(form.totalAmount)
+    if (!form.name.trim()) {
+      toast.error('El nombre es obligatorio')
+      return
+    }
+    if (!form.phone.trim()) {
+      toast.error('El teléfono es obligatorio')
+      return
+    }
+    if (!form.church.trim()) {
+      toast.error('Selecciona una iglesia')
+      return
+    }
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('El monto total debe ser mayor a 0')
+      return
+    }
 
+    startTransition(async () => {
       try {
         if (editingId) {
           await updateAttendee(userId, editingId, {
@@ -98,6 +120,7 @@ export function AttendeesClient({ userId }: Props) {
             totalAmount: amount,
             notes: form.notes,
           })
+          toast.success('Asistente actualizado correctamente')
         } else {
           await createAttendee(userId, {
             name: form.name,
@@ -108,6 +131,7 @@ export function AttendeesClient({ userId }: Props) {
             totalAmount: amount,
             notes: form.notes,
           })
+          toast.success('Asistente agregado correctamente')
         }
         setDialogOpen(false)
         setForm({
@@ -122,7 +146,7 @@ export function AttendeesClient({ userId }: Props) {
         setEditingId(null)
         await loadAttendees()
       } catch (error) {
-        alert('Error al guardar asistente')
+        toast.error('Error al guardar el asistente')
         console.error(error)
       }
     })
@@ -132,29 +156,28 @@ export function AttendeesClient({ userId }: Props) {
     e.preventDefault()
     if (!selectedAttendeeId) return
 
+    const amount = parseFloat(paymentForm.amount)
+    const attendee = attendeeList.find((a) => a.id === selectedAttendeeId)
+    if (!attendee) return
+
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('El monto debe ser mayor a 0')
+      return
+    }
+
+    const totalAmount = parseFloat(attendee.totalAmount as string)
+    const alreadyPaid = parseFloat(attendee.amountPaid as string)
+    const remaining = totalAmount - alreadyPaid
+
+    if (amount > remaining) {
+      toast.error(`El monto excede lo pendiente. Faltan $${remaining.toFixed(2)}`)
+      return
+    }
+
     startTransition(async () => {
-      const amount = parseFloat(paymentForm.amount)
-      const attendee = attendeeList.find((a) => a.id === selectedAttendeeId)
-      if (!attendee) return
-
-      if (isNaN(amount) || amount <= 0) {
-        alert('El monto debe ser mayor a 0')
-        return
-      }
-
-      const totalAmount = parseFloat(attendee.totalAmount as string)
-      const alreadyPaid = parseFloat(attendee.amountPaid as string)
-      const remaining = totalAmount - alreadyPaid
-
-      if (amount > remaining) {
-        alert(
-          `No puedes registrar más de $${remaining.toFixed(2)}. El asistente aún debe $${remaining.toFixed(2)} de $${totalAmount.toFixed(2)}`
-        )
-        return
-      }
-
       try {
         await addAttendeePayment(userId, selectedAttendeeId, amount, paymentForm.date, paymentForm.notes)
+        toast.success(`Pago de $${amount.toFixed(2)} registrado para ${attendee.name}`)
         setPaymentDialogOpen(false)
         setPaymentForm({
           amount: '',
@@ -164,7 +187,7 @@ export function AttendeesClient({ userId }: Props) {
         setSelectedAttendeeId(null)
         await loadAttendees()
       } catch (error) {
-        alert('Error al registrar pago')
+        toast.error('Error al registrar el pago')
         console.error(error)
       }
     })
@@ -174,9 +197,42 @@ export function AttendeesClient({ userId }: Props) {
     startTransition(async () => {
       try {
         await deleteAttendee(userId, id)
+        toast.success('Asistente eliminado')
         await loadAttendees()
       } catch (error) {
-        alert('Error al eliminar asistente')
+        toast.error('Error al eliminar el asistente')
+        console.error(error)
+      }
+    })
+  }
+
+  async function openHistory(attendeeId: number) {
+    setHistoryAttendeeId(attendeeId)
+    setHistoryDialogOpen(true)
+    setLoadingHistory(true)
+    try {
+      const data = await getAttendeePayments(userId, attendeeId)
+      setPaymentHistory(data)
+    } catch (error) {
+      toast.error('Error al cargar el historial de pagos')
+      console.error(error)
+    } finally {
+      setLoadingHistory(false)
+    }
+  }
+
+  async function handleDeletePayment(paymentId: number) {
+    startTransition(async () => {
+      try {
+        await deleteAttendeePayment(userId, paymentId)
+        toast.success('Pago eliminado')
+        if (historyAttendeeId) {
+          const data = await getAttendeePayments(userId, historyAttendeeId)
+          setPaymentHistory(data)
+        }
+        await loadAttendees()
+      } catch (error) {
+        toast.error('Error al eliminar el pago')
         console.error(error)
       }
     })
@@ -232,7 +288,7 @@ export function AttendeesClient({ userId }: Props) {
         const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[]
 
         if (rows.length < 2) {
-          alert('El archivo debe contener al menos una fila de datos')
+          toast.error('El archivo debe contener al menos una fila de datos')
           return
         }
 
@@ -258,20 +314,25 @@ export function AttendeesClient({ userId }: Props) {
           )
         ) {
           await bulkCreateAttendees(userId, attendeesToImport)
-          alert(`${attendeesToImport.length} asistentes importados exitosamente`)
+          toast.success(`${attendeesToImport.length} asistentes importados correctamente`)
           await loadAttendees()
         } else {
-          alert('Algunos registros están incompletos. Verifica todos los campos requeridos.')
+          toast.error('Algunos registros están incompletos. Verifica todos los campos requeridos.')
         }
       }
       reader.readAsBinaryString(file)
     } catch (error) {
-      alert('Error al procesar el archivo')
+      toast.error('Error al procesar el archivo')
       console.error(error)
     }
+    e.target.value = ''
   }
 
   function exportCurrentData() {
+    if (attendeeList.length === 0) {
+      toast.error('No hay asistentes para exportar')
+      return
+    }
     const data = attendeeList.map((a) => {
       const total = parseFloat(a.totalAmount as string)
       const paid = parseFloat(a.amountPaid as string)
@@ -293,7 +354,41 @@ export function AttendeesClient({ userId }: Props) {
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Asistentes')
     XLSX.writeFile(wb, `Asistentes_${new Date().toISOString().split('T')[0]}.xlsx`)
+    toast.success('Reporte exportado correctamente')
   }
+
+  const summary = attendeeList.reduce(
+    (acc, a) => {
+      acc.expected += parseFloat(a.totalAmount as string)
+      acc.collected += parseFloat(a.amountPaid as string)
+      return acc
+    },
+    { expected: 0, collected: 0 }
+  )
+  const pendingAmount = summary.expected - summary.collected
+  const paidCount = attendeeList.filter((a) => a.status === 'paid').length
+  const partialCount = attendeeList.filter((a) => a.status === 'partial').length
+  const pendingCount = attendeeList.filter((a) => a.status === 'pending').length
+
+  const filteredAttendees = attendeeList
+    .filter((a) => {
+      if (statusFilter !== 'all' && a.status !== statusFilter) return false
+      if (search.trim()) {
+        const q = search.toLowerCase()
+        return (
+          a.name.toLowerCase().includes(q) ||
+          (a.church || '').toLowerCase().includes(q) ||
+          (a.phone || '').toLowerCase().includes(q)
+        )
+      }
+      return true
+    })
+    .sort((a, b) => {
+      const statusOrder: { [key: string]: number } = { paid: 0, partial: 1, pending: 2 }
+      const statusDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3)
+      if (statusDiff !== 0) return statusDiff
+      return a.name.localeCompare(b.name)
+    })
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
@@ -333,8 +428,80 @@ export function AttendeesClient({ userId }: Props) {
         </div>
       </div>
 
+      {/* Summary Cards */}
+      {!loading && attendeeList.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">Esperado</p>
+              <p className="text-lg sm:text-xl font-bold">${summary.expected.toFixed(2)}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">Recaudado</p>
+              <p className="text-lg sm:text-xl font-bold text-accent">${summary.collected.toFixed(2)}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">Pendiente</p>
+              <p className="text-lg sm:text-xl font-bold text-red-600">${pendingAmount.toFixed(2)}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">Estado</p>
+              <p className="text-sm font-semibold mt-1">
+                {paidCount} pagados · {partialCount} parciales · {pendingCount} pendientes
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Search & Filter */}
+      {!loading && attendeeList.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nombre, iglesia o teléfono"
+              className="pl-9"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los estados</SelectItem>
+              <SelectItem value="paid">Pagados</SelectItem>
+              <SelectItem value="partial">Parciales</SelectItem>
+              <SelectItem value="pending">Pendientes</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       {/* Attendees List */}
-      {attendeeList.length === 0 ? (
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="overflow-hidden">
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex flex-col gap-3 animate-pulse">
+                  <div className="h-4 w-40 bg-muted rounded" />
+                  <div className="h-3 w-24 bg-muted rounded" />
+                  <div className="h-2 w-full bg-muted rounded" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : attendeeList.length === 0 ? (
         <Card className="p-12 text-center">
           <div className="flex flex-col items-center gap-3">
             <Users className="w-12 h-12 text-muted-foreground/40" />
@@ -348,15 +515,16 @@ export function AttendeesClient({ userId }: Props) {
             </Button>
           </div>
         </Card>
+      ) : filteredAttendees.length === 0 ? (
+        <Card className="p-12 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <Search className="w-10 h-10 text-muted-foreground/40" />
+            <p className="text-sm text-muted-foreground">No se encontraron asistentes con esos filtros</p>
+          </div>
+        </Card>
       ) : (
         <div className="space-y-3">
-          {attendeeList
-            .sort((a, b) => {
-              const statusOrder: { [key: string]: number } = { paid: 0, partial: 1, pending: 2 }
-              const statusDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3)
-              if (statusDiff !== 0) return statusDiff
-              return a.name.localeCompare(b.name)
-            })
+          {filteredAttendees
             .map((attendee) => {
               const total = parseFloat(attendee.totalAmount as string)
               const paid = parseFloat(attendee.amountPaid as string)
@@ -397,6 +565,15 @@ export function AttendeesClient({ userId }: Props) {
                             title="Registrar pago"
                           >
                             <DollarSign className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => openHistory(attendee.id)}
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 hover:bg-accent/15"
+                            title="Ver historial de pagos"
+                          >
+                            <History className="w-4 h-4 text-accent" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -681,6 +858,77 @@ export function AttendeesClient({ userId }: Props) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Payment History Dialog */}
+      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Historial de pagos</DialogTitle>
+            {historyAttendeeId && (
+              <DialogDescription>
+                {attendeeList.find((a) => a.id === historyAttendeeId)?.name}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          {loadingHistory ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : paymentHistory.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <History className="w-10 h-10 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">Aún no hay abonos registrados</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {(() => {
+                const totalPaid = paymentHistory.reduce(
+                  (sum, p) => sum + parseFloat(p.amount as string),
+                  0
+                )
+                return (
+                  <div className="flex justify-between items-center bg-accent/10 rounded-lg px-3 py-2 mb-1">
+                    <span className="text-sm font-medium text-foreground">Total abonado</span>
+                    <span className="text-sm font-bold text-accent">${totalPaid.toFixed(2)}</span>
+                  </div>
+                )
+              })()}
+              {paymentHistory.map((payment) => (
+                <div
+                  key={payment.id}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-border p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm">
+                      ${parseFloat(payment.amount as string).toFixed(2)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(payment.paymentDate + 'T00:00:00').toLocaleDateString('es-MX', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    {payment.notes && (
+                      <p className="text-xs text-muted-foreground truncate">{payment.notes}</p>
+                    )}
+                  </div>
+                  <Button
+                    onClick={() => handleDeletePayment(payment.id)}
+                    size="sm"
+                    variant="ghost"
+                    disabled={isPending}
+                    className="h-8 w-8 p-0 hover:bg-red-100 shrink-0"
+                    title="Eliminar pago"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

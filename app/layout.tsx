@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Toaster } from 'sonner'
 import { UserProvider } from '@/components/user-provider'
 import './globals.css'
 
@@ -56,6 +57,7 @@ export default function RootLayout({
         <UserProvider>
           {children}
         </UserProvider>
+        <Toaster position="top-center" richColors closeButton />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

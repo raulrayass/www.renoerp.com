@@ -33,6 +33,7 @@ import { getCategories, createCategory, updateCategory, deleteCategory } from '@
 import { Plus, Pencil, Trash2, Tag, TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react'
 import { Category } from '@/lib/db/schema'
 import { useEffect, useState, useTransition } from 'react'
+import { toast } from 'sonner'
 
 const PRESET_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
@@ -90,25 +91,42 @@ export function CategoriesClient({ userId }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!form.name.trim()) {
+      toast.error('El nombre de la categoría es obligatorio')
+      return
+    }
     startTransition(async () => {
-      if (editingId) {
-        await updateCategory(userId, editingId, form)
-      } else {
-        await createCategory(userId, form)
+      try {
+        if (editingId) {
+          await updateCategory(userId, editingId, form)
+          toast.success('Categoría actualizada')
+        } else {
+          await createCategory(userId, form)
+          toast.success('Categoría creada')
+        }
+        setDialogOpen(false)
+        const updated = await getCategories(userId)
+        setCategories(updated)
+      } catch (error) {
+        toast.error('Error al guardar la categoría')
+        console.error(error)
       }
-      setDialogOpen(false)
-      const updated = await getCategories(userId)
-      setCategories(updated)
     })
   }
 
   async function handleDelete() {
     if (!deletingId) return
     startTransition(async () => {
-      await deleteCategory(userId, deletingId)
-      setDeleteDialogOpen(false)
-      const updated = await getCategories(userId)
-      setCategories(updated)
+      try {
+        await deleteCategory(userId, deletingId)
+        toast.success('Categoría eliminada')
+        setDeleteDialogOpen(false)
+        const updated = await getCategories(userId)
+        setCategories(updated)
+      } catch (error) {
+        toast.error('Error al eliminar la categoría')
+        console.error(error)
+      }
     })
   }
 

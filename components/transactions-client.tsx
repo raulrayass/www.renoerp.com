@@ -23,6 +23,7 @@ import { getCategories } from '@/app/actions/categories'
 import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, FileDown, Filter } from 'lucide-react'
 import type { Category } from '@/lib/db/schema'
 import * as XLSX from 'xlsx'
+import { toast } from 'sonner'
 
 type TransactionRow = Awaited<ReturnType<typeof getTransactions>>[number]
 
@@ -113,39 +114,69 @@ export function TransactionsClient({ userId }: { userId: string }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const amount = parseFloat(form.amount)
+    if (!form.categoryId) {
+      toast.error('Selecciona una categoría')
+      return
+    }
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('El monto debe ser mayor a 0')
+      return
+    }
+    if (!form.description.trim()) {
+      toast.error('La descripción es obligatoria')
+      return
+    }
     startTransition(async () => {
-      if (editingId) {
-        await updateTransaction(userId, editingId, {
-          categoryId: parseInt(form.categoryId),
-          type: form.type,
-          amount: form.amount,
-          description: form.description,
-          date: form.date,
-        })
-      } else {
-        await createTransaction(userId, {
-          categoryId: parseInt(form.categoryId),
-          type: form.type,
-          amount: form.amount,
-          description: form.description,
-          date: form.date,
-        })
+      try {
+        if (editingId) {
+          await updateTransaction(userId, editingId, {
+            categoryId: parseInt(form.categoryId),
+            type: form.type,
+            amount: form.amount,
+            description: form.description,
+            date: form.date,
+          })
+          toast.success('Transacción actualizada')
+        } else {
+          await createTransaction(userId, {
+            categoryId: parseInt(form.categoryId),
+            type: form.type,
+            amount: form.amount,
+            description: form.description,
+            date: form.date,
+          })
+          toast.success('Transacción registrada')
+        }
+        setDialogOpen(false)
+        await reload()
+      } catch (error) {
+        toast.error('Error al guardar la transacción')
+        console.error(error)
       }
-      setDialogOpen(false)
-      await reload()
     })
   }
 
   async function handleDelete() {
     if (!deletingId) return
     startTransition(async () => {
-      await deleteTransaction(userId, deletingId)
-      setDeleteDialogOpen(false)
-      await reload()
+      try {
+        await deleteTransaction(userId, deletingId)
+        toast.success('Transacción eliminada')
+        setDeleteDialogOpen(false)
+        await reload()
+      } catch (error) {
+        toast.error('Error al eliminar la transacción')
+        console.error(error)
+      }
     })
   }
 
   function exportToExcel() {
+    if (filtered.length === 0) {
+      toast.error('No hay transacciones para exportar')
+      return
+    }
     const data = filtered.map((t) => {
       const amount = parseFloat(t.amount as string)
       const signedAmount = t.type === 'income' ? amount : -amount
@@ -161,6 +192,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Transacciones')
     XLSX.writeFile(wb, `Transacciones_${new Date().toISOString().split('T')[0]}.xlsx`)
+    toast.success('Transacciones exportadas correctamente')
   }
 
   if (loading) {
