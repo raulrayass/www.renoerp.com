@@ -107,7 +107,7 @@ export async function addAttendeePayment(
     .from(attendees)
     .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
 
-  if (!attendee) throw new Error('Asistente no encontrado')
+  if (!attendee) throw new Error('Campero no encontrado')
 
   // Validate payment doesn't exceed remaining amount
   const totalAmount = parseFloat(attendee.totalAmount as string)
@@ -186,7 +186,7 @@ export async function deleteAttendeePayment(userId: string, paymentId: number) {
     .from(attendees)
     .where(eq(attendees.id, payment.attendeeId))
 
-  if (!attendee) throw new Error('Asistente no encontrado')
+  if (!attendee) throw new Error('Campero no encontrado')
 
   // Delete corresponding transaction
   await db

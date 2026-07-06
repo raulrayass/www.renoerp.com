@@ -120,7 +120,7 @@ export function AttendeesClient({ userId }: Props) {
             totalAmount: amount,
             notes: form.notes,
           })
-          toast.success('Asistente actualizado correctamente')
+          toast.success('Campero actualizado correctamente')
         } else {
           await createAttendee(userId, {
             name: form.name,
@@ -131,7 +131,7 @@ export function AttendeesClient({ userId }: Props) {
             totalAmount: amount,
             notes: form.notes,
           })
-          toast.success('Asistente agregado correctamente')
+          toast.success('Campero agregado correctamente')
         }
         setDialogOpen(false)
         setForm({
@@ -146,7 +146,7 @@ export function AttendeesClient({ userId }: Props) {
         setEditingId(null)
         await loadAttendees()
       } catch (error) {
-        toast.error('Error al guardar el asistente')
+        toast.error('Error al guardar el campero')
         console.error(error)
       }
     })
@@ -197,10 +197,10 @@ export function AttendeesClient({ userId }: Props) {
     startTransition(async () => {
       try {
         await deleteAttendee(userId, id)
-        toast.success('Asistente eliminado')
+        toast.success('Campero eliminado')
         await loadAttendees()
       } catch (error) {
-        toast.error('Error al eliminar el asistente')
+        toast.error('Error al eliminar el campero')
         console.error(error)
       }
     })
@@ -272,8 +272,8 @@ export function AttendeesClient({ userId }: Props) {
       ],
     ])
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Asistentes')
-    XLSX.writeFile(wb, 'Plantilla_Asistentes.xlsx')
+    XLSX.utils.book_append_sheet(wb, ws, 'Camperos')
+    XLSX.writeFile(wb, 'Plantilla_Camperos.xlsx')
   }
 
   async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
@@ -314,7 +314,7 @@ export function AttendeesClient({ userId }: Props) {
           )
         ) {
           await bulkCreateAttendees(userId, attendeesToImport)
-          toast.success(`${attendeesToImport.length} asistentes importados correctamente`)
+          toast.success(`${attendeesToImport.length} camperos importados correctamente`)
           await loadAttendees()
         } else {
           toast.error('Algunos registros están incompletos. Verifica todos los campos requeridos.')
@@ -330,7 +330,7 @@ export function AttendeesClient({ userId }: Props) {
 
   function exportCurrentData() {
     if (attendeeList.length === 0) {
-      toast.error('No hay asistentes para exportar')
+      toast.error('No hay camperos para exportar')
       return
     }
     const data = attendeeList.map((a) => {
@@ -352,8 +352,8 @@ export function AttendeesClient({ userId }: Props) {
     })
     const ws = XLSX.utils.json_to_sheet(data)
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Asistentes')
-    XLSX.writeFile(wb, `Asistentes_${new Date().toISOString().split('T')[0]}.xlsx`)
+    XLSX.utils.book_append_sheet(wb, ws, 'Camperos')
+    XLSX.writeFile(wb, `Camperos_${new Date().toISOString().split('T')[0]}.xlsx`)
     toast.success('Reporte exportado correctamente')
   }
 
@@ -395,7 +395,7 @@ export function AttendeesClient({ userId }: Props) {
       {/* Header */}
       <div className="flex flex-col gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Asistentes</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Camperos</h1>
           <p className="text-muted-foreground text-xs sm:text-sm mt-1">
             Total: {attendeeList.length} | Pagados: {attendeeList.filter((a) => a.status === 'paid').length}
           </p>
@@ -506,12 +506,12 @@ export function AttendeesClient({ userId }: Props) {
           <div className="flex flex-col items-center gap-3">
             <Users className="w-12 h-12 text-muted-foreground/40" />
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-1">Sin asistentes registrados</h3>
-              <p className="text-sm text-muted-foreground">Comienza agregando asistentes usando el botón "Agregar" o importando un archivo Excel</p>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Sin camperos registrados</h3>
+              <p className="text-sm text-muted-foreground">Comienza agregando camperos usando el botón "Agregar" o importando un archivo Excel</p>
             </div>
             <Button onClick={() => setDialogOpen(true)} className="mt-2 gap-2">
               <Plus className="w-4 h-4" />
-              Agregar primer asistente
+              Agregar primer campero
             </Button>
           </div>
         </Card>
@@ -519,7 +519,7 @@ export function AttendeesClient({ userId }: Props) {
         <Card className="p-12 text-center">
           <div className="flex flex-col items-center gap-3">
             <Search className="w-10 h-10 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">No se encontraron asistentes con esos filtros</p>
+            <p className="text-sm text-muted-foreground">No se encontraron camperos con esos filtros</p>
           </div>
         </Card>
       ) : (
@@ -592,7 +592,7 @@ export function AttendeesClient({ userId }: Props) {
                             size="sm"
                             variant="ghost"
                             className="h-8 w-8 p-0 hover:bg-blue-100"
-                            title="Editar asistente"
+                            title="Editar campero"
                           >
                             <Edit2 className="w-4 h-4 text-blue-600" />
                           </Button>
@@ -604,7 +604,7 @@ export function AttendeesClient({ userId }: Props) {
                             size="sm"
                             variant="ghost"
                             className="h-8 w-8 p-0 hover:bg-red-100"
-                            title="Eliminar asistente"
+                            title="Eliminar campero"
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
@@ -660,7 +660,7 @@ export function AttendeesClient({ userId }: Props) {
       >
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar asistente' : 'Agregar asistente'}</DialogTitle>
+              <DialogTitle>{editingId ? 'Editar campero' : 'Agregar campero'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -746,7 +746,7 @@ export function AttendeesClient({ userId }: Props) {
                 Cancelar
               </Button>
               <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-400">
-                {editingId ? 'Guardar Cambios' : 'Agregar Asistente'}
+                {editingId ? 'Guardar Cambios' : 'Agregar Campero'}
               </Button>
             </div>
           </form>
@@ -839,7 +839,7 @@ export function AttendeesClient({ userId }: Props) {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro que deseas eliminar este asistente y todos sus registros de pago? Esta acción no se puede deshacer.
+              ¿Estás seguro que deseas eliminar este campero y todos sus registros de pago? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-2 justify-end pt-4">

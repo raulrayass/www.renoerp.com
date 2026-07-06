@@ -238,8 +238,8 @@ export function DashboardClient({ userId }: { userId: string }) {
         </Card>
 
         <Card className="p-5">
-          <h2 className="font-semibold text-foreground mb-1">Asistentes por Iglesia</h2>
-          <p className="text-xs text-muted-foreground mb-4">Distribución de asistentes del campamento</p>
+          <h2 className="font-semibold text-foreground mb-1">Camperos por Iglesia</h2>
+          <p className="text-xs text-muted-foreground mb-4">Distribución de camperos del campamento</p>
           {churchData && churchData.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
@@ -257,7 +257,7 @@ export function DashboardClient({ userId }: { userId: string }) {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => `${value} asistentes`}
+                  formatter={(value: number) => `${value} camperos`}
                   contentStyle={{ borderRadius: '8px', fontSize: '13px', border: '1px solid var(--border)' }}
                 />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
@@ -265,7 +265,7 @@ export function DashboardClient({ userId }: { userId: string }) {
             </ResponsiveContainer>
           ) : (
             <div className="text-center py-12 text-muted-foreground text-sm">
-              No hay datos de iglesias. Verifica que los asistentes tengan iglesia asignada.
+              No hay datos de iglesias. Verifica que los camperos tengan iglesia asignada.
             </div>
           )}
         </Card>
