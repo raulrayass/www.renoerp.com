@@ -25,10 +25,18 @@ export async function createAttendee(
   userId: string,
   data: {
     name: string
+    age?: number | null
+    shirtSize?: string
+    sex?: string
     phone?: string
     church?: string
     emergencyContactName?: string
     emergencyContactPhone?: string
+    emergencyContactName2?: string
+    emergencyContactPhone2?: string
+    allergies?: string
+    roomId?: number | null
+    teamId?: number | null
     totalAmount: number
     notes?: string
   }
@@ -36,10 +44,18 @@ export async function createAttendee(
   await db.insert(attendees).values({
     userId,
     name: data.name,
+    age: data.age ?? null,
+    shirtSize: data.shirtSize || null,
+    sex: data.sex || null,
     phone: data.phone || '',
     church: data.church || '',
     emergencyContactName: data.emergencyContactName || '',
     emergencyContactPhone: data.emergencyContactPhone || '',
+    emergencyContactName2: data.emergencyContactName2 || '',
+    emergencyContactPhone2: data.emergencyContactPhone2 || '',
+    allergies: data.allergies || '',
+    roomId: data.roomId ?? null,
+    teamId: data.teamId ?? null,
     totalAmount: parseFloat(data.totalAmount.toString()),
     status: 'pending',
     notes: data.notes || '',
@@ -51,10 +67,18 @@ export async function updateAttendee(
   attendeeId: number,
   data: Partial<{
     name: string
+    age: number | null
+    shirtSize: string
+    sex: string
     phone: string
     church: string
     emergencyContactName: string
     emergencyContactPhone: string
+    emergencyContactName2: string
+    emergencyContactPhone2: string
+    allergies: string
+    roomId: number | null
+    teamId: number | null
     totalAmount: number
     notes: string
   }>
@@ -69,6 +93,13 @@ export async function updateAttendee(
   await db
     .update(attendees)
     .set(updateData)
+    .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
+}
+
+export async function toggleCheckIn(userId: string, attendeeId: number, checkedIn: boolean) {
+  await db
+    .update(attendees)
+    .set({ checkedIn, updatedAt: new Date() })
     .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
 }
 

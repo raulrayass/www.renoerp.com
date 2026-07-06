@@ -10,9 +10,12 @@ import {
   deleteAttendeePayment,
   getAttendeePayments,
   bulkCreateAttendees,
+  toggleCheckIn,
 } from '@/app/actions/attendees'
 import { getChurches, initializeDefaultChurches } from '@/app/actions/churches'
-import { Attendee, AttendeePayment, Church } from '@/lib/db/schema'
+import { getTeams } from '@/app/actions/teams'
+import { getRooms } from '@/app/actions/rooms'
+import { Attendee, AttendeePayment, Church, Team, Room } from '@/lib/db/schema'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,17 +25,40 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 interface Props {
   userId: string
 }
 
+const emptyForm = {
+  name: '',
+  age: '',
+  shirtSize: '',
+  sex: '',
+  phone: '',
+  church: '',
+  emergencyContactName: '',
+  emergencyContactPhone: '',
+  emergencyContactName2: '',
+  emergencyContactPhone2: '',
+  allergies: '',
+  roomId: '',
+  teamId: '',
+  totalAmount: '',
+  notes: '',
+}
+
+const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+
 export function AttendeesClient({ userId }: Props) {
   const [attendeeList, setAttendeeList] = useState<Attendee[]>([])
   const [churches, setChurches] = useState<Church[]>([])
+  const [teams, setTeams] = useState<Team[]>([])
+  const [rooms, setRooms] = useState<Room[]>([])
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
@@ -40,15 +66,7 @@ export function AttendeesClient({ userId }: Props) {
   const [selectedAttendeeId, setSelectedAttendeeId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    church: '',
-    emergencyContactName: '',
-    emergencyContactPhone: '',
-    totalAmount: '',
-    notes: '',
-  })
+  const [form, setForm] = useState({ ...emptyForm })
   const [paymentForm, setPaymentForm] = useState({
     amount: '',
     date: new Date().toISOString().split('T')[0],
@@ -75,6 +93,8 @@ export function AttendeesClient({ userId }: Props) {
     }
     await loadAttendees()
     await loadChurches()
+    await loadTeams()
+    await loadRooms()
     setLoading(false)
   }
 
@@ -86,6 +106,16 @@ export function AttendeesClient({ userId }: Props) {
   async function loadChurches() {
     const data = await getChurches(userId)
     setChurches(data)
+  }
+
+  async function loadTeams() {
+    const data = await getTeams(userId)
+    setTeams(data)
+  }
+
+  async function loadRooms() {
+    const data = await getRooms(userId)
+    setRooms(data)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -108,41 +138,35 @@ export function AttendeesClient({ userId }: Props) {
       return
     }
 
+    const payload = {
+      name: form.name,
+      age: form.age ? parseInt(form.age, 10) : null,
+      shirtSize: form.shirtSize,
+      sex: form.sex,
+      phone: form.phone,
+      church: form.church,
+      emergencyContactName: form.emergencyContactName,
+      emergencyContactPhone: form.emergencyContactPhone,
+      emergencyContactName2: form.emergencyContactName2,
+      emergencyContactPhone2: form.emergencyContactPhone2,
+      allergies: form.allergies,
+      roomId: form.roomId ? parseInt(form.roomId, 10) : null,
+      teamId: form.teamId ? parseInt(form.teamId, 10) : null,
+      totalAmount: amount,
+      notes: form.notes,
+    }
+
     startTransition(async () => {
       try {
         if (editingId) {
-          await updateAttendee(userId, editingId, {
-            name: form.name,
-            phone: form.phone,
-            church: form.church,
-            emergencyContactName: form.emergencyContactName,
-            emergencyContactPhone: form.emergencyContactPhone,
-            totalAmount: amount,
-            notes: form.notes,
-          })
+          await updateAttendee(userId, editingId, payload)
           toast.success('Campero actualizado correctamente')
         } else {
-          await createAttendee(userId, {
-            name: form.name,
-            phone: form.phone,
-            church: form.church,
-            emergencyContactName: form.emergencyContactName,
-            emergencyContactPhone: form.emergencyContactPhone,
-            totalAmount: amount,
-            notes: form.notes,
-          })
+          await createAttendee(userId, payload)
           toast.success('Campero agregado correctamente')
         }
         setDialogOpen(false)
-        setForm({
-          name: '',
-          phone: '',
-          church: '',
-          emergencyContactName: '',
-          emergencyContactPhone: '',
-          totalAmount: '',
-          notes: '',
-        })
+        setForm({ ...emptyForm })
         setEditingId(null)
         await loadAttendees()
       } catch (error) {
@@ -201,6 +225,20 @@ export function AttendeesClient({ userId }: Props) {
         await loadAttendees()
       } catch (error) {
         toast.error('Error al eliminar el campero')
+        console.error(error)
+      }
+    })
+  }
+
+  async function handleToggleCheckIn(attendee: Attendee) {
+    const next = !attendee.checkedIn
+    startTransition(async () => {
+      try {
+        await toggleCheckIn(userId, attendee.id, next)
+        toast.success(next ? `${attendee.name} registró Check-in` : `Check-in cancelado para ${attendee.name}`)
+        await loadAttendees()
+      } catch (error) {
+        toast.error('Error al actualizar el check-in')
         console.error(error)
       }
     })
@@ -366,6 +404,9 @@ export function AttendeesClient({ userId }: Props) {
     { expected: 0, collected: 0 }
   )
   const pendingAmount = summary.expected - summary.collected
+  const teamMap = new Map(teams.map((t) => [t.id, t]))
+  const roomMap = new Map(rooms.map((r) => [r.id, r]))
+  const checkedInCount = attendeeList.filter((a) => a.checkedIn).length
   const paidCount = attendeeList.filter((a) => a.status === 'paid').length
   const partialCount = attendeeList.filter((a) => a.status === 'partial').length
   const pendingCount = attendeeList.filter((a) => a.status === 'pending').length
@@ -397,7 +438,7 @@ export function AttendeesClient({ userId }: Props) {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Camperos</h1>
           <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Total: {attendeeList.length} | Pagados: {attendeeList.filter((a) => a.status === 'paid').length}
+            Total: {attendeeList.length} | Pagados: {attendeeList.filter((a) => a.status === 'paid').length} | Check-in: {checkedInCount}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -544,16 +585,60 @@ export function AttendeesClient({ userId }: Props) {
                             >
                               {attendee.status === 'paid' ? 'Pagado' : attendee.status === 'partial' ? 'Parcial' : 'Pendiente'}
                             </Badge>
+                            {attendee.checkedIn && (
+                              <Badge className="shrink-0 text-xs bg-green-600 hover:bg-green-600 text-white gap-1">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Check-in
+                              </Badge>
+                            )}
+                            {attendee.teamId && teamMap.get(attendee.teamId) && (
+                              <span
+                                className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full text-white shrink-0"
+                                style={{ backgroundColor: teamMap.get(attendee.teamId)!.color }}
+                              >
+                                {teamMap.get(attendee.teamId)!.name}
+                              </span>
+                            )}
                           </div>
                           <div className="text-xs text-muted-foreground space-y-0.5">
+                            {(attendee.age != null || attendee.shirtSize || attendee.sex) && (
+                              <p>
+                                {[
+                                  attendee.age != null ? `${attendee.age} años` : null,
+                                  attendee.sex,
+                                  attendee.shirtSize ? `Talla ${attendee.shirtSize}` : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' · ')}
+                              </p>
+                            )}
                             {attendee.church && <p>Iglesia: {attendee.church}</p>}
                             {attendee.phone && <p>Tel: {attendee.phone}</p>}
+                            {attendee.roomId && roomMap.get(attendee.roomId) && (
+                              <p>Habitación: {roomMap.get(attendee.roomId)!.name}</p>
+                            )}
                             {attendee.emergencyContactName && (
                               <p>Emergencia: {attendee.emergencyContactName} ({attendee.emergencyContactPhone})</p>
                             )}
+                            {attendee.emergencyContactName2 && (
+                              <p>Emergencia 2: {attendee.emergencyContactName2} ({attendee.emergencyContactPhone2})</p>
+                            )}
+                            {attendee.allergies && <p className="text-amber-700">Alergias: {attendee.allergies}</p>}
                           </div>
                         </div>
                         <div className="flex gap-1 shrink-0">
+                          <Button
+                            onClick={() => handleToggleCheckIn(attendee)}
+                            size="sm"
+                            variant="ghost"
+                            className={cn(
+                              'h-8 w-8 p-0',
+                              attendee.checkedIn ? 'text-green-600 hover:bg-green-100' : 'hover:bg-muted'
+                            )}
+                            title={attendee.checkedIn ? 'Cancelar check-in' : 'Registrar check-in'}
+                          >
+                            {attendee.checkedIn ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                          </Button>
                           <Button
                             onClick={() => {
                               setSelectedAttendeeId(attendee.id)
@@ -580,10 +665,18 @@ export function AttendeesClient({ userId }: Props) {
                               setEditingId(attendee.id)
                               setForm({
                                 name: attendee.name,
+                                age: attendee.age != null ? String(attendee.age) : '',
+                                shirtSize: attendee.shirtSize || '',
+                                sex: attendee.sex || '',
                                 phone: attendee.phone || '',
                                 church: attendee.church || '',
                                 emergencyContactName: attendee.emergencyContactName || '',
                                 emergencyContactPhone: attendee.emergencyContactPhone || '',
+                                emergencyContactName2: attendee.emergencyContactName2 || '',
+                                emergencyContactPhone2: attendee.emergencyContactPhone2 || '',
+                                allergies: attendee.allergies || '',
+                                roomId: attendee.roomId != null ? String(attendee.roomId) : '',
+                                teamId: attendee.teamId != null ? String(attendee.teamId) : '',
                                 totalAmount: total.toString(),
                                 notes: attendee.notes || '',
                               })
@@ -634,26 +727,10 @@ export function AttendeesClient({ userId }: Props) {
           setDialogOpen(open)
           if (open) {
             if (!editingId) {
-              setForm({
-                name: '',
-                phone: '',
-                church: '',
-                emergencyContactName: '',
-                emergencyContactPhone: '',
-                totalAmount: '',
-                notes: '',
-              })
+              setForm({ ...emptyForm })
             }
           } else {
-            setForm({
-              name: '',
-              phone: '',
-              church: '',
-              emergencyContactName: '',
-              emergencyContactPhone: '',
-              totalAmount: '',
-              notes: '',
-            })
+            setForm({ ...emptyForm })
             setEditingId(null)
           }
         }}
@@ -672,8 +749,48 @@ export function AttendeesClient({ userId }: Props) {
                 placeholder="Juan García"
               />
             </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <Label htmlFor="age">Edad</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  min="0"
+                  value={form.age}
+                  onChange={(e) => setForm({ ...form, age: e.target.value })}
+                  placeholder="21"
+                />
+              </div>
+              <div>
+                <Label htmlFor="shirtSize">Talla</Label>
+                <Select value={form.shirtSize} onValueChange={(value) => setForm({ ...form, shirtSize: value })}>
+                  <SelectTrigger id="shirtSize">
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SHIRT_SIZES.map((size) => (
+                      <SelectItem key={size} value={size}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="sex">Sexo</Label>
+                <Select value={form.sex} onValueChange={(value) => setForm({ ...form, sex: value })}>
+                  <SelectTrigger id="sex">
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Hombre">Hombre</SelectItem>
+                    <SelectItem value="Mujer">Mujer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div>
-              <Label htmlFor="phone">Teléfono *</Label>
+              <Label htmlFor="phone">Contacto Personal (Teléfono) *</Label>
               <Input
                 id="phone"
                 value={form.phone}
@@ -702,23 +819,94 @@ export function AttendeesClient({ userId }: Props) {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="emergencyContactName">Contacto de emergencia (Nombre) *</Label>
-              <Input
-                id="emergencyContactName"
-                value={form.emergencyContactName}
-                onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })}
-                placeholder="Maria García"
-              />
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="emergencyContactName">Contacto emergencia 1 *</Label>
+                <Input
+                  id="emergencyContactName"
+                  value={form.emergencyContactName}
+                  onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })}
+                  placeholder="Mamá"
+                />
+              </div>
+              <div>
+                <Label htmlFor="emergencyContactPhone">Teléfono 1 *</Label>
+                <Input
+                  id="emergencyContactPhone"
+                  value={form.emergencyContactPhone}
+                  onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
+                  placeholder="5559876543"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="emergencyContactName2">Contacto emergencia 2</Label>
+                <Input
+                  id="emergencyContactName2"
+                  value={form.emergencyContactName2}
+                  onChange={(e) => setForm({ ...form, emergencyContactName2: e.target.value })}
+                  placeholder="Papá"
+                />
+              </div>
+              <div>
+                <Label htmlFor="emergencyContactPhone2">Teléfono 2</Label>
+                <Input
+                  id="emergencyContactPhone2"
+                  value={form.emergencyContactPhone2}
+                  onChange={(e) => setForm({ ...form, emergencyContactPhone2: e.target.value })}
+                  placeholder="5551112222"
+                />
+              </div>
             </div>
             <div>
-              <Label htmlFor="emergencyContactPhone">Contacto de emergencia (Teléfono) *</Label>
+              <Label htmlFor="allergies">Alergias</Label>
               <Input
-                id="emergencyContactPhone"
-                value={form.emergencyContactPhone}
-                onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
-                placeholder="5559876543"
+                id="allergies"
+                value={form.allergies}
+                onChange={(e) => setForm({ ...form, allergies: e.target.value })}
+                placeholder="Ninguna / Penicilina / etc."
               />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="teamId">Equipo</Label>
+                <Select
+                  value={form.teamId || 'none'}
+                  onValueChange={(value) => setForm({ ...form, teamId: value === 'none' ? '' : value })}
+                >
+                  <SelectTrigger id="teamId">
+                    <SelectValue placeholder="Sin equipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin equipo</SelectItem>
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={String(team.id)}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="roomId">Habitación</Label>
+                <Select
+                  value={form.roomId || 'none'}
+                  onValueChange={(value) => setForm({ ...form, roomId: value === 'none' ? '' : value })}
+                >
+                  <SelectTrigger id="roomId">
+                    <SelectValue placeholder="Sin habitación" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sin habitación</SelectItem>
+                    {rooms.map((room) => (
+                      <SelectItem key={room.id} value={String(room.id)}>
+                        {room.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div>
               <Label htmlFor="totalAmount">Monto Total ($) *</Label>
