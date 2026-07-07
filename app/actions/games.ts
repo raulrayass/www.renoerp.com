@@ -60,6 +60,17 @@ export async function getGameScores(userId: string, gameId: number) {
   })
 }
 
+// Add points for a team in a specific game (accumulative)
+export async function addGameScore(userId: string, gameId: number, teamId: number, points: number) {
+  if (points === 0) return
+  await db.insert(gameScores).values({
+    userId,
+    gameId,
+    teamId,
+    points,
+  })
+}
+
 // Set (upsert) the points a team earned in a specific game
 export async function setGameScore(userId: string, gameId: number, teamId: number, points: number) {
   const existing = await db.query.gameScores.findFirst({
@@ -78,6 +89,12 @@ export async function setGameScore(userId: string, gameId: number, teamId: numbe
   } else {
     await db.insert(gameScores).values({ userId, gameId, teamId, points })
   }
+}
+
+export async function deleteGameScore(userId: string, scoreId: number) {
+  await db
+    .delete(gameScores)
+    .where(and(eq(gameScores.userId, userId), eq(gameScores.id, scoreId)))
 }
 
 // Leaderboard: total points per team across all games
