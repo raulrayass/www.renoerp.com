@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, serial, numeric, date, integer } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, serial, numeric, date, integer, boolean } from 'drizzle-orm/pg-core'
 
 // Simple user table - identified only by email
 export const appUsers = pgTable('app_users', {
@@ -34,10 +34,19 @@ export const attendees = pgTable('attendees', {
   id: serial('id').primaryKey(),
   userId: text('userId').notNull(),
   name: text('name').notNull(),
+  age: integer('age'),
+  shirtSize: text('shirtSize'), // 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
+  sex: text('sex'), // 'Hombre' | 'Mujer'
   phone: text('phone'),
   church: text('church'),
   emergencyContactName: text('emergencyContactName'),
   emergencyContactPhone: text('emergencyContactPhone'),
+  emergencyContactName2: text('emergencyContactName2'),
+  emergencyContactPhone2: text('emergencyContactPhone2'),
+  allergies: text('allergies'),
+  checkedIn: boolean('checkedIn').notNull().default(false),
+  roomId: integer('roomId'),
+  teamId: integer('teamId'),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
   amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
   status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
@@ -64,6 +73,43 @@ export const churches = pgTable('churches', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
+export const teams = pgTable('teams', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(),
+  name: text('name').notNull(),
+  color: text('color').notNull().default('#4a9d67'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const rooms = pgTable('rooms', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(),
+  name: text('name').notNull(),
+  capacity: integer('capacity'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const games = pgTable('games', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(),
+  name: text('name').notNull(),
+  description: text('description'),
+  gameDate: date('gameDate'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const gameScores = pgTable('game_scores', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(),
+  gameId: integer('gameId').notNull(),
+  teamId: integer('teamId').notNull(),
+  points: integer('points').notNull().default(0),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
 export type AppUser = typeof appUsers.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
@@ -75,3 +121,11 @@ export type AttendeePayment = typeof attendeePayments.$inferSelect
 export type NewAttendeePayment = typeof attendeePayments.$inferInsert
 export type Church = typeof churches.$inferSelect
 export type NewChurch = typeof churches.$inferInsert
+export type Team = typeof teams.$inferSelect
+export type NewTeam = typeof teams.$inferInsert
+export type Room = typeof rooms.$inferSelect
+export type NewRoom = typeof rooms.$inferInsert
+export type Game = typeof games.$inferSelect
+export type NewGame = typeof games.$inferInsert
+export type GameScore = typeof gameScores.$inferSelect
+export type NewGameScore = typeof gameScores.$inferInsert

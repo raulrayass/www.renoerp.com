@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ArrowLeftRight, Tag, Users, LogOut, User, Church } from 'lucide-react'
+import { LayoutDashboard, ArrowLeftRight, Tag, Users, LogOut, User, Church, Zap, Home, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { Button } from '@/components/ui/button'
@@ -20,9 +20,12 @@ import {
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/attendees', label: 'Camperos', icon: Users },
+  { href: '/teams', label: 'Equipos', icon: Zap },
+  { href: '/rooms', label: 'Habitaciones', icon: Home },
+  { href: '/games', label: 'Juegos', icon: Trophy },
   { href: '/churches', label: 'Iglesias', icon: Church },
   { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
-  { href: '/categories', label: 'Categorias', icon: Tag },
+  { href: '/categories', label: 'Categorías', icon: Tag },
 ]
 
 export function Topbar() {
