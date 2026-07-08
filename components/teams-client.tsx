@@ -258,12 +258,12 @@ export function TeamsClient({ userId }: Props) {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name">Nombre *</Label>
-              <Input
-                id="name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Dragones"
-              />
+                <Input
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Ej: Grupo A, Equipo Principal, etc."
+                />
             </div>
             <div>
               <Label>Color *</Label>
