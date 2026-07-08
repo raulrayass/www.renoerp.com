@@ -9,7 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts'
-import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Tent } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
 
@@ -48,17 +48,6 @@ export function DashboardClient({ userId }: { userId: string }) {
   return (
     <div className="w-full h-full overflow-y-auto">
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
-
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
-          <Tent className="w-5 h-5 text-primary-foreground" />
-        </div>
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight">Permanece Camp</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm">Nueva Creación — Resumen general de finanzas</p>
-        </div>
-      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
