@@ -78,3 +78,10 @@ export async function getTeamMemberCounts(userId: string) {
   }
   return counts
 }
+
+export async function getTeamMembers(userId: string, teamId: number) {
+  return await db.query.attendees.findMany({
+    where: and(eq(attendees.userId, userId), eq(attendees.teamId, teamId)),
+    orderBy: (attendees, { asc }) => [asc(attendees.name)],
+  })
+}

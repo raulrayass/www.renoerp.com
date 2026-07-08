@@ -7,10 +7,10 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Plus, Edit2, Trash2, Users } from 'lucide-react'
+import { Plus, Edit2, Trash2, Users, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
-import { createRoom, updateRoom, deleteRoom, getRooms } from '@/app/actions/rooms'
-import { Room } from '@/lib/db/schema'
+import { createRoom, updateRoom, deleteRoom, getRooms, getRoomOccupancy, getRoomOccupants } from '@/app/actions/rooms'
+import { Room, Attendee } from '@/lib/db/schema'
 
 interface Props {
   userId: string
@@ -18,6 +18,9 @@ interface Props {
 
 export function RoomsClient({ userId }: Props) {
   const [roomList, setRoomList] = useState<Room[]>([])
+  const [occupancy, setOccupancy] = useState<Record<number, number>>({})
+  const [expandedRoomId, setExpandedRoomId] = useState<number | null>(null)
+  const [expandedOccupants, setExpandedOccupants] = useState<Record<number, Attendee[]>>({})
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -36,12 +39,31 @@ export function RoomsClient({ userId }: Props) {
     setLoading(true)
     try {
       const data = await getRooms(userId)
+      const occ = await getRoomOccupancy(userId)
       setRoomList(data)
+      setOccupancy(occ)
     } catch (error) {
       toast.error('Error al cargar habitaciones')
       console.error(error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function toggleRoomOccupants(roomId: number) {
+    if (expandedRoomId === roomId) {
+      setExpandedRoomId(null)
+    } else {
+      setExpandedRoomId(roomId)
+      if (!expandedOccupants[roomId]) {
+        try {
+          const occupants = await getRoomOccupants(userId, roomId)
+          setExpandedOccupants({ ...expandedOccupants, [roomId]: occupants })
+        } catch (error) {
+          toast.error('Error al cargar habitantes de la habitación')
+          console.error(error)
+        }
+      }
     }
   }
 
@@ -125,45 +147,84 @@ export function RoomsClient({ userId }: Props) {
       ) : (
         <div className="space-y-2">
           {roomList.map((room) => (
-            <Card key={room.id} className="overflow-hidden hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="font-semibold text-sm truncate">{room.name}</h3>
-                    {room.capacity && (
-                      <p className="text-xs text-muted-foreground">Capacidad: {room.capacity} personas</p>
-                    )}
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button
-                      onClick={() => {
-                        setEditingId(room.id)
-                        setForm({ name: room.name, capacity: room.capacity ? String(room.capacity) : '' })
-                        setDialogOpen(true)
-                      }}
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 w-8 p-0 hover:bg-blue-100"
-                      title="Editar habitación"
+            <div key={room.id}>
+              <Card className="overflow-hidden hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      onClick={() => toggleRoomOccupants(room.id)}
+                      className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-80 transition-opacity"
                     >
-                      <Edit2 className="w-4 h-4 text-blue-600" />
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setDeletingId(room.id)
-                        setDeleteDialogOpen(true)
-                      }}
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 w-8 p-0 hover:bg-red-100"
-                      title="Eliminar habitación"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </Button>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-sm truncate">{room.name}</h3>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {occupancy[room.id] || 0}
+                          {room.capacity ? ` / ${room.capacity}` : ''} {room.capacity ? 'ocupadas' : 'habitantes'}
+                        </p>
+                      </div>
+                    </button>
+                    <div className="flex gap-1 shrink-0">
+                      <Button
+                        onClick={() => toggleRoomOccupants(room.id)}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        title={expandedRoomId === room.id ? 'Contraer' : 'Expandir'}
+                      >
+                        <ChevronDown
+                          className="w-4 h-4 transition-transform"
+                          style={{
+                            transform: expandedRoomId === room.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                          }}
+                        />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setEditingId(room.id)
+                          setForm({ name: room.name, capacity: room.capacity ? String(room.capacity) : '' })
+                          setDialogOpen(true)
+                        }}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 hover:bg-blue-100"
+                        title="Editar habitación"
+                      >
+                        <Edit2 className="w-4 h-4 text-blue-600" />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setDeletingId(room.id)
+                          setDeleteDialogOpen(true)
+                        }}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 hover:bg-red-100"
+                        title="Eliminar habitación"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </Button>
+                    </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Expanded Occupants List */}
+              {expandedRoomId === room.id && expandedOccupants[room.id] && (
+                <div className="mt-1 ml-4 border-l-2 border-muted pl-4 space-y-1">
+                  {expandedOccupants[room.id]?.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-2">Sin habitantes</p>
+                  ) : (
+                    expandedOccupants[room.id]?.map((occupant) => (
+                      <div key={occupant.id} className="text-xs py-1">
+                        <p className="font-medium text-foreground">{occupant.name}</p>
+                        {occupant.phone && <p className="text-muted-foreground">{occupant.phone}</p>}
+                      </div>
+                    ))
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           ))}
         </div>
       )}
