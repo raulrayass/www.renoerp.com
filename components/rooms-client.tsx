@@ -60,7 +60,7 @@ export function RoomsClient({ userId }: Props) {
           const occupants = await getRoomOccupants(userId, roomId)
           setExpandedOccupants({ ...expandedOccupants, [roomId]: occupants })
         } catch (error) {
-          toast.error('Error al cargar habitantes de la habitación')
+          toast.error('Error al cargar integrantes de la habitación')
           console.error(error)
         }
       }
@@ -249,7 +249,7 @@ export function RoomsClient({ userId }: Props) {
                 id="name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Pieza A"
+                placeholder="Litera A"
               />
             </div>
             <div>

@@ -170,7 +170,7 @@ export function GamesClient({ userId }: Props) {
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Juegos & Marcador</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Juegos y Puntaje</h1>
             <p className="text-muted-foreground text-xs sm:text-sm mt-1">
               Total: {gameList.length} juegos
           </p>
@@ -185,7 +185,7 @@ export function GamesClient({ userId }: Props) {
       {teams.length > 0 && (
         <Card>
           <CardContent className="p-6">
-            <h2 className="font-semibold text-lg mb-4">Marcador General</h2>
+            <h2 className="font-semibold text-lg mb-4">Puntaje General</h2>
             <div className="space-y-2">
               {leaderboard.map((entry, idx) => (
                 <div
@@ -323,7 +323,7 @@ export function GamesClient({ userId }: Props) {
                 id="name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Carrera de obstáculos"
+                placeholder="Rally, Bolley"
               />
             </div>
             <div>
@@ -332,7 +332,7 @@ export function GamesClient({ userId }: Props) {
                 id="description"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Detalles del juego..."
+                placeholder="Detalles del juego"
               />
             </div>
             <div>

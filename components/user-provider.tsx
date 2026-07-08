@@ -86,7 +86,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             <h1 className="text-2xl font-bold text-foreground text-balance text-center">Permanece Camp</h1>
             <p className="text-accent text-sm font-medium mt-0.5">Nueva Creacion</p>
             <p className="text-muted-foreground text-xs mt-1 text-center">
-              Control de ingresos y egresos del campamento
+              Administracion general 
             </p>
           </div>
 
