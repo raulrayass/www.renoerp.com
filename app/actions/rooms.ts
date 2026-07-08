@@ -78,3 +78,10 @@ export async function getRoomOccupancy(userId: string) {
   }
   return counts
 }
+
+export async function getRoomOccupants(userId: string, roomId: number) {
+  return await db.query.attendees.findMany({
+    where: and(eq(attendees.userId, userId), eq(attendees.roomId, roomId)),
+    orderBy: (attendees, { asc }) => [asc(attendees.name)],
+  })
+}

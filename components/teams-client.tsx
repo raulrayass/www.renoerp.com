@@ -8,10 +8,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Edit2, Trash2 } from 'lucide-react'
+import { Plus, Edit2, Trash2, ChevronDown, Users } from 'lucide-react'
 import { toast } from 'sonner'
-import { createTeam, updateTeam, deleteTeam, getTeams } from '@/app/actions/teams'
-import { Team } from '@/lib/db/schema'
+import { createTeam, updateTeam, deleteTeam, getTeams, getTeamMembers, getTeamMemberCounts } from '@/app/actions/teams'
+import { Team, Attendee } from '@/lib/db/schema'
 
 interface Props {
   userId: string
@@ -19,6 +19,9 @@ interface Props {
 
 export function TeamsClient({ userId }: Props) {
   const [teamList, setTeamList] = useState<Team[]>([])
+  const [memberCounts, setMemberCounts] = useState<Record<number, number>>({})
+  const [expandedTeamId, setExpandedTeamId] = useState<number | null>(null)
+  const [expandedMembers, setExpandedMembers] = useState<Record<number, Attendee[]>>({})
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -48,12 +51,31 @@ export function TeamsClient({ userId }: Props) {
     setLoading(true)
     try {
       const data = await getTeams(userId)
+      const counts = await getTeamMemberCounts(userId)
       setTeamList(data)
+      setMemberCounts(counts)
     } catch (error) {
       toast.error('Error al cargar equipos')
       console.error(error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function toggleTeamMembers(teamId: number) {
+    if (expandedTeamId === teamId) {
+      setExpandedTeamId(null)
+    } else {
+      setExpandedTeamId(teamId)
+      if (!expandedMembers[teamId]) {
+        try {
+          const members = await getTeamMembers(userId, teamId)
+          setExpandedMembers({ ...expandedMembers, [teamId]: members })
+        } catch (error) {
+          toast.error('Error al cargar integrantes del equipo')
+          console.error(error)
+        }
+      }
     }
   }
 
@@ -134,51 +156,89 @@ export function TeamsClient({ userId }: Props) {
           </div>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-2">
           {teamList.map((team) => (
-            <Card key={team.id} className="overflow-hidden hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className="w-8 h-8 rounded-full shrink-0 border-2 border-border"
-                      style={{ backgroundColor: team.color }}
-                    />
-                    <div className="min-w-0">
-                      <h3 className="font-semibold text-sm truncate">{team.name}</h3>
-                      <p className="text-xs text-muted-foreground">{team.color}</p>
+            <div key={team.id}>
+              <Card className="overflow-hidden hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      onClick={() => toggleTeamMembers(team.id)}
+                      className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-80 transition-opacity"
+                    >
+                      <div
+                        className="w-8 h-8 rounded-full shrink-0 border-2 border-border"
+                        style={{ backgroundColor: team.color }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-sm truncate">{team.name}</h3>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {memberCounts[team.id] || 0} integrante{(memberCounts[team.id] || 0) !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </button>
+                    <div className="flex gap-1 shrink-0">
+                      <Button
+                        onClick={() => toggleTeamMembers(team.id)}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        title={expandedTeamId === team.id ? 'Contraer' : 'Expandir'}
+                      >
+                        <ChevronDown
+                          className="w-4 h-4 transition-transform"
+                          style={{
+                            transform: expandedTeamId === team.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                          }}
+                        />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setEditingId(team.id)
+                          setForm({ name: team.name, color: team.color })
+                          setDialogOpen(true)
+                        }}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 hover:bg-blue-100"
+                        title="Editar equipo"
+                      >
+                        <Edit2 className="w-4 h-4 text-blue-600" />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setDeletingId(team.id)
+                          setDeleteDialogOpen(true)
+                        }}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 hover:bg-red-100"
+                        title="Eliminar equipo"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button
-                      onClick={() => {
-                        setEditingId(team.id)
-                        setForm({ name: team.name, color: team.color })
-                        setDialogOpen(true)
-                      }}
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 w-8 p-0 hover:bg-blue-100"
-                      title="Editar equipo"
-                    >
-                      <Edit2 className="w-4 h-4 text-blue-600" />
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setDeletingId(team.id)
-                        setDeleteDialogOpen(true)
-                      }}
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 w-8 p-0 hover:bg-red-100"
-                      title="Eliminar equipo"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </Button>
-                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Expanded Members List */}
+              {expandedTeamId === team.id && expandedMembers[team.id] && (
+                <div className="mt-1 ml-4 border-l-2 border-muted pl-4 space-y-1">
+                  {expandedMembers[team.id]?.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-2">Sin integrantes</p>
+                  ) : (
+                    expandedMembers[team.id]?.map((member) => (
+                      <div key={member.id} className="text-xs py-1">
+                        <p className="font-medium text-foreground">{member.name}</p>
+                        {member.phone && <p className="text-muted-foreground">{member.phone}</p>}
+                      </div>
+                    ))
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           ))}
         </div>
       )}
