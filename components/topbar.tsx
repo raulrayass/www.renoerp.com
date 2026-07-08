@@ -33,9 +33,9 @@ export function Topbar() {
   const { user, signOut } = useUser()
 
   return (
-    <header className="sticky top-0 z-40 bg-card border-b border-border shadow-lg backdrop-blur-sm">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-3 sm:py-2">
-        <div className="flex items-center justify-between h-14 gap-3 sm:gap-4">
+    <header className="sticky top-0 z-40 bg-transparent">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-between h-12 gap-3 sm:gap-4 px-4 py-3 rounded-2xl bg-card border border-border shadow-lg backdrop-blur-sm">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 hover:opacity-80 transition-opacity">
             <Image
@@ -48,7 +48,6 @@ export function Topbar() {
             />
             <div className="flex flex-col leading-tight min-w-0">
               <span className="font-bold text-foreground text-xs sm:text-sm truncate">Permanece Camp</span>
-              <span className="text-xs text-muted-foreground leading-none truncate hidden xs:inline">Nueva Creación</span>
             </div>
           </Link>
 
@@ -80,8 +79,8 @@ export function Topbar() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-muted transition-colors">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shrink-0 shadow-md">
-                  <User className="w-4 h-4 text-white" />
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary via-primary to-primary/70 flex items-center justify-center shrink-0 shadow-md border border-primary/20">
+                  <User className="w-4 h-4 text-primary-foreground" />
                 </div>
                 <span className="hidden sm:block truncate text-foreground text-sm font-medium max-w-[120px]">
                   {user.name || user.email?.split('@')[0] || 'Usuario'}
