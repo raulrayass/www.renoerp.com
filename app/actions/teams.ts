@@ -11,13 +11,16 @@ export async function getTeams(userId: string) {
   })
 }
 
-export async function createTeam(userId: string, name: string, color: string) {
-  if (!name.trim()) {
+export async function createTeam(
+  userId: string,
+  data: { name: string; color?: string }
+) {
+  if (!data.name.trim()) {
     throw new Error('El nombre del equipo es requerido')
   }
 
   const existing = await db.query.teams.findFirst({
-    where: and(eq(teams.userId, userId), eq(teams.name, name.trim())),
+    where: and(eq(teams.userId, userId), eq(teams.name, data.name.trim())),
   })
 
   if (existing) {
@@ -26,18 +29,22 @@ export async function createTeam(userId: string, name: string, color: string) {
 
   await db.insert(teams).values({
     userId,
-    name: name.trim(),
-    color: color || '#4a9d67',
+    name: data.name.trim(),
+    color: data.color || '#4a9d67',
   })
 }
 
-export async function updateTeam(userId: string, teamId: number, name: string, color: string) {
-  if (!name.trim()) {
+export async function updateTeam(
+  userId: string,
+  teamId: number,
+  data: { name: string; color?: string }
+) {
+  if (!data.name.trim()) {
     throw new Error('El nombre del equipo es requerido')
   }
 
   const existing = await db.query.teams.findFirst({
-    where: and(eq(teams.userId, userId), eq(teams.name, name.trim())),
+    where: and(eq(teams.userId, userId), eq(teams.name, data.name.trim())),
   })
 
   if (existing && existing.id !== teamId) {
@@ -46,7 +53,7 @@ export async function updateTeam(userId: string, teamId: number, name: string, c
 
   await db
     .update(teams)
-    .set({ name: name.trim(), color: color || '#4a9d67', updatedAt: new Date() })
+    .set({ name: data.name.trim(), color: data.color || '#4a9d67', updatedAt: new Date() })
     .where(and(eq(teams.userId, userId), eq(teams.id, teamId)))
 }
 

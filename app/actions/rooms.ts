@@ -11,13 +11,16 @@ export async function getRooms(userId: string) {
   })
 }
 
-export async function createRoom(userId: string, name: string, capacity: number | null) {
-  if (!name.trim()) {
+export async function createRoom(
+  userId: string,
+  data: { name: string; capacity?: number | null }
+) {
+  if (!data.name.trim()) {
     throw new Error('El nombre de la habitación es requerido')
   }
 
   const existing = await db.query.rooms.findFirst({
-    where: and(eq(rooms.userId, userId), eq(rooms.name, name.trim())),
+    where: and(eq(rooms.userId, userId), eq(rooms.name, data.name.trim())),
   })
 
   if (existing) {
@@ -26,18 +29,22 @@ export async function createRoom(userId: string, name: string, capacity: number 
 
   await db.insert(rooms).values({
     userId,
-    name: name.trim(),
-    capacity: capacity ?? null,
+    name: data.name.trim(),
+    capacity: data.capacity ?? null,
   })
 }
 
-export async function updateRoom(userId: string, roomId: number, name: string, capacity: number | null) {
-  if (!name.trim()) {
+export async function updateRoom(
+  userId: string,
+  roomId: number,
+  data: { name: string; capacity?: number | null }
+) {
+  if (!data.name.trim()) {
     throw new Error('El nombre de la habitación es requerido')
   }
 
   const existing = await db.query.rooms.findFirst({
-    where: and(eq(rooms.userId, userId), eq(rooms.name, name.trim())),
+    where: and(eq(rooms.userId, userId), eq(rooms.name, data.name.trim())),
   })
 
   if (existing && existing.id !== roomId) {
@@ -46,7 +53,7 @@ export async function updateRoom(userId: string, roomId: number, name: string, c
 
   await db
     .update(rooms)
-    .set({ name: name.trim(), capacity: capacity ?? null, updatedAt: new Date() })
+    .set({ name: data.name.trim(), capacity: data.capacity ?? null, updatedAt: new Date() })
     .where(and(eq(rooms.userId, userId), eq(rooms.id, roomId)))
 }
 
