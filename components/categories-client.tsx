@@ -253,7 +253,7 @@ export function CategoriesClient({ userId }: Props) {
               <Label htmlFor="cat-name">Nombre</Label>
               <Input
                 id="cat-name"
-                placeholder="Ej: Alimentación, Salario..."
+                placeholder="Ej: Transporte"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required

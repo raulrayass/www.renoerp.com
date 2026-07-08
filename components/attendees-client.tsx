@@ -289,9 +289,9 @@ export function AttendeesClient({ userId }: Props) {
         'Notas',
       ],
       [
-        'Juan García',
-        '5551234567',
-        'Iglesia Central',
+        'Abi Med',
+        '3326094596',
+        'Nueva creacion',
         'Maria García',
         '5559876543',
         '2000',
@@ -299,12 +299,12 @@ export function AttendeesClient({ userId }: Props) {
         'Ejemplo',
       ],
       [
-        'María López',
-        '5559876543',
-        'Iglesia del Calvario',
-        'Carlos López',
-        '5551111111',
-        '1800',
+        'Raul Rayas',
+        '3326094596',
+        'Masai Guadaaara',
+        'Esmerada López',
+        '3351111111',
+        '1200',
         '500',
         'Con pago inicial',
       ],
@@ -746,7 +746,7 @@ export function AttendeesClient({ userId }: Props) {
                 id="name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Juan García"
+                placeholder="Enrique Medina"
               />
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -795,7 +795,7 @@ export function AttendeesClient({ userId }: Props) {
                 id="phone"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                placeholder="5551234567"
+                placeholder="3326094596"
               />
             </div>
             <div>
@@ -835,7 +835,7 @@ export function AttendeesClient({ userId }: Props) {
                   id="emergencyContactPhone"
                   value={form.emergencyContactPhone}
                   onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
-                  placeholder="5559876543"
+                  placeholder="3326094596"
                 />
               </div>
             </div>
@@ -855,7 +855,7 @@ export function AttendeesClient({ userId }: Props) {
                   id="emergencyContactPhone2"
                   value={form.emergencyContactPhone2}
                   onChange={(e) => setForm({ ...form, emergencyContactPhone2: e.target.value })}
-                  placeholder="5551112222"
+                  placeholder="3324255466"
                 />
               </div>
             </div>
@@ -865,7 +865,7 @@ export function AttendeesClient({ userId }: Props) {
                 id="allergies"
                 value={form.allergies}
                 onChange={(e) => setForm({ ...form, allergies: e.target.value })}
-                placeholder="Ninguna / Penicilina / etc."
+                placeholder="Ninguna / paraceamol / etc."
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -917,7 +917,7 @@ export function AttendeesClient({ userId }: Props) {
                 min="0"
                 value={form.totalAmount}
                 onChange={(e) => setForm({ ...form, totalAmount: e.target.value })}
-                placeholder="2000"
+                placeholder="1200"
               />
             </div>
             <div>
