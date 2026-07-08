@@ -33,8 +33,8 @@ export function Topbar() {
   const { user, signOut } = useUser()
 
   return (
-    <header className="sticky top-0 z-40 bg-background border-b border-border shadow-lg backdrop-blur-sm">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-3">
+    <header className="sticky top-0 z-40 bg-card border-b border-border shadow-lg backdrop-blur-sm">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-3 sm:py-2">
         <div className="flex items-center justify-between h-14 gap-3 sm:gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 hover:opacity-80 transition-opacity">
@@ -43,11 +43,11 @@ export function Topbar() {
               alt="Permanece Camp"
               width={40}
               height={40}
-              className="w-9 h-9 rounded-lg object-contain"
+              className="w-10 h-10 rounded-lg object-contain"
               priority
             />
             <div className="flex flex-col leading-tight min-w-0">
-              <span className="font-bold text-foreground text-sm truncate">Permanece Camp</span>
+              <span className="font-bold text-foreground text-xs sm:text-sm truncate">Permanece Camp</span>
               <span className="text-xs text-muted-foreground leading-none truncate hidden xs:inline">Nueva Creación</span>
             </div>
           </Link>
@@ -63,7 +63,7 @@ export function Topbar() {
                   className={cn(
                     'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
                     active
-                      ? 'bg-primary/10 text-primary shadow-md'
+                      ? 'bg-accent/10 text-primary shadow-md'
                       : 'text-foreground/60 hover:text-foreground hover:bg-muted'
                   )}
                 >
