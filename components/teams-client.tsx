@@ -120,19 +120,20 @@ export function TeamsClient({ userId }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Equipos</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Total: {teamList.length}
-          </p>
+    <div className="w-full h-full overflow-y-auto">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Equipos</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
+              Total: {teamList.length}
+            </p>
+          </div>
+          <Button onClick={() => setDialogOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Agregar equipo
+          </Button>
         </div>
-        <Button onClick={() => setDialogOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Agregar equipo
-        </Button>
-      </div>
 
       {loading ? (
         <div className="space-y-3">
@@ -243,8 +244,8 @@ export function TeamsClient({ userId }: Props) {
         </div>
       )}
 
-      {/* Team Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        {/* Team Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
         setDialogOpen(open)
         if (!open) {
           setForm({ ...emptyForm })
@@ -262,7 +263,7 @@ export function TeamsClient({ userId }: Props) {
                   id="name"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Ej: Grupo A, Equipo Principal, etc."
+                  placeholder="Nombre"
                 />
             </div>
             <div>
@@ -337,6 +338,7 @@ export function TeamsClient({ userId }: Props) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   )
 }
