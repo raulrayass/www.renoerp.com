@@ -33,9 +33,9 @@ export function Topbar() {
   const { user, signOut } = useUser()
 
   return (
-    <header className="sticky top-0 z-40 bg-card border-b border-border shadow-sm">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-0">
-        <div className="flex items-center justify-between h-16 gap-3 sm:gap-4">
+    <header className="sticky top-0 z-40 bg-card border-b border-border shadow-lg backdrop-blur-sm">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-3 sm:py-2">
+        <div className="flex items-center justify-between h-14 gap-3 sm:gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 hover:opacity-80 transition-opacity">
             <Image
@@ -61,9 +61,9 @@ export function Topbar() {
                   key={href}
                   href={href}
                   className={cn(
-                    'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                    'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
                     active
-                      ? 'bg-primary/10 text-primary shadow-sm'
+                      ? 'bg-accent/10 text-primary shadow-md'
                       : 'text-foreground/60 hover:text-foreground hover:bg-muted'
                   )}
                 >
@@ -79,8 +79,8 @@ export function Topbar() {
           {/* User area */}
           {user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-muted transition-colors">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shrink-0 shadow-md">
+              <DropdownMenuTrigger className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-muted transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shrink-0 shadow-md">
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <span className="hidden sm:block truncate text-foreground text-sm font-medium max-w-[120px]">
