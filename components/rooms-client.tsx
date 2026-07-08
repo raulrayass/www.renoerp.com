@@ -109,19 +109,20 @@ export function RoomsClient({ userId }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Habitaciones</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Total: {roomList.length}
-          </p>
+    <div className="w-full h-full overflow-y-auto">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Habitaciones</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
+              Total: {roomList.length}
+            </p>
+          </div>
+          <Button onClick={() => setDialogOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Agregar habitación
+          </Button>
         </div>
-        <Button onClick={() => setDialogOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Agregar habitación
-        </Button>
-      </div>
 
       {loading ? (
         <div className="space-y-3">
@@ -229,8 +230,8 @@ export function RoomsClient({ userId }: Props) {
         </div>
       )}
 
-      {/* Room Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        {/* Room Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
         setDialogOpen(open)
         if (!open) {
           setForm({ ...emptyForm })
@@ -298,6 +299,7 @@ export function RoomsClient({ userId }: Props) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   )
 }

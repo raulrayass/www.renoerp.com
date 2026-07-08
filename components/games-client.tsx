@@ -166,12 +166,13 @@ export function GamesClient({ userId }: Props) {
     .sort((a, b) => b.totalPoints - a.totalPoints)
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Juegos & Marcador</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Total: {gameList.length} juegos
+    <div className="w-full h-full overflow-y-auto">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Juegos & Marcador</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
+              Total: {gameList.length} juegos
           </p>
         </div>
         <Button onClick={() => setDialogOpen(true)} className="gap-2">
@@ -303,8 +304,8 @@ export function GamesClient({ userId }: Props) {
         </div>
       )}
 
-      {/* Game Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        {/* Game Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
         setDialogOpen(open)
         if (!open) {
           setForm({ ...emptyForm })
@@ -486,6 +487,7 @@ export function GamesClient({ userId }: Props) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   )
 }
