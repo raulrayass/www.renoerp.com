@@ -348,30 +348,34 @@ export function AttendeesClient({ userId }: Props) {
 
         const attendeesToImport = rows.slice(1).map((row) => ({
           name: String(row[0] || '').trim(),
-          phone: String(row[1] || '').trim(),
-          church: String(row[2] || '').trim(),
-          emergencyContactName: String(row[3] || '').trim(),
-          emergencyContactPhone: String(row[4] || '').trim(),
-          totalAmount: parseFloat(String(row[5] || '0')),
-          initialPayment: parseFloat(String(row[6] || '0')) || 0,
-          notes: String(row[7] || '').trim(),
+          age: row[1] ? parseInt(String(row[1])) : undefined,
+          sex: String(row[2] || '').trim() || undefined,
+          shirtSize: String(row[3] || '').trim() || undefined,
+          phone: String(row[4] || '').trim() || undefined,
+          church: String(row[5] || '').trim() || undefined,
+          emergencyContactName: String(row[6] || '').trim() || undefined,
+          emergencyContactPhone: String(row[7] || '').trim() || undefined,
+          emergencyContactName2: String(row[8] || '').trim() || undefined,
+          emergencyContactPhone2: String(row[9] || '').trim() || undefined,
+          allergies: String(row[10] || '').trim() || undefined,
+          totalAmount: parseFloat(String(row[13] || '0')),
+          initialPayment: parseFloat(String(row[14] || '0')) || 0,
+          notes: String(row[17] || '').trim() || undefined,
         }))
 
+        // Validar solo campos requeridos: nombre y monto total
         if (
           attendeesToImport.every(
             (a) =>
-              a.name &&
-              a.totalAmount > 0 &&
-              a.church &&
-              a.emergencyContactName &&
-              a.emergencyContactPhone
+              a.name && // Nombre es requerido
+              a.totalAmount > 0 // Monto total es requerido y debe ser > 0
           )
         ) {
           await bulkCreateAttendees(userId, attendeesToImport)
           toast.success(`${attendeesToImport.length} camperos importados correctamente`)
           await loadAttendees()
         } else {
-          toast.error('Algunos registros están incompletos. Verifica todos los campos requeridos.')
+          toast.error('Verifica que todos los registros tengan Nombre y Monto Total válidos.')
         }
       }
       reader.readAsBinaryString(file)

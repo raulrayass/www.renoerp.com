@@ -253,10 +253,16 @@ export async function bulkCreateAttendees(
   userId: string,
   attendeesList: Array<{
     name: string
+    age?: number
+    sex?: string
+    shirtSize?: string
     phone?: string
     church?: string
     emergencyContactName?: string
     emergencyContactPhone?: string
+    emergencyContactName2?: string
+    emergencyContactPhone2?: string
+    allergies?: string
     totalAmount: number
     initialPayment?: number
     notes?: string
@@ -271,10 +277,16 @@ export async function bulkCreateAttendees(
       attendeesList.map((a) => ({
         userId,
         name: a.name.trim(),
+        age: a.age ?? null,
+        sex: a.sex || null,
+        shirtSize: a.shirtSize || null,
         phone: (a.phone || '').trim(),
         church: (a.church || '').trim(),
         emergencyContactName: (a.emergencyContactName || '').trim(),
         emergencyContactPhone: (a.emergencyContactPhone || '').trim(),
+        emergencyContactName2: (a.emergencyContactName2 || '').trim(),
+        emergencyContactPhone2: (a.emergencyContactPhone2 || '').trim(),
+        allergies: (a.allergies || '').trim(),
         totalAmount: parseFloat(a.totalAmount.toString()),
         amountPaid: parseFloat((a.initialPayment || 0).toString()),
         status:
