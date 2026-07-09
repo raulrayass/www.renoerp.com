@@ -277,41 +277,54 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   function downloadTemplate() {
-    const ws = XLSX.utils.aoa_to_sheet([
-      [
-        'Nombre',
-        'Teléfono',
-        'Iglesia',
-        'Contacto Emergencia',
-        'Teléfono Emergencia',
-        'Monto Total ($)',
-        'Pago Inicial ($)',
-        'Notas',
-      ],
-      [
-        'Abi Med',
+    const headers = [
+      'Nombre',
+      'Teléfono',
+      'Iglesia',
+      'Contacto Emergencia',
+      'Teléfono Emergencia',
+      'Monto Total ($)',
+      'Pago Inicial ($)',
+      'Notas',
+    ]
+
+    // Si hay datos, exportar los actuales; si no, exportar plantilla vacía
+    let rows: any[] = [headers]
+    
+    if (attendeeList.length > 0) {
+      // Incluir los camperos actuales en la plantilla
+      attendeeList.forEach((a) => {
+        const paid = parseFloat(a.amountPaid as string) || 0
+        rows.push([
+          a.name,
+          a.phone || '',
+          a.church || '',
+          a.emergencyContactName || '',
+          a.emergencyContactPhone || '',
+          parseFloat(a.totalAmount as string).toFixed(2),
+          paid.toFixed(2),
+          a.notes || '',
+        ])
+      })
+    } else {
+      // Plantilla vacía con una fila de ejemplo
+      rows.push([
+        'Nombre completo',
         '3326094596',
-        'Nueva creacion',
-        'Maria García',
-        '5559876543',
-        '2000',
+        'Nombre iglesia',
+        'Contacto emergencia',
+        '3326094596',
+        '1000',
         '0',
-        'Ejemplo',
-      ],
-      [
-        'Raul Rayas',
-        '3326094596',
-        'Masai Guadaaara',
-        'Esmerada López',
-        '3351111111',
-        '1200',
-        '500',
-        'Con pago inicial',
-      ],
-    ])
+        '',
+      ])
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(rows)
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Camperos')
     XLSX.writeFile(wb, 'Plantilla_Camperos.xlsx')
+    toast.success('Plantilla descargada')
   }
 
   async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
