@@ -16,6 +16,7 @@ import { getChurches, initializeDefaultChurches } from '@/app/actions/churches'
 import { getTeams } from '@/app/actions/teams'
 import { getRooms } from '@/app/actions/rooms'
 import { Attendee, AttendeePayment, Church, Team, Room } from '@/lib/db/schema'
+import { formatMXN } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -504,19 +505,19 @@ export function AttendeesClient({ userId }: Props) {
           <Card>
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">Esperado</p>
-              <p className="text-lg sm:text-xl font-bold">${summary.expected.toFixed(2)}</p>
+              <p className="text-lg sm:text-xl font-bold">{formatMXN(summary.expected)}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">Recaudado</p>
-              <p className="text-lg sm:text-xl font-bold text-accent">${summary.collected.toFixed(2)}</p>
+              <p className="text-lg sm:text-xl font-bold text-accent">{formatMXN(summary.collected)}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">Pendiente</p>
-              <p className="text-lg sm:text-xl font-bold text-red-600">${pendingAmount.toFixed(2)}</p>
+              <p className="text-lg sm:text-xl font-bold text-red-600">{formatMXN(pendingAmount)}</p>
             </CardContent>
           </Card>
           <Card>
@@ -736,7 +737,7 @@ export function AttendeesClient({ userId }: Props) {
                         <div className="flex justify-between text-xs sm:text-sm">
                           <span className="text-muted-foreground">Progreso de pago</span>
                           <span className="font-semibold">
-                            ${paid.toFixed(2)} / ${total.toFixed(2)}
+                            {formatMXN(paid)} / {formatMXN(total)}
                           </span>
                         </div>
                         <Progress value={percentage} className="h-2" />
@@ -992,15 +993,15 @@ export function AttendeesClient({ userId }: Props) {
                   <>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Monto Total:</span>
-                      <span className="font-semibold">${total.toFixed(2)}</span>
+                      <span className="font-semibold">{formatMXN(total)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Ya Pagado:</span>
-                      <span className="font-semibold">${paid.toFixed(2)}</span>
+                      <span className="font-semibold">{formatMXN(paid)}</span>
                     </div>
                     <div className="flex justify-between text-primary">
                       <span className="font-medium">Falta Pagar:</span>
-                      <span className="font-bold">${remaining.toFixed(2)}</span>
+                      <span className="font-bold">{formatMXN(remaining)}</span>
                     </div>
                   </>
                 )
@@ -1106,7 +1107,7 @@ export function AttendeesClient({ userId }: Props) {
                 return (
                   <div className="flex justify-between items-center bg-accent/10 rounded-lg px-3 py-2 mb-1">
                     <span className="text-sm font-medium text-foreground">Total abonado</span>
-                    <span className="text-sm font-bold text-accent">${totalPaid.toFixed(2)}</span>
+                    <span className="text-sm font-bold text-accent">{formatMXN(totalPaid)}</span>
                   </div>
                 )
               })()}
@@ -1117,7 +1118,7 @@ export function AttendeesClient({ userId }: Props) {
                 >
                   <div className="min-w-0">
                     <p className="font-semibold text-sm">
-                      ${parseFloat(payment.amount as string).toFixed(2)}
+                      {formatMXN(parseFloat(payment.amount as string))}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(payment.paymentDate + 'T00:00:00').toLocaleDateString('es-MX', {
