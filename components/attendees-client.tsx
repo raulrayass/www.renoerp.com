@@ -288,27 +288,10 @@ export function AttendeesClient({ userId }: Props) {
       'Notas',
     ]
 
-    // Si hay datos, exportar los actuales; si no, exportar plantilla vacía
-    let rows: any[] = [headers]
-    
-    if (attendeeList.length > 0) {
-      // Incluir los camperos actuales en la plantilla
-      attendeeList.forEach((a) => {
-        const paid = parseFloat(a.amountPaid as string) || 0
-        rows.push([
-          a.name,
-          a.phone || '',
-          a.church || '',
-          a.emergencyContactName || '',
-          a.emergencyContactPhone || '',
-          parseFloat(a.totalAmount as string).toFixed(2),
-          paid.toFixed(2),
-          a.notes || '',
-        ])
-      })
-    } else {
-      // Plantilla vacía con una fila de ejemplo
-      rows.push([
+    // Descargar template vacío con una fila de ejemplo
+    const rows = [
+      headers,
+      [
         'Nombre completo',
         '3326094596',
         'Nombre iglesia',
@@ -317,8 +300,8 @@ export function AttendeesClient({ userId }: Props) {
         '1000',
         '0',
         '',
-      ])
-    }
+      ],
+    ]
 
     const ws = XLSX.utils.aoa_to_sheet(rows)
     const wb = XLSX.utils.book_new()
@@ -390,14 +373,23 @@ export function AttendeesClient({ userId }: Props) {
       const remaining = total - paid
       return {
         Nombre: a.name,
+        Edad: a.age || '',
+        Sexo: a.sex || '',
+        'Talla Camisa': a.shirtSize || '',
         Teléfono: a.phone || '',
-        Iglesia: a.church || 'Sin iglesia',
-        'Contacto Emergencia': a.emergencyContactName || '',
-        'Teléfono Emergencia': a.emergencyContactPhone || '',
+        Iglesia: a.church || '',
+        'Contacto Emergencia 1': a.emergencyContactName || '',
+        'Teléfono Emergencia 1': a.emergencyContactPhone || '',
+        'Contacto Emergencia 2': a.emergencyContactName2 || '',
+        'Teléfono Emergencia 2': a.emergencyContactPhone2 || '',
+        Alergias: a.allergies || '',
+        Equipo: teamMap.get(a.teamId)?.name || '',
+        Habitación: roomMap.get(a.roomId)?.name || '',
         'Monto Total ($)': total.toFixed(2),
         'Pagado ($)': paid.toFixed(2),
         'Falta Pagar ($)': remaining.toFixed(2),
         Estado: a.status === 'paid' ? 'Pagado' : a.status === 'partial' ? 'Parcial' : 'Pendiente',
+        'Check-in': a.checkedIn ? 'Sí' : 'No',
         Notas: a.notes || '',
       }
     })
