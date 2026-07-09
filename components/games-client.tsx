@@ -167,12 +167,7 @@ export function GamesClient({ userId }: Props) {
       .reduce((sum, gs) => sum + gs.points, 0)
   }
 
-  const leaderboard = teams
-    .map((team) => ({
-      team,
-      totalPoints: getTeamTotalPoints(team.id),
-    }))
-    .sort((a, b) => b.totalPoints - a.totalPoints)
+
 
   return (
     <div className="w-full h-full overflow-y-auto">
