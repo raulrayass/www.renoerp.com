@@ -9,10 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Plus, Edit2, Trash2, Gamepad2, Trophy, Minus } from 'lucide-react'
 import { toast } from 'sonner'
-import { createGame, updateGame, deleteGame, getGames, addGameScore, deleteGameScore, getGameScores } from '@/app/actions/games'
+import { createGame, updateGame, deleteGame, getGames, addGameScore, deleteGameScore, getGameScores, getLeaderboard } from '@/app/actions/games'
 import { getTeams } from '@/app/actions/teams'
 import { Game, GameScore, Team } from '@/lib/db/schema'
-import { cn } from '@/lib/utils'
+import { cn, formatMXN } from '@/lib/utils'
 
 interface Props {
   userId: string
@@ -22,6 +22,7 @@ export function GamesClient({ userId }: Props) {
   const [gameList, setGameList] = useState<Game[]>([])
   const [teams, setTeams] = useState<Team[]>([])
   const [gameScores, setGameScores] = useState<GameScore[]>([])
+  const [leaderboard, setLeaderboard] = useState<Array<{ id: number; name: string; color: string; totalPoints: number }>>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [scoringDialogOpen, setScoringDialogOpen] = useState(false)
@@ -42,12 +43,14 @@ export function GamesClient({ userId }: Props) {
   async function loadGames() {
     setLoading(true)
     try {
-      const [gamesData, teamsData] = await Promise.all([
+      const [gamesData, teamsData, leaderboardData] = await Promise.all([
         getGames(userId),
         getTeams(userId),
+        getLeaderboard(userId),
       ])
       setGameList(gamesData)
       setTeams(teamsData)
+      setLeaderboard(leaderboardData)
     } catch (error) {
       toast.error('Error al cargar datos')
       console.error(error)
@@ -124,6 +127,9 @@ export function GamesClient({ userId }: Props) {
         toast.success('Puntos registrados')
         setScoringForm({ teamId: '', points: '' })
         await loadScoresForGame(selectedGameId)
+        // Reload leaderboard to reflect new points
+        const updatedLeaderboard = await getLeaderboard(userId)
+        setLeaderboard(updatedLeaderboard)
       } catch (error) {
         toast.error('Error al registrar puntos')
         console.error(error)
@@ -137,6 +143,9 @@ export function GamesClient({ userId }: Props) {
         await deleteGameScore(userId, scoreId)
         toast.success('Puntos eliminados')
         await loadScoresForGame(gameId)
+        // Reload leaderboard to reflect deleted points
+        const updatedLeaderboard = await getLeaderboard(userId)
+        setLeaderboard(updatedLeaderboard)
       } catch (error) {
         toast.error('Error al eliminar los puntos')
         console.error(error)
@@ -303,6 +312,40 @@ export function GamesClient({ userId }: Props) {
           ))}
         </div>
       )}
+
+        {/* Leaderboard */}
+        {leaderboard.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Trophy className="w-6 h-6 text-primary" />
+              <h2 className="text-2xl font-bold">Marcador General</h2>
+            </div>
+            <div className="space-y-2">
+              {leaderboard.map((team, index) => (
+                <Card key={team.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <div
+                          className="w-4 h-4 rounded-full shrink-0"
+                          style={{ backgroundColor: team.color }}
+                        />
+                        <span className="font-semibold">{team.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-primary">{team.totalPoints}</p>
+                        <p className="text-xs text-muted-foreground">puntos</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Game Dialog */}
         <Dialog open={dialogOpen} onOpenChange={(open) => {
