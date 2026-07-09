@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,9 +36,9 @@ export function GamesClient({ userId }: Props) {
 
   const emptyForm = { name: '', description: '', gameDate: '' }
 
-  useState(() => {
+  useEffect(() => {
     loadGames()
-  })
+  }, [userId])
 
   async function loadGames() {
     setLoading(true)
