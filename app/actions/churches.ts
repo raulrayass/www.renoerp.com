@@ -6,6 +6,14 @@ import { eq, and } from 'drizzle-orm'
 
 const CHURCHES_PER_PAGE = 25
 
+// Get ALL churches (no pagination)
+export async function getAllChurches(userId: string) {
+  return await db.query.churches.findMany({
+    where: eq(churches.userId, userId),
+    orderBy: (churches, { asc }) => [asc(churches.name)],
+  })
+}
+
 export async function getChurches(userId: string, page: number = 1) {
   const offset = (page - 1) * CHURCHES_PER_PAGE
   return await db.query.churches.findMany({

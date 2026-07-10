@@ -7,6 +7,16 @@ import { desc } from 'drizzle-orm'
 
 const ATTENDEES_PER_PAGE = 20
 
+// Get ALL attendees for reports and metrics (no pagination)
+export async function getAllAttendees(userId: string) {
+  return db
+    .select()
+    .from(attendees)
+    .where(eq(attendees.userId, userId))
+    .orderBy(desc(attendees.createdAt))
+}
+
+// Get paginated attendees for UI display
 export async function getAttendees(userId: string, page: number = 1) {
   const offset = (page - 1) * ATTENDEES_PER_PAGE
   return db

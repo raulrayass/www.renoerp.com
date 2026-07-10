@@ -7,6 +7,15 @@ import { revalidatePath } from 'next/cache'
 
 const CATEGORIES_PER_PAGE = 25
 
+// Get ALL categories (no pagination)
+export async function getAllCategories(userId: string) {
+  return db
+    .select()
+    .from(categories)
+    .where(eq(categories.userId, userId))
+    .orderBy(asc(categories.name))
+}
+
 export async function getCategories(userId: string, page: number = 1) {
   const offset = (page - 1) * CATEGORIES_PER_PAGE
   return db

@@ -6,6 +6,14 @@ import { eq, and } from 'drizzle-orm'
 
 const TEAMS_PER_PAGE = 20
 
+// Get ALL teams (no pagination)
+export async function getAllTeams(userId: string) {
+  return await db.query.teams.findMany({
+    where: eq(teams.userId, userId),
+    orderBy: (teams, { asc }) => [asc(teams.name)],
+  })
+}
+
 export async function getTeams(userId: string, page: number = 1) {
   const offset = (page - 1) * TEAMS_PER_PAGE
   return await db.query.teams.findMany({
