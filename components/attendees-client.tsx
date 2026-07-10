@@ -487,26 +487,6 @@ export function AttendeesClient({ userId }: Props) {
   const partialCount = attendeeList.filter((a) => a.status === 'partial').length
   const pendingCount = attendeeList.filter((a) => a.status === 'pending').length
 
-  const filteredAttendees = attendeeList
-    .filter((a) => {
-      if (statusFilter !== 'all' && a.status !== statusFilter) return false
-      if (search.trim()) {
-        const q = search.toLowerCase()
-        return (
-          a.name.toLowerCase().includes(q) ||
-          (a.church || '').toLowerCase().includes(q) ||
-          (a.phone || '').toLowerCase().includes(q)
-        )
-      }
-      return true
-    })
-    .sort((a, b) => {
-      const statusOrder: { [key: string]: number } = { paid: 0, partial: 1, pending: 2 }
-      const statusDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3)
-      if (statusDiff !== 0) return statusDiff
-      return a.name.localeCompare(b.name)
-    })
-
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
       {/* Header */}
