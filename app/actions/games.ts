@@ -4,11 +4,24 @@ import { db } from '@/lib/db'
 import { games, gameScores, teams } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 
-export async function getGames(userId: string) {
+const GAMES_PER_PAGE = 15
+
+export async function getGames(userId: string, page: number = 1) {
+  const offset = (page - 1) * GAMES_PER_PAGE
   return await db.query.games.findMany({
     where: eq(games.userId, userId),
     orderBy: (games, { desc }) => [desc(games.createdAt)],
+    limit: GAMES_PER_PAGE,
+    offset: offset,
   })
+}
+
+export async function getGamesCount(userId: string) {
+  const result = await db
+    .select({ count: db.sql`count(*)` })
+    .from(games)
+    .where(eq(games.userId, userId))
+  return parseInt(result[0].count as string, 10)
 }
 
 export async function createGame(

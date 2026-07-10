@@ -4,11 +4,24 @@ import { db } from '@/lib/db'
 import { churches } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
-export async function getChurches(userId: string) {
+const CHURCHES_PER_PAGE = 25
+
+export async function getChurches(userId: string, page: number = 1) {
+  const offset = (page - 1) * CHURCHES_PER_PAGE
   return await db.query.churches.findMany({
     where: eq(churches.userId, userId),
     orderBy: (churches, { asc }) => [asc(churches.name)],
+    limit: CHURCHES_PER_PAGE,
+    offset: offset,
   })
+}
+
+export async function getChurchesCount(userId: string) {
+  const result = await db
+    .select({ count: db.sql`count(*)` })
+    .from(churches)
+    .where(eq(churches.userId, userId))
+  return parseInt(result[0].count as string, 10)
 }
 
 export async function createChurch(userId: string, name: string) {

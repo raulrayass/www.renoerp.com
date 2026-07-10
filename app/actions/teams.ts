@@ -4,11 +4,24 @@ import { db } from '@/lib/db'
 import { teams, attendees } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
-export async function getTeams(userId: string) {
+const TEAMS_PER_PAGE = 20
+
+export async function getTeams(userId: string, page: number = 1) {
+  const offset = (page - 1) * TEAMS_PER_PAGE
   return await db.query.teams.findMany({
     where: eq(teams.userId, userId),
     orderBy: (teams, { asc }) => [asc(teams.name)],
+    limit: TEAMS_PER_PAGE,
+    offset: offset,
   })
+}
+
+export async function getTeamsCount(userId: string) {
+  const result = await db
+    .select({ count: db.sql`count(*)` })
+    .from(teams)
+    .where(eq(teams.userId, userId))
+  return parseInt(result[0].count as string, 10)
 }
 
 export async function createTeam(
