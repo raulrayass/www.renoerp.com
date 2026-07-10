@@ -5,12 +5,25 @@ import { categories } from '@/lib/db/schema'
 import { and, eq, asc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 
-export async function getCategories(userId: string) {
+const CATEGORIES_PER_PAGE = 25
+
+export async function getCategories(userId: string, page: number = 1) {
+  const offset = (page - 1) * CATEGORIES_PER_PAGE
   return db
     .select()
     .from(categories)
     .where(eq(categories.userId, userId))
     .orderBy(asc(categories.name))
+    .limit(CATEGORIES_PER_PAGE)
+    .offset(offset)
+}
+
+export async function getCategoriesCount(userId: string) {
+  const result = await db
+    .select({ count: db.sql`count(*)` })
+    .from(categories)
+    .where(eq(categories.userId, userId))
+  return parseInt(result[0].count as string, 10)
 }
 
 export async function createCategory(

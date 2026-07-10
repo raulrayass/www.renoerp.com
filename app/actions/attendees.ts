@@ -5,12 +5,25 @@ import { attendees, attendeePayments, transactions, categories } from '@/lib/db/
 import { eq, and } from 'drizzle-orm'
 import { desc } from 'drizzle-orm'
 
-export async function getAttendees(userId: string) {
+const ATTENDEES_PER_PAGE = 20
+
+export async function getAttendees(userId: string, page: number = 1) {
+  const offset = (page - 1) * ATTENDEES_PER_PAGE
   return db
     .select()
     .from(attendees)
     .where(eq(attendees.userId, userId))
     .orderBy(desc(attendees.createdAt))
+    .limit(ATTENDEES_PER_PAGE)
+    .offset(offset)
+}
+
+export async function getAttendeesCount(userId: string) {
+  const result = await db
+    .select({ count: db.sql`count(*)` })
+    .from(attendees)
+    .where(eq(attendees.userId, userId))
+  return parseInt(result[0].count as string, 10)
 }
 
 export async function getAttendeePayments(userId: string, attendeeId: number) {

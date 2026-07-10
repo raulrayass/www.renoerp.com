@@ -4,11 +4,24 @@ import { db } from '@/lib/db'
 import { rooms, attendees } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
-export async function getRooms(userId: string) {
+const ROOMS_PER_PAGE = 20
+
+export async function getRooms(userId: string, page: number = 1) {
+  const offset = (page - 1) * ROOMS_PER_PAGE
   return await db.query.rooms.findMany({
     where: eq(rooms.userId, userId),
     orderBy: (rooms, { asc }) => [asc(rooms.name)],
+    limit: ROOMS_PER_PAGE,
+    offset: offset,
   })
+}
+
+export async function getRoomsCount(userId: string) {
+  const result = await db
+    .select({ count: db.sql`count(*)` })
+    .from(rooms)
+    .where(eq(rooms.userId, userId))
+  return parseInt(result[0].count as string, 10)
 }
 
 export async function createRoom(
