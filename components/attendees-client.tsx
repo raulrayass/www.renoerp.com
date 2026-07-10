@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import {
+  getAllAttendees,
   getAttendees,
   createAttendee,
   updateAttendee,
@@ -100,8 +101,9 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   async function loadAttendees() {
-    const data = await getAttendees(userId)
-    setAttendeeList(data)
+    // Load all attendees for calculations and metrics (not paginated)
+    const allData = await getAllAttendees(userId)
+    setAttendeeList(allData)
   }
 
   async function loadChurches() {

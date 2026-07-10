@@ -6,6 +6,14 @@ import { eq, and, desc } from 'drizzle-orm'
 
 const GAMES_PER_PAGE = 15
 
+// Get ALL games for leaderboard and calculations (no pagination)
+export async function getAllGames(userId: string) {
+  return await db.query.games.findMany({
+    where: eq(games.userId, userId),
+    orderBy: (games, { desc }) => [desc(games.createdAt)],
+  })
+}
+
 export async function getGames(userId: string, page: number = 1) {
   const offset = (page - 1) * GAMES_PER_PAGE
   return await db.query.games.findMany({

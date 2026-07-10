@@ -6,6 +6,14 @@ import { eq, and } from 'drizzle-orm'
 
 const ROOMS_PER_PAGE = 20
 
+// Get ALL rooms (no pagination)
+export async function getAllRooms(userId: string) {
+  return await db.query.rooms.findMany({
+    where: eq(rooms.userId, userId),
+    orderBy: (rooms, { asc }) => [asc(rooms.name)],
+  })
+}
+
 export async function getRooms(userId: string, page: number = 1) {
   const offset = (page - 1) * ROOMS_PER_PAGE
   return await db.query.rooms.findMany({
