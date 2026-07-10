@@ -27,7 +27,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, Filter, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -81,6 +81,15 @@ export function AttendeesClient({ userId }: Props) {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    churchId: '',
+    teamId: '',
+    roomId: '',
+    minAmount: '',
+    maxAmount: '',
+    checkedIn: 'all', // all, yes, no
+  })
 
   useEffect(() => {
     initializeDefaults()
@@ -427,7 +436,42 @@ export function AttendeesClient({ userId }: Props) {
     toast.success('Reporte exportado correctamente')
   }
 
-  const summary = attendeeList.reduce(
+  // Apply all filters
+  const filteredAttendees = attendeeList.filter((a) => {
+    // Search filter
+    const searchLower = search.toLowerCase()
+    const matchesSearch = !search || 
+      a.name.toLowerCase().includes(searchLower) ||
+      (a.phone && a.phone.includes(search)) ||
+      (a.church && a.church.toLowerCase().includes(searchLower))
+
+    // Status filter
+    const matchesStatus = statusFilter === 'all' || a.status === statusFilter
+
+    // Church filter
+    const matchesChurch = !filters.churchId || a.church === churches.find(c => c.id === parseInt(filters.churchId))?.name
+
+    // Team filter
+    const matchesTeam = !filters.teamId || a.teamId === parseInt(filters.teamId)
+
+    // Room filter
+    const matchesRoom = !filters.roomId || a.roomId === parseInt(filters.roomId)
+
+    // Amount range filter
+    const total = parseFloat(a.totalAmount as string)
+    const minAmt = filters.minAmount ? parseFloat(filters.minAmount) : 0
+    const maxAmt = filters.maxAmount ? parseFloat(filters.maxAmount) : Infinity
+    const matchesAmount = total >= minAmt && total <= maxAmt
+
+    // Check-in filter
+    const matchesCheckIn = filters.checkedIn === 'all' || 
+      (filters.checkedIn === 'yes' && a.checkedIn) ||
+      (filters.checkedIn === 'no' && !a.checkedIn)
+
+    return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom && matchesAmount && matchesCheckIn
+  })
+
+  const summary = filteredAttendees.reduce(
     (acc, a) => {
       acc.expected += parseFloat(a.totalAmount as string)
       acc.collected += parseFloat(a.amountPaid as string)
@@ -470,7 +514,7 @@ export function AttendeesClient({ userId }: Props) {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Camperos</h1>
           <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Total: {attendeeList.length} | Pagados: {attendeeList.filter((a) => a.status === 'paid').length} | Check-in: {checkedInCount}
+            Total: {filteredAttendees.length} / {attendeeList.length} | Pagados: {filteredAttendees.filter((a) => a.status === 'paid').length} | Check-in: {filteredAttendees.filter((a) => a.checkedIn).length}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -533,29 +577,150 @@ export function AttendeesClient({ userId }: Props) {
         </div>
       )}
 
-      {/* Search & Filter */}
+      {/* Search & Advanced Filters */}
       {!loading && attendeeList.length > 0 && (
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por nombre, iglesia o teléfono"
-              className="pl-9"
-            />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por nombre, iglesia o teléfono"
+                className="pl-9"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="paid">Pagados</SelectItem>
+                <SelectItem value="partial">Parciales</SelectItem>
+                <SelectItem value="pending">Pendientes</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="gap-2 w-full sm:w-auto"
+            >
+              <Filter className="w-4 h-4" />
+              <span className="hidden sm:inline">Filtros</span>
+            </Button>
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="paid">Pagados</SelectItem>
-              <SelectItem value="partial">Parciales</SelectItem>
-              <SelectItem value="pending">Pendientes</SelectItem>
-            </SelectContent>
-          </Select>
+
+          {/* Advanced Filters Panel */}
+          {showFilters && (
+            <Card className="p-4 border-primary/20 bg-muted/50">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                <div>
+                  <Label className="text-xs font-semibold mb-1.5 block">Iglesia</Label>
+                  <Select value={filters.churchId} onValueChange={(v) => setFilters({...filters, churchId: v})}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todas las iglesias</SelectItem>
+                      {churches.map((c) => (
+                        <SelectItem key={c.id} value={c.id.toString()}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-semibold mb-1.5 block">Equipo</Label>
+                  <Select value={filters.teamId} onValueChange={(v) => setFilters({...filters, teamId: v})}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todos los equipos</SelectItem>
+                      {teams.map((t) => (
+                        <SelectItem key={t.id} value={t.id.toString()}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-semibold mb-1.5 block">Habitación</Label>
+                  <Select value={filters.roomId} onValueChange={(v) => setFilters({...filters, roomId: v})}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todas las habitaciones</SelectItem>
+                      {rooms.map((r) => (
+                        <SelectItem key={r.id} value={r.id.toString()}>
+                          {r.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-semibold mb-1.5 block">Check-in</Label>
+                  <Select value={filters.checkedIn} onValueChange={(v) => setFilters({...filters, checkedIn: v})}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="yes">Check-in hecho</SelectItem>
+                      <SelectItem value="no">Sin check-in</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-semibold mb-1.5 block">Monto mínimo</Label>
+                  <Input
+                    type="number"
+                    value={filters.minAmount}
+                    onChange={(e) => setFilters({...filters, minAmount: e.target.value})}
+                    placeholder="$0"
+                    className="h-9"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-xs font-semibold mb-1.5 block">Monto máximo</Label>
+                  <Input
+                    type="number"
+                    value={filters.maxAmount}
+                    onChange={(e) => setFilters({...filters, maxAmount: e.target.value})}
+                    placeholder="Sin límite"
+                    className="h-9"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 lg:col-span-2 flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFilters({churchId: '', teamId: '', roomId: '', minAmount: '', maxAmount: '', checkedIn: 'all'})
+                      setSearch('')
+                      setStatusFilter('all')
+                    }}
+                    className="flex-1 gap-2"
+                  >
+                    <X className="w-3 h-3" />
+                    Limpiar filtros
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
       )}
 
