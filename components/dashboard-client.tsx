@@ -9,7 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts'
-import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { TrendingUp, TrendingDown, Banknote, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import { SectionHeader } from '@/components/section-header'
 import { StatCard } from '@/components/stat-card'
 
@@ -56,7 +56,7 @@ export function DashboardClient({ userId }: { userId: string }) {
         <StatCard
           label="Balance Total"
           value={formatCurrency(balance)}
-          icon={Wallet}
+          icon={Banknote}
           color={balance >= 0 ? 'primary' : 'red'}
           subtitle={balance >= 0 ? 'Saldo positivo' : 'Saldo negativo'}
         />

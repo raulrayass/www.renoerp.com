@@ -5,11 +5,11 @@ import { usePathname, useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import {
-  LayoutDashboard,
-  ArrowLeftRight,
-  Tag,
+  Gauge3,
+  ReceiptText,
+  Layers,
   LogOut,
-  TrendingUp,
+  Compass,
   Menu,
   X,
 } from 'lucide-react'
@@ -17,9 +17,9 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
-  { href: '/categories', label: 'Categorías', icon: Tag },
+  { href: '/', label: 'Dashboard', icon: Gauge3 },
+  { href: '/transactions', label: 'Transacciones', icon: ReceiptText },
+  { href: '/categories', label: 'Categorías', icon: Layers },
 ]
 
 interface SidebarProps {
@@ -42,7 +42,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Logo */}
       <div className="px-6 py-5 flex items-center gap-3 border-b border-sidebar-border">
         <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
-          <TrendingUp className="w-5 h-5 text-primary-foreground" />
+          <Compass className="w-5 h-5 text-primary-foreground" />
         </div>
         <span className="text-lg font-bold text-sidebar-foreground">FinanzApp</span>
       </div>
