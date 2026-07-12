@@ -641,7 +641,7 @@ export function AttendeesClient({ userId }: Props) {
                     <Label className="text-xs font-semibold mb-1.5 block">Habitación</Label>
                     <Select value={filters.roomId} onValueChange={(v) => setFilters({...filters, roomId: v})}>
                       <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Todas" />
+                        {filters.roomId ? <span>{getRoomName(filters.roomId)}</span> : <SelectValue placeholder="Todas" />}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Todas las habitaciones</SelectItem>
@@ -725,7 +725,7 @@ export function AttendeesClient({ userId }: Props) {
                     <Label className="text-xs font-semibold mb-2 block">Iglesia</Label>
                     <Select value={filters.churchId} onValueChange={(v) => setFilters({...filters, churchId: v})}>
                       <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Todas" />
+                        {filters.churchId ? <span>{getChurchName(filters.churchId)}</span> : <SelectValue placeholder="Todas" />}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Todas las iglesias</SelectItem>
@@ -742,7 +742,7 @@ export function AttendeesClient({ userId }: Props) {
                     <Label className="text-xs font-semibold mb-2 block">Equipo</Label>
                     <Select value={filters.teamId} onValueChange={(v) => setFilters({...filters, teamId: v})}>
                       <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Todos" />
+                        {filters.teamId ? <span>{getTeamName(filters.teamId)}</span> : <SelectValue placeholder="Todos" />}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Todos los equipos</SelectItem>
@@ -759,7 +759,7 @@ export function AttendeesClient({ userId }: Props) {
                     <Label className="text-xs font-semibold mb-2 block">Habitación</Label>
                     <Select value={filters.roomId} onValueChange={(v) => setFilters({...filters, roomId: v})}>
                       <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Todas" />
+                        {filters.roomId ? <span>{getRoomName(filters.roomId)}</span> : <SelectValue placeholder="Todas" />}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Todas las habitaciones</SelectItem>
@@ -1173,14 +1173,11 @@ export function AttendeesClient({ userId }: Props) {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label htmlFor="teamId">Equipo</Label>
-                <Select
-                  value={form.teamId || 'none'}
-                  onValueChange={(value) => setForm({ ...form, teamId: value === 'none' ? '' : value })}
-                >
-                  <SelectTrigger id="teamId">
-                    <SelectValue placeholder="Sin equipo" />
-                  </SelectTrigger>
+            <Label htmlFor="teamId">Equipo</Label>
+            <Select value={form.teamId || 'none'} onValueChange={(value) => setForm({ ...form, teamId: value === 'none' ? '' : value })}>
+              <SelectTrigger id="teamId">
+                {form.teamId ? <span>{getTeamName(form.teamId)}</span> : <SelectValue placeholder="Selecciona un equipo" />}
+              </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Sin equipo</SelectItem>
                     {teams.map((team) => (
@@ -1192,14 +1189,11 @@ export function AttendeesClient({ userId }: Props) {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="roomId">Habitación</Label>
-                <Select
-                  value={form.roomId || 'none'}
-                  onValueChange={(value) => setForm({ ...form, roomId: value === 'none' ? '' : value })}
-                >
-                  <SelectTrigger id="roomId">
-                    <SelectValue placeholder="Sin habitación" />
-                  </SelectTrigger>
+            <Label htmlFor="roomId">Habitación</Label>
+            <Select value={form.roomId || 'none'} onValueChange={(value) => setForm({ ...form, roomId: value === 'none' ? '' : value })}>
+              <SelectTrigger id="roomId">
+                {form.roomId ? <span>{getRoomName(form.roomId)}</span> : <SelectValue placeholder="Selecciona una habitación" />}
+              </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Sin habitación</SelectItem>
                     {rooms.map((room) => (
