@@ -10,6 +10,8 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { SectionHeader } from '@/components/section-header'
+import { StatCard } from '@/components/stat-card'
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
 
