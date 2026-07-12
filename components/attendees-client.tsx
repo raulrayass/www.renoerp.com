@@ -477,7 +477,7 @@ export function AttendeesClient({ userId }: Props) {
       {/* Header */}
       <PageHeader
         title="Camperos"
-        description={`Total: ${filteredAttendees.length} / ${attendeeList.length} | Pagados: ${filteredAttendees.filter((a) => a.status === 'paid').length} | Check-in: ${filteredAttendees.filter((a) => a.checkedIn).length}`}
+        description={`Total: ${attendeeList.length} | Pagados: ${paidCount} | Check-in: ${checkedInCount}`}
       >
         <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs">
           <Download className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -528,7 +528,7 @@ export function AttendeesClient({ userId }: Props) {
           />
           <StatCard
             label="Check-in"
-            value={`${filteredAttendees.filter((a) => a.checkedIn).length}/${filteredAttendees.length}`}
+            value={`${checkedInCount}/${attendeeList.length}`}
             color="primary"
             icon={UserCheck}
             subtitle={`${paidCount} pagados • ${partialCount} parciales`}
