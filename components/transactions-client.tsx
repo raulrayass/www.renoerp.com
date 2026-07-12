@@ -224,15 +224,15 @@ export function TransactionsClient({ userId }: { userId: string }) {
 
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card className="p-4 border-l-4 border-l-green-600">
+        <Card className="border-l-4 border-l-green-600">
           <p className="text-xs text-muted-foreground">Ingresos</p>
           <p className="text-lg font-bold mt-0.5 text-green-600">{formatCurrency(totals.income)}</p>
         </Card>
-        <Card className="p-4 border-l-4 border-l-orange-600">
+        <Card className="border-l-4 border-l-orange-600">
           <p className="text-xs text-muted-foreground">Egresos</p>
           <p className="text-lg font-bold mt-0.5 text-orange-600">{formatCurrency(totals.expense)}</p>
         </Card>
-        <Card className="p-4 border-l-4 border-l-slate-600">
+        <Card className="border-l-4 border-l-slate-600">
           <p className="text-xs text-muted-foreground">Balance</p>
           <p className={`text-lg font-bold mt-0.5 ${totals.income - totals.expense >= 0 ? 'text-slate-700' : 'text-red-600'}`}>
             {formatCurrency(totals.income - totals.expense)}
@@ -241,7 +241,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
       </div>
 
       {/* Filters */}
-      <Card className="p-4">
+      <Card>
         <div className="flex items-center gap-2 mb-3">
           <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
           <span className="text-xs font-medium text-muted-foreground">Filtros</span>

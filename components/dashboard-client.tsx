@@ -51,7 +51,7 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-5">
+        <Card>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Balance Total</p>
@@ -68,7 +68,7 @@ export function DashboardClient({ userId }: { userId: string }) {
           </Badge>
         </Card>
 
-        <Card className="p-5">
+        <Card>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Ingresos</p>
@@ -83,7 +83,7 @@ export function DashboardClient({ userId }: { userId: string }) {
           <p className="text-xs text-muted-foreground mt-3">Acumulado total</p>
         </Card>
 
-        <Card className="p-5">
+        <Card>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Egresos</p>
@@ -101,7 +101,7 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* Monthly chart + Expense pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2 p-5">
+        <Card className="lg:col-span-2">
           <h2 className="font-semibold text-foreground mb-4">Ingresos vs Egresos por mes</h2>
           {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
             <ResponsiveContainer width="100%" height={240}>
@@ -125,7 +125,7 @@ export function DashboardClient({ userId }: { userId: string }) {
           )}
         </Card>
 
-        <Card className="p-5">
+        <Card>
           <h2 className="font-semibold text-foreground mb-1">Egresos por categoria</h2>
           {expenseByCategory.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
@@ -196,7 +196,7 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* Income pie + Recent */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="p-5">
+        <Card>
           <h2 className="font-semibold text-foreground mb-1">Ingresos por categoria</h2>
           {incomeByCategory.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
@@ -226,7 +226,7 @@ export function DashboardClient({ userId }: { userId: string }) {
           )}
         </Card>
 
-        <Card className="p-5">
+        <Card>
           <h2 className="font-semibold text-foreground mb-1">Camperos por Iglesia</h2>
           <p className="text-xs text-muted-foreground mb-4">Distribución de camperos del campamento</p>
           {churchData && churchData.length > 0 ? (
