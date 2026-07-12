@@ -396,68 +396,6 @@ export async function getChurchDistribution(userId: string) {
   }
 }
 
-export async function getShirtSizeDistribution(userId: string) {
-  try {
-    // Get all attendees with shirt sizes
-    const allAttendees = await db.query.attendees.findMany({
-      where: eq(attendees.userId, userId),
-      columns: {
-        shirtSize: true,
-      },
-    })
-
-    // Define order and colors for shirt sizes
-    const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
-    const sizeColors: Record<string, string> = {
-      'XS': '#8b5cf6',
-      'S': '#06b6d4',
-      'M': '#10b981',
-      'L': '#3b82f6',
-      'XL': '#f59e0b',
-      'XXL': '#ef4444',
-    }
-
-    // Group and count by size
-    const sizeMap = new Map<string, number>()
-    for (const attendee of allAttendees) {
-      const size = attendee.shirtSize || 'Sin talla'
-      sizeMap.set(size, (sizeMap.get(size) || 0) + 1)
-    }
-
-    // Return sorted by shirt size order
-    const result = sizeOrder
-      .filter(size => sizeMap.has(size))
-      .map(size => ({
-        name: size,
-        value: sizeMap.get(size) || 0,
-        color: sizeColors[size],
-      }))
-
-    // Add any sizes not in the standard list
-    const nonStandardSizes = Array.from(sizeMap.entries())
-      .filter(([size]) => !sizeOrder.includes(size) && size !== 'Sin talla')
-      .map(([size, count]) => ({
-        name: size,
-        value: count,
-        color: '#94a3b8',
-      }))
-
-    // Add Sin talla count if exists
-    if (sizeMap.has('Sin talla')) {
-      nonStandardSizes.push({
-        name: 'Sin talla',
-        value: sizeMap.get('Sin talla') || 0,
-        color: '#cbd5e1',
-      })
-    }
-
-    return result.concat(nonStandardSizes)
-  } catch (error) {
-    console.error('[v0] Error fetching shirt size distribution:', error)
-    return []
-  }
-}
-
 export async function generateExcelTemplate() {
   // Returns data for creating an Excel template file
   return {
