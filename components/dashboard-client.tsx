@@ -53,13 +53,25 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <StatCard
-          label="Balance Total"
-          value={formatCurrency(balance)}
-          icon={Wallet}
-          color={balance >= 0 ? 'primary' : 'red'}
-          subtitle={balance >= 0 ? 'Saldo positivo' : 'Saldo negativo'}
-        />
+        <Card className="p-4">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">Balance Total</p>
+              <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(balance)}</p>
+            </div>
+            <Wallet className="w-5 h-5 text-primary" />
+          </div>
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Efectivo:</span>
+              <span className="font-medium">{formatCurrency(paymentMethodBreakdown?.cash?.total || 0)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Banca Móvil:</span>
+              <span className="font-medium">{formatCurrency(mobileBanking || 0)}</span>
+            </div>
+          </div>
+        </Card>
         <StatCard
           label="Total Ingresos"
           value={formatCurrency(totalIncome)}
@@ -74,31 +86,6 @@ export function DashboardClient({ userId }: { userId: string }) {
           color="orange"
           subtitle="Acumulado total"
         />
-      </div>
-
-      {/* Payment Method Breakdown */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <Card className="p-4">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Dinero en Efectivo</h3>
-          <p className="text-2xl font-bold text-foreground">{formatCurrency(paymentMethodBreakdown?.cash?.total || 0)}</p>
-          <p className="text-xs text-muted-foreground mt-2">
-            {`Ingresos: ${formatCurrency(paymentMethodBreakdown?.cash?.income || 0)} | Egresos: ${formatCurrency(paymentMethodBreakdown?.cash?.expense || 0)}`}
-          </p>
-        </Card>
-        <Card className="p-4">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Banca Móvil</h3>
-          <p className="text-2xl font-bold text-foreground">{formatCurrency(mobileBanking || 0)}</p>
-          <p className="text-xs text-muted-foreground mt-2">
-            {`Transferencias: ${formatCurrency(paymentMethodBreakdown?.transfer?.total || 0)} | Depósitos: ${formatCurrency(paymentMethodBreakdown?.deposit?.total || 0)}`}
-          </p>
-        </Card>
-        <Card className="p-4">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Resumen Total</h3>
-          <p className="text-2xl font-bold text-foreground">{formatCurrency(balance)}</p>
-          <p className="text-xs text-muted-foreground mt-2">
-            {`Efectivo ${((paymentMethodBreakdown?.cash?.total || 0) / Math.max(1, balance) * 100).toFixed(0)}% | Banca ${((mobileBanking || 0) / Math.max(1, balance) * 100).toFixed(0)}%`}
-          </p>
-        </Card>
       </div>
 
       {/* Monthly chart + Expense pie */}
