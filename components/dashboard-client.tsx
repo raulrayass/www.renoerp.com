@@ -64,11 +64,11 @@ export function DashboardClient({ userId }: { userId: string }) {
           <div className="space-y-1 text-xs">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Efectivo:</span>
-              <span className="font-medium">{formatCurrency(paymentMethodBreakdown?.cash?.available || 0)}</span>
+              <span className="font-medium">{formatCurrency(paymentMethodBreakdown?.cash?.available ?? 0)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Banca Móvil:</span>
-              <span className="font-medium">{formatCurrency(mobileBanking || 0)}</span>
+              <span className="font-medium">{formatCurrency((paymentMethodBreakdown?.transfer?.available ?? 0) + (paymentMethodBreakdown?.deposit?.available ?? 0))}</span>
             </div>
           </div>
         </Card>
