@@ -289,52 +289,67 @@ export async function bulkCreateAttendees(
     emergencyContactPhone2?: string
     allergies?: string
     totalAmount: number
+    initialPayment?: number
     notes?: string
   }>
 ) {
-  if (!attendeesList || attendeesList.length === 0) return
+  if (attendeesList.length === 0) return
 
-  // Insert attendees - simple and clean
-  await db.insert(attendees).values(
-    attendeesList.map((a) => ({
-      userId,
-      name: a.name?.trim() || 'Sin nombre',
-      age: a.age ?? null,
-      sex: a.sex?.trim() || null,
-      shirtSize: a.shirtSize?.trim() || null,
-      phone: a.phone?.trim() || '',
-      church: a.church?.trim() || '',
-      emergencyContactName: a.emergencyContactName?.trim() || '',
-      emergencyContactPhone: a.emergencyContactPhone?.trim() || '',
-      emergencyContactName2: a.emergencyContactName2?.trim() || '',
-      emergencyContactPhone2: a.emergencyContactPhone2?.trim() || '',
-      allergies: a.allergies?.trim() || '',
-      totalAmount: Math.max(0, parseFloat(a.totalAmount?.toString() || '0')),
-      amountPaid: 0, // Pagos se agregan manualmente
-      status: 'pending',
-      notes: a.notes?.trim() || '',
-    }))
-  )
-}
+  // Insert attendees
+  const createdAttendees = await db
+    .insert(attendees)
+    .values(
+      attendeesList.map((a) => ({
+        userId,
+        name: a.name.trim(),
+        age: a.age ?? null,
+        sex: a.sex || null,
+        shirtSize: a.shirtSize || null,
+        phone: (a.phone || '').trim(),
+        church: (a.church || '').trim(),
+        emergencyContactName: (a.emergencyContactName || '').trim(),
+        emergencyContactPhone: (a.emergencyContactPhone || '').trim(),
+        emergencyContactName2: (a.emergencyContactName2 || '').trim(),
+        emergencyContactPhone2: (a.emergencyContactPhone2 || '').trim(),
+        allergies: (a.allergies || '').trim(),
+        totalAmount: parseFloat(a.totalAmount.toString()),
+        amountPaid: parseFloat((a.initialPayment || 0).toString()),
+        status:
+          a.initialPayment && a.initialPayment > 0
+            ? a.initialPayment >= a.totalAmount
+              ? 'paid'
+              : 'partial'
+            : 'pending',
+        notes: (a.notes || '').trim(),
+      }))
+    )
+    .returning()
 
-export async function bulkDeleteAttendees(userId: string, attendeeIds: number[]) {
-  if (!attendeeIds || attendeeIds.length === 0) return
+  // Get category for payments
+  const campPaymentCat = await db.query.categories.findFirst({
+    where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Camperos')),
+  })
 
-  try {
-    // Delete attendee payments first
-    for (const id of attendeeIds) {
-      await db.delete(attendeePayments).where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, id)))
+  if (!campPaymentCat) return
+
+  // Create transactions for initial payments
+  const transactionsToInsert: any[] = []
+  for (let i = 0; i < createdAttendees.length; i++) {
+    const initialPayment = parseFloat((attendeesList[i].initialPayment || 0).toString())
+    if (initialPayment > 0) {
+      transactionsToInsert.push({
+        userId,
+        categoryId: campPaymentCat.id,
+        type: 'income',
+        amount: initialPayment,
+        description: `Pago inicial de ${attendeesList[i].name}`,
+        date: new Date().toISOString().split('T')[0],
+      })
     }
+  }
 
-    // Delete attendees
-    for (const id of attendeeIds) {
-      await db.delete(attendees).where(and(eq(attendees.userId, userId), eq(attendees.id, id)))
-    }
-
-    console.log(`[bulkDeleteAttendees] Eliminados ${attendeeIds.length} camperos`)
-  } catch (error) {
-    console.error('[bulkDeleteAttendees] Error:', error)
-    throw error
+  if (transactionsToInsert.length > 0) {
+    await db.insert(transactions).values(transactionsToInsert)
   }
 }
 
