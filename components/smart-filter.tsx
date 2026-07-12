@@ -14,6 +14,16 @@ export interface SmartFilterProps {
   churchFilter: string
   onChurchChange: (value: string) => void
   churches: Array<{ id: number; name: string }>
+  teamFilter?: string
+  onTeamChange?: (value: string) => void
+  teams?: Array<{ id: number; name: string }>
+  roomFilter?: string
+  onRoomChange?: (value: string) => void
+  rooms?: Array<{ id: number; name: string }>
+  minAmount?: string
+  onMinAmountChange?: (value: string) => void
+  maxAmount?: string
+  onMaxAmountChange?: (value: string) => void
   onClearFilters: () => void
 }
 
@@ -25,12 +35,25 @@ export function SmartFilter({
   churchFilter,
   onChurchChange,
   churches,
+  teamFilter,
+  onTeamChange,
+  teams = [],
+  roomFilter,
+  onRoomChange,
+  rooms = [],
+  minAmount,
+  onMinAmountChange,
+  maxAmount,
+  onMaxAmountChange,
   onClearFilters,
 }: SmartFilterProps) {
   const activeFiltersCount = [
     search ? 1 : 0,
     statusFilter !== 'all' ? 1 : 0,
     churchFilter ? 1 : 0,
+    teamFilter ? 1 : 0,
+    roomFilter ? 1 : 0,
+    minAmount || maxAmount ? 1 : 0,
   ].reduce((a, b) => a + b, 0)
 
   return (
@@ -54,7 +77,7 @@ export function SmartFilter({
         )}
       </div>
 
-      {/* Quick filters */}
+      {/* Quick filters - Row 1: Status */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {/* Status quick filters */}
         <Button
@@ -81,7 +104,11 @@ export function SmartFilter({
         >
           Pendiente
         </Button>
+        <div className="opacity-0 pointer-events-none" />
+      </div>
 
+      {/* Quick filters - Row 2: Dropdowns */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {/* Church filter */}
         <Select value={churchFilter} onValueChange={onChurchChange}>
           <SelectTrigger className="text-xs h-9">
@@ -101,7 +128,71 @@ export function SmartFilter({
             ))}
           </SelectContent>
         </Select>
+
+        {/* Team filter */}
+        {teams.length > 0 && onTeamChange && (
+          <Select value={teamFilter || ''} onValueChange={onTeamChange}>
+            <SelectTrigger className="text-xs h-9">
+              <SelectValue placeholder="Equipo">
+                {teamFilter 
+                  ? teams.find(t => t.id.toString() === teamFilter)?.name || 'Equipo'
+                  : 'Equipo'
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos los equipos</SelectItem>
+              {teams.map((team) => (
+                <SelectItem key={team.id} value={team.id.toString()}>
+                  {team.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {/* Room filter */}
+        {rooms.length > 0 && onRoomChange && (
+          <Select value={roomFilter || ''} onValueChange={onRoomChange}>
+            <SelectTrigger className="text-xs h-9">
+              <SelectValue placeholder="Habitación">
+                {roomFilter 
+                  ? rooms.find(r => r.id.toString() === roomFilter)?.name || 'Habitación'
+                  : 'Habitación'
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas las habitaciones</SelectItem>
+              {rooms.map((room) => (
+                <SelectItem key={room.id} value={room.id.toString()}>
+                  {room.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
+
+      {/* Amount range filter */}
+      {(onMinAmountChange || onMaxAmountChange) && (
+        <div className="grid grid-cols-2 gap-2">
+          <Input
+            type="number"
+            placeholder="Monto mín"
+            value={minAmount || ''}
+            onChange={(e) => onMinAmountChange?.(e.target.value)}
+            className="h-9 text-xs"
+          />
+          <Input
+            type="number"
+            placeholder="Monto máx"
+            value={maxAmount || ''}
+            onChange={(e) => onMaxAmountChange?.(e.target.value)}
+            className="h-9 text-xs"
+          />
+        </div>
+      )}
 
       {/* Active filters indicator */}
       {activeFiltersCount > 0 && (
