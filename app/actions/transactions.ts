@@ -64,13 +64,30 @@ export async function getDashboardData(userId: string) {
     .where(eq(transactions.userId, userId))
     .orderBy(desc(transactions.date))
 
-  const totalIncome = allTransactions
-    .filter((t) => t.type === 'income')
-    .reduce((sum, t) => sum + parseFloat(t.amount as string), 0)
+  // Payment method breakdown first (so we can derive totals from it)
+  const paymentMethodBreakdown = {
+    cash: { available: 0, income: 0, expense: 0 },
+    transfer: { available: 0, income: 0, expense: 0 },
+    deposit: { available: 0, income: 0, expense: 0 },
+  }
 
-  const totalExpense = allTransactions
-    .filter((t) => t.type === 'expense')
-    .reduce((sum, t) => sum + parseFloat(t.amount as string), 0)
+  allTransactions.forEach((t) => {
+    const method = (t.paymentMethod || 'cash') as keyof typeof paymentMethodBreakdown
+    const amount = parseFloat(t.amount as string)
+    if (method in paymentMethodBreakdown) {
+      if (t.type === 'income') {
+        paymentMethodBreakdown[method].income += amount
+        paymentMethodBreakdown[method].available += amount
+      } else {
+        paymentMethodBreakdown[method].expense += amount
+        paymentMethodBreakdown[method].available -= amount
+      }
+    }
+  })
+
+  // Calculate totals from payment method breakdown (ensures they match)
+  const totalIncome = Object.values(paymentMethodBreakdown).reduce((sum, m) => sum + m.income, 0)
+  const totalExpense = Object.values(paymentMethodBreakdown).reduce((sum, m) => sum + m.expense, 0)
 
   // Last 6 months
   const monthlyMap: Record<string, { income: number; expense: number }> = {}
@@ -129,27 +146,7 @@ export async function getDashboardData(userId: string) {
     color: incomeByCat[name]?.color ?? expenseByCat[name]?.color ?? '#888',
   })).sort((a, b) => (b.income + b.expense) - (a.income + a.expense))
 
-  // Payment method breakdown (available balance per method)
-  const paymentMethodBreakdown = {
-    cash: { available: 0, income: 0, expense: 0 },
-    transfer: { available: 0, income: 0, expense: 0 },
-    deposit: { available: 0, income: 0, expense: 0 },
-  }
-
-  allTransactions.forEach((t) => {
-    const method = (t.paymentMethod || 'cash') as keyof typeof paymentMethodBreakdown
-    const amount = parseFloat(t.amount as string)
-    if (method in paymentMethodBreakdown) {
-      if (t.type === 'income') {
-        paymentMethodBreakdown[method].income += amount
-        paymentMethodBreakdown[method].available += amount
-      } else {
-        paymentMethodBreakdown[method].expense += amount
-        paymentMethodBreakdown[method].available -= amount
-      }
-    }
-  })
-
+  // Mobile banking is transfer + deposit combined
   const mobileBanking = paymentMethodBreakdown.transfer.available + paymentMethodBreakdown.deposit.available
 
   return {
