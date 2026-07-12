@@ -26,6 +26,7 @@ export const transactions = pgTable('transactions', {
   amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
   description: text('description').notNull(),
   date: date('date').notNull(),
+  paymentMethod: text('paymentMethod').notNull().default('cash'), // 'cash' | 'digital' | 'mobile' | 'card' | 'other'
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
@@ -61,6 +62,7 @@ export const attendeePayments = pgTable('attendee_payments', {
   userId: text('userId').notNull(),
   amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
   paymentDate: date('paymentDate').notNull(),
+  paymentMethod: text('paymentMethod').notNull().default('cash'), // 'cash' | 'digital' | 'mobile' | 'card' | 'other'
   notes: text('notes'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
