@@ -88,6 +88,12 @@ export async function getDashboardData(userId: string) {
   // Calculate totals from payment method breakdown (ensures they match)
   const totalIncome = Object.values(paymentMethodBreakdown).reduce((sum, m) => sum + m.income, 0)
   const totalExpense = Object.values(paymentMethodBreakdown).reduce((sum, m) => sum + m.expense, 0)
+  
+  console.log('[v0] DEBUG: Total transactions:', allTransactions.length)
+  console.log('[v0] DEBUG: Cash - Income:', paymentMethodBreakdown.cash.income, 'Expense:', paymentMethodBreakdown.cash.expense, 'Available:', paymentMethodBreakdown.cash.available)
+  console.log('[v0] DEBUG: Transfer - Income:', paymentMethodBreakdown.transfer.income, 'Expense:', paymentMethodBreakdown.transfer.expense, 'Available:', paymentMethodBreakdown.transfer.available)
+  console.log('[v0] DEBUG: Deposit - Income:', paymentMethodBreakdown.deposit.income, 'Expense:', paymentMethodBreakdown.deposit.expense, 'Available:', paymentMethodBreakdown.deposit.available)
+  console.log('[v0] DEBUG: Total Income:', totalIncome, 'Total Expense:', totalExpense, 'Balance:', totalIncome - totalExpense)
 
   // Last 6 months
   const monthlyMap: Record<string, { income: number; expense: number }> = {}
