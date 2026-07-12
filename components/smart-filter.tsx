@@ -85,7 +85,12 @@ export function SmartFilter({
         {/* Church filter */}
         <Select value={churchFilter} onValueChange={onChurchChange}>
           <SelectTrigger className="text-xs h-9">
-            <SelectValue placeholder="Iglesia" />
+            <SelectValue placeholder="Iglesia">
+              {churchFilter 
+                ? churches.find(c => c.id.toString() === churchFilter)?.name || 'Iglesia'
+                : 'Iglesia'
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">Todas las iglesias</SelectItem>
