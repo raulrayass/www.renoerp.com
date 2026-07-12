@@ -302,6 +302,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
                   <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Descripcion</th>
                   <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3 hidden sm:table-cell">Categoria</th>
                   <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3 hidden sm:table-cell">Tipo</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3 hidden md:table-cell">Método</th>
                   <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">Monto</th>
                   <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">Acciones</th>
                 </tr>
@@ -323,6 +324,11 @@ export function TransactionsClient({ userId }: { userId: string }) {
                           ? <><ArrowUpRight className="w-3 h-3" /> Ingreso</>
                           : <><ArrowDownRight className="w-3 h-3" /> Egreso</>}
                       </Badge>
+                    </td>
+                    <td className="px-4 py-3 hidden md:table-cell">
+                      <span className="text-sm text-foreground">
+                        {t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <span className={`text-sm font-semibold ${t.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
@@ -430,10 +436,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="cash">Efectivo</SelectItem>
-                  <SelectItem value="digital">Digital</SelectItem>
-                  <SelectItem value="mobile">Banca Móvil</SelectItem>
-                  <SelectItem value="card">Tarjeta</SelectItem>
-                  <SelectItem value="other">Otro</SelectItem>
+                  <SelectItem value="transfer">Transferencia</SelectItem>
+                  <SelectItem value="deposit">Depósito</SelectItem>
                 </SelectContent>
               </Select>
             </div>
