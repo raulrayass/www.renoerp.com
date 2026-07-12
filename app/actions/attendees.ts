@@ -293,116 +293,78 @@ export async function bulkCreateAttendees(
     notes?: string
   }>
 ) {
-  if (attendeesList.length === 0) return
+  if (!attendeesList || attendeesList.length === 0) return
 
-  // Get existing attendees to avoid duplicates
-  const existingAttendees = await db
-    .select({ id: attendees.id, name: attendees.name, phone: attendees.phone })
-    .from(attendees)
-    .where(eq(attendees.userId, userId))
+  try {
+    // Get existing attendees to avoid duplicates
+    const existingAttendees = await db
+      .select({ name: attendees.name })
+      .from(attendees)
+      .where(eq(attendees.userId, userId))
 
-  const existingSet = new Set(existingAttendees.map((a) => `${a.name.trim().toLowerCase()}-${a.phone?.trim().toLowerCase()}`))
+    const existingNames = new Set(existingAttendees.map((a) => a.name.trim().toLowerCase()))
 
-  // Filter out duplicates
-  const uniqueAttendees = attendeesList.filter((a) => {
-    const key = `${a.name.trim().toLowerCase()}-${a.phone?.trim().toLowerCase()}`
-    return !existingSet.has(key)
-  })
+    // Filter unique attendees
+    const uniqueAttendees = attendeesList.filter((a) => {
+      return !existingNames.has(a.name.trim().toLowerCase())
+    })
 
-  if (uniqueAttendees.length === 0) {
-    throw new Error('Todos los camperos ya existen en la base de datos')
-  }
-
-  // Insert attendees
-  const createdAttendees = await db
-    .insert(attendees)
-    .values(
-      uniqueAttendees.map((a) => ({
-        userId,
-        name: a.name.trim(),
-        age: a.age ?? null,
-        sex: a.sex || null,
-        shirtSize: a.shirtSize || null,
-        phone: (a.phone || '').trim(),
-        church: (a.church || '').trim(),
-        emergencyContactName: (a.emergencyContactName || '').trim(),
-        emergencyContactPhone: (a.emergencyContactPhone || '').trim(),
-        emergencyContactName2: (a.emergencyContactName2 || '').trim(),
-        emergencyContactPhone2: (a.emergencyContactPhone2 || '').trim(),
-        allergies: (a.allergies || '').trim(),
-        totalAmount: parseFloat(a.totalAmount.toString()),
-        amountPaid: parseFloat((a.initialPayment || 0).toString()),
-        status:
-          a.initialPayment && a.initialPayment > 0
-            ? a.initialPayment >= a.totalAmount
-              ? 'paid'
-              : 'partial'
-            : 'pending',
-        notes: (a.notes || '').trim(),
-      }))
-    )
-    .returning()
-
-  // Get category for payments
-  const campPaymentCat = await db.query.categories.findFirst({
-    where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Camperos')),
-  })
-
-  if (!campPaymentCat) return
-
-  // Create transactions for initial payments
-  const transactionsToInsert: any[] = []
-  for (let i = 0; i < createdAttendees.length; i++) {
-    const initialPayment = parseFloat((uniqueAttendees[i].initialPayment || 0).toString())
-    if (initialPayment > 0) {
-      transactionsToInsert.push({
-        userId,
-        categoryId: campPaymentCat.id,
-        type: 'income',
-        amount: initialPayment,
-        description: `Pago inicial de ${uniqueAttendees[i].name}`,
-        date: new Date().toISOString().split('T')[0],
-      })
+    if (uniqueAttendees.length === 0) {
+      throw new Error('Todos los registros ya existen como camperos')
     }
-  }
 
-  if (transactionsToInsert.length > 0) {
-    await db.insert(transactions).values(transactionsToInsert)
+    // Insert attendees
+    await db
+      .insert(attendees)
+      .values(
+        uniqueAttendees.map((a) => ({
+          userId,
+          name: a.name.trim(),
+          age: a.age ?? null,
+          sex: a.sex?.trim() || null,
+          shirtSize: a.shirtSize?.trim() || null,
+          phone: (a.phone || '').trim(),
+          church: (a.church || '').trim(),
+          emergencyContactName: (a.emergencyContactName || '').trim(),
+          emergencyContactPhone: (a.emergencyContactPhone || '').trim(),
+          emergencyContactName2: (a.emergencyContactName2 || '').trim(),
+          emergencyContactPhone2: (a.emergencyContactPhone2 || '').trim(),
+          allergies: (a.allergies || '').trim(),
+          totalAmount: Math.max(0, parseFloat(a.totalAmount?.toString() || '0')),
+          amountPaid: Math.max(0, parseFloat((a.initialPayment || 0).toString())),
+          status:
+            a.initialPayment && a.initialPayment > 0
+              ? a.initialPayment >= a.totalAmount
+                ? 'paid'
+                : 'partial'
+              : 'pending',
+          notes: (a.notes || '').trim(),
+        }))
+      )
+  } catch (error) {
+    console.error('[bulkCreateAttendees] Error:', error)
+    throw error
   }
 }
 
 export async function bulkDeleteAttendees(userId: string, attendeeIds: number[]) {
-  if (attendeeIds.length === 0) return
+  if (!attendeeIds || attendeeIds.length === 0) return
 
-  // Delete all payments and transactions for these attendees
-  const payments = await db
-    .select()
-    .from(attendeePayments)
-    .where(and(eq(attendeePayments.userId, userId)))
+  try {
+    // Delete attendee payments first
+    for (const id of attendeeIds) {
+      await db.delete(attendeePayments).where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, id)))
+    }
 
-  const paymentsToDelete = payments.filter((p) => attendeeIds.includes(p.attendeeId))
+    // Delete attendees
+    for (const id of attendeeIds) {
+      await db.delete(attendees).where(and(eq(attendees.userId, userId), eq(attendees.id, id)))
+    }
 
-  // Delete transactions for each payment
-  for (const payment of paymentsToDelete) {
-    await db
-      .delete(transactions)
-      .where(
-        and(
-          eq(transactions.userId, userId),
-          eq(transactions.type, 'income'),
-          eq(transactions.amount, payment.amount)
-        )
-      )
-  }
-
-  // Delete all payments for these attendees
-  for (const id of attendeeIds) {
-    await db.delete(attendeePayments).where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, id)))
-  }
-
-  // Delete attendees
-  for (const id of attendeeIds) {
-    await db.delete(attendees).where(and(eq(attendees.userId, userId), eq(attendees.id, id)))
+    console.log(`[bulkDeleteAttendees] Eliminados ${attendeeIds.length} camperos`)
+  } catch (error) {
+    console.error('[bulkDeleteAttendees] Error:', error)
+    throw error
   }
 }
 
