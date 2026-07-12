@@ -42,7 +42,7 @@ export function DashboardClient({ userId }: { userId: string }) {
   const {
     totalIncome, totalExpense, balance,
     monthlyData, expenseByCategory, incomeByCategory,
-    categoryComparison, recentTransactions,
+    categoryComparison, recentTransactions, paymentMethodBreakdown, mobileBanking,
   } = data
 
   const hasAnyData = totalIncome > 0 || totalExpense > 0
@@ -74,6 +74,31 @@ export function DashboardClient({ userId }: { userId: string }) {
           color="orange"
           subtitle="Acumulado total"
         />
+      </div>
+
+      {/* Payment Method Breakdown */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <Card className="p-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Dinero en Efectivo</h3>
+          <p className="text-2xl font-bold text-foreground">{formatCurrency(paymentMethodBreakdown?.cash?.total || 0)}</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            {`Ingresos: ${formatCurrency(paymentMethodBreakdown?.cash?.income || 0)} | Egresos: ${formatCurrency(paymentMethodBreakdown?.cash?.expense || 0)}`}
+          </p>
+        </Card>
+        <Card className="p-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Banca Móvil</h3>
+          <p className="text-2xl font-bold text-foreground">{formatCurrency(mobileBanking || 0)}</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            {`Transferencias: ${formatCurrency(paymentMethodBreakdown?.transfer?.total || 0)} | Depósitos: ${formatCurrency(paymentMethodBreakdown?.deposit?.total || 0)}`}
+          </p>
+        </Card>
+        <Card className="p-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Resumen Total</h3>
+          <p className="text-2xl font-bold text-foreground">{formatCurrency(balance)}</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            {`Efectivo ${((paymentMethodBreakdown?.cash?.total || 0) / Math.max(1, balance) * 100).toFixed(0)}% | Banca ${((mobileBanking || 0) / Math.max(1, balance) * 100).toFixed(0)}%`}
+          </p>
+        </Card>
       </div>
 
       {/* Monthly chart + Expense pie */}
