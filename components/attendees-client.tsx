@@ -1030,10 +1030,8 @@ export function AttendeesClient({ userId }: Props) {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="cash">Efectivo</SelectItem>
-                  <SelectItem value="digital">Digital</SelectItem>
-                  <SelectItem value="mobile">Banca Móvil</SelectItem>
-                  <SelectItem value="card">Tarjeta</SelectItem>
-                  <SelectItem value="other">Otro</SelectItem>
+                  <SelectItem value="transfer">Transferencia</SelectItem>
+                  <SelectItem value="deposit">Depósito</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1125,7 +1123,7 @@ export function AttendeesClient({ userId }: Props) {
                 >
                   <div className="min-w-0">
                     <p className="font-semibold text-sm">
-                      {formatMXN(parseFloat(payment.amount as string))}
+                      {formatMXN(parseFloat(payment.amount as string))} • {payment.paymentMethod === 'cash' ? 'Efectivo' : payment.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(payment.paymentDate + 'T00:00:00').toLocaleDateString('es-MX', {
