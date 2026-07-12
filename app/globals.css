@@ -167,9 +167,25 @@
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    @apply font-sans;
-  }
+html {
+  scroll-behavior: smooth;
+}
+
+/* Consistent Card Styling */
+[data-slot="card"] {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+[data-slot="card"]:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Remove inconsistent padding overrides */
+[data-slot="card"].p-4,
+[data-slot="card"].p-5 {
+  padding: var(--spacing-4);
+}
   /* Prevent iOS Safari auto-zoom on form focus */
   input,
   select,
