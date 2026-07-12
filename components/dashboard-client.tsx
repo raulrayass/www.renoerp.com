@@ -83,7 +83,7 @@ export function DashboardClient({ userId }: { userId: string }) {
         <Card className="lg:col-span-2">
           <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-4">Ingresos vs Egresos por mes</h2>
           {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
-            <ResponsiveContainer width="100%" height={240}>
+            <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 200 : 240}>
               <BarChart data={monthlyData} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
@@ -107,15 +107,15 @@ export function DashboardClient({ userId }: { userId: string }) {
         <Card>
           <h2 className="font-semibold text-foreground mb-1">Egresos por categoria</h2>
           {expenseByCategory.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 250 : 260}>
               <PieChart>
                 <Pie
-                  data={expenseByCategory}
-                  dataKey="total"
-                  nameKey="name"
+                  data={expenseData}
                   cx="50%"
-                  cy="42%"
-                  outerRadius={80}
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: ${value}`}
+                  outerRadius={window.innerWidth < 768 ? 60 : 80}
                   innerRadius={48}
                 >
                   {expenseByCategory.map((entry, i) => (
@@ -140,8 +140,8 @@ export function DashboardClient({ userId }: { userId: string }) {
         <h2 className="font-semibold text-foreground mb-1">Ingreso y Egreso por categoria</h2>
         <p className="text-xs text-muted-foreground mb-4">Comparativo de cada categoria del campamento</p>
         {hasAnyData && categoryComparison.length > 0 ? (
-          <ResponsiveContainer width="100%" height={Math.max(220, categoryComparison.length * 52)}>
-            <BarChart
+            <ResponsiveContainer width="100%" height={Math.max(window.innerWidth < 768 ? 200 : 220, categoryComparison.length * 40)}>
+              <BarChart
               data={categoryComparison}
               layout="vertical"
               margin={{ left: 16, right: 16 }}
@@ -178,15 +178,15 @@ export function DashboardClient({ userId }: { userId: string }) {
         <Card>
           <h2 className="font-semibold text-foreground mb-1">Ingresos por categoria</h2>
           {incomeByCategory.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 250 : 260}>
               <PieChart>
                 <Pie
-                  data={incomeByCategory}
-                  dataKey="total"
-                  nameKey="name"
+                  data={incomeData}
                   cx="50%"
-                  cy="42%"
-                  outerRadius={80}
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: ${value}`}
+                  outerRadius={window.innerWidth < 768 ? 60 : 80}
                   innerRadius={48}
                 >
                   {incomeByCategory.map((entry, i) => (
@@ -209,15 +209,15 @@ export function DashboardClient({ userId }: { userId: string }) {
           <h2 className="font-semibold text-foreground mb-1">Camperos por Iglesia</h2>
           <p className="text-xs text-muted-foreground mb-4">Distribución de camperos del campamento</p>
           {churchData && churchData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 250 : 260}>
               <PieChart>
                 <Pie
                   data={churchData}
-                  dataKey="value"
-                  nameKey="name"
                   cx="50%"
-                  cy="42%"
-                  outerRadius={80}
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: ${value}`}
+                  outerRadius={window.innerWidth < 768 ? 60 : 80}
                   innerRadius={48}
                 >
                   {churchData.map((entry, i) => (
@@ -240,34 +240,39 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* Shirt sizes distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <Card>
-          <h2 className="font-semibold text-foreground mb-1">Distribución de Tallas</h2>
-          <p className="text-xs text-muted-foreground mb-4">Cantidad de camperos por talla de camiseta</p>
-          {sizeData && sizeData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={sizeData} barGap={2}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
-                <YAxis tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
-                <Tooltip
-                  formatter={(value: number) => `${value} camperos`}
-                  contentStyle={{ borderRadius: '8px', fontSize: '13px', border: '1px solid var(--border)' }}
-                />
-                <Bar dataKey="value" name="Camperos" radius={[4, 4, 0, 0]}>
-                  {sizeData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground text-sm">
-              No hay datos de tallas. Verifica que los camperos tengan talla asignada.
-            </div>
-          )}
-        </Card>
-      </div>
+      <Card>
+        <h2 className="font-semibold text-foreground mb-1">Distribución de Tallas</h2>
+        <p className="text-xs text-muted-foreground mb-4">Cantidad de camperos por talla de camiseta</p>
+        {sizeData && sizeData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart>
+              <Pie
+                data={sizeData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, value }) => `${name}: ${value}`}
+                outerRadius={window.innerWidth < 768 ? 60 : 80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {sizeData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value: number) => `${value} camperos`}
+                contentStyle={{ borderRadius: '8px', fontSize: '13px', border: '1px solid var(--border)' }}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="text-center py-12 text-muted-foreground text-sm">
+            No hay datos de tallas. Verifica que los camperos tengan talla asignada.
+          </div>
+        )}
+      </Card>
 
       {/* Recent transactions */}
       <Card className="p-5">
