@@ -31,7 +31,7 @@ import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Sear
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { FilterPanel, type FilterConfig } from '@/components/filter-panel'
+import { SmartFilter } from '@/components/smart-filter'
 import { SectionHeader } from '@/components/section-header'
 import { StatCard } from '@/components/stat-card'
 import { PageHeader } from '@/components/page-header'
@@ -83,25 +83,9 @@ export function AttendeesClient({ userId }: Props) {
   const [paymentHistory, setPaymentHistory] = useState<AttendeePayment[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [filterConfigs, setFilterConfigs] = useState<FilterConfig[]>([
-    { id: 'search', label: 'Buscar', type: 'search', placeholder: 'Nombre, iglesia o teléfono', value: '' },
-    { id: 'status', label: 'Estado', type: 'select', placeholder: 'Todos', options: [
-      { value: 'all', label: 'Todos los estados' },
-      { value: 'paid', label: 'Pagados' },
-      { value: 'partial', label: 'Parciales' },
-      { value: 'pending', label: 'Pendientes' },
-    ], value: 'all' },
-    { id: 'churchId', label: 'Iglesia', type: 'select', placeholder: 'Todas', options: [], value: '' },
-    { id: 'teamId', label: 'Equipo', type: 'select', placeholder: 'Todos', options: [], value: '' },
-    { id: 'roomId', label: 'Habitación', type: 'select', placeholder: 'Todas', options: [], value: '' },
-    { id: 'checkedIn', label: 'Check-in', type: 'select', placeholder: 'Todos', options: [
-      { value: 'all', label: 'Todos' },
-      { value: 'yes', label: 'Check-in hecho' },
-      { value: 'no', label: 'Sin check-in' },
-    ], value: 'all' },
-    { id: 'minAmount', label: 'Monto mínimo', type: 'number', placeholder: '$0', value: '' },
-    { id: 'maxAmount', label: 'Monto máximo', type: 'number', placeholder: 'Sin límite', value: '' },
-  ])
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [churchFilter, setChurchFilter] = useState('')
 
   useEffect(() => {
     initializeDefaults()
@@ -457,50 +441,22 @@ export function AttendeesClient({ userId }: Props) {
     toast.success('Reporte exportado correctamente')
   }
 
-  // Get current filter values from filterConfigs
-  const getFilterValue = (id: string) => filterConfigs.find(f => f.id === id)?.value || ''
-  const search = getFilterValue('search')
-  const statusFilter = getFilterValue('status')
-  const churchId = getFilterValue('churchId')
-  const teamId = getFilterValue('teamId')
-  const roomId = getFilterValue('roomId')
-  const checkedInFilter = getFilterValue('checkedIn')
-  const minAmount = getFilterValue('minAmount')
-  const maxAmount = getFilterValue('maxAmount')
-
-  // Apply all filters
+  // Apply smart filters
   const filteredAttendees = attendeeList.filter((a) => {
-    // Search filter
+    // Smart search - searches name, phone, church simultaneously
     const searchLower = search.toLowerCase()
     const matchesSearch = !search || 
       a.name.toLowerCase().includes(searchLower) ||
       (a.phone && a.phone.includes(search)) ||
       (a.church && a.church.toLowerCase().includes(searchLower))
 
-    // Status filter
+    // Status quick filter
     const matchesStatus = statusFilter === 'all' || a.status === statusFilter
 
-    // Church filter
-    const matchesChurch = !churchId || a.church === churches.find(c => c.id === parseInt(churchId))?.name
+    // Church quick filter
+    const matchesChurch = !churchFilter || a.church === churches.find(c => c.id === parseInt(churchFilter))?.name
 
-    // Team filter
-    const matchesTeam = !teamId || a.teamId === parseInt(teamId)
-
-    // Room filter
-    const matchesRoom = !roomId || a.roomId === parseInt(roomId)
-
-    // Amount range filter
-    const total = parseFloat(a.totalAmount as string)
-    const minAmt = minAmount ? parseFloat(minAmount) : 0
-    const maxAmt = maxAmount ? parseFloat(maxAmount) : Infinity
-    const matchesAmount = total >= minAmt && total <= maxAmt
-
-    // Check-in filter
-    const matchesCheckIn = checkedInFilter === 'all' || 
-      (checkedInFilter === 'yes' && a.checkedIn) ||
-      (checkedInFilter === 'no' && !a.checkedIn)
-
-    return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom && matchesAmount && matchesCheckIn
+    return matchesSearch && matchesStatus && matchesChurch
   })
 
   const summary = filteredAttendees.reduce(
@@ -588,28 +544,22 @@ export function AttendeesClient({ userId }: Props) {
         </div>
       )}
 
-      {/* Filters using FilterPanel component */}
+      {/* Smart filter system */}
       {!loading && attendeeList.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex flex-col sm:flex-row gap-1.5">
-            {/* Search input with icon */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={getFilterValue('search')}
-                onChange={(e) => setFilterConfigs(prev => prev.map(f => f.id === 'search' ? {...f, value: e.target.value} : f))}
-                placeholder="Buscar por nombre, iglesia o teléfono"
-                className="pl-9"
-              />
-            </div>
-          </div>
-          <FilterPanel
-            filters={filterConfigs}
-            onFilterChange={(id, value) => setFilterConfigs(prev => prev.map(f => f.id === id ? {...f, value} : f))}
-            onClearAll={() => setFilterConfigs(prev => prev.map(f => ({...f, value: f.id === 'status' || f.id === 'checkedIn' ? 'all' : ''})))}
-            showMobile={true}
-          />
-        </div>
+        <SmartFilter
+          search={search}
+          onSearchChange={setSearch}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          churchFilter={churchFilter}
+          onChurchChange={setChurchFilter}
+          churches={churches}
+          onClearFilters={() => {
+            setSearch('')
+            setStatusFilter('all')
+            setChurchFilter('')
+          }}
+        />
       )}
 
 
