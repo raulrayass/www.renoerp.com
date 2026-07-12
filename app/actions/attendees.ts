@@ -154,6 +154,7 @@ export async function addAttendeePayment(
   attendeeId: number,
   amount: number,
   paymentDate: string,
+  paymentMethod: string = 'cash',
   notes?: string
 ) {
   const [attendee] = await db
@@ -179,6 +180,7 @@ export async function addAttendeePayment(
     attendeeId,
     userId,
     amount,
+    paymentMethod,
     paymentDate,
     notes: notes || '',
   })

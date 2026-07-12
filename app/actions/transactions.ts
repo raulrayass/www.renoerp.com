@@ -33,6 +33,7 @@ export async function getTransactions(
       amount: transactions.amount,
       description: transactions.description,
       date: transactions.date,
+      paymentMethod: transactions.paymentMethod,
       createdAt: transactions.createdAt,
       updatedAt: transactions.updatedAt,
       categoryName: categories.name,
@@ -167,4 +168,46 @@ export async function deleteTransaction(userId: string, id: number) {
     .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
   revalidatePath('/')
   revalidatePath('/transactions')
+}
+
+export async function getPaymentMethodBreakdown(userId: string) {
+  try {
+    const allTransactions = await db
+      .select({
+        paymentMethod: transactions.paymentMethod,
+        amount: transactions.amount,
+      })
+      .from(transactions)
+      .where(eq(transactions.userId, userId))
+
+    // Group by payment method
+    const breakdown = {
+      cash: { total: 0, transactions: 0 },
+      digital: { total: 0, transactions: 0 },
+      mobile: { total: 0, transactions: 0 },
+      card: { total: 0, transactions: 0 },
+      other: { total: 0, transactions: 0 },
+    }
+
+    for (const tx of allTransactions) {
+      const method = tx.paymentMethod as string || 'cash'
+      const amount = parseFloat(tx.amount as string)
+      
+      if (method in breakdown) {
+        breakdown[method as keyof typeof breakdown].total += amount
+        breakdown[method as keyof typeof breakdown].transactions += 1
+      }
+    }
+
+    return breakdown
+  } catch (error) {
+    console.error('[v0] Error getting payment method breakdown:', error)
+    return {
+      cash: { total: 0, transactions: 0 },
+      digital: { total: 0, transactions: 0 },
+      mobile: { total: 0, transactions: 0 },
+      card: { total: 0, transactions: 0 },
+      other: { total: 0, transactions: 0 },
+    }
+  }
 }
