@@ -450,7 +450,8 @@ export function AttendeesClient({ userId }: Props) {
     return matchesSearch && matchesStatus && matchesChurch
   })
 
-  const summary = filteredAttendees.reduce(
+  // Calculate totals based on ALL attendees (not filtered)
+  const summary = attendeeList.reduce(
     (acc, a) => {
       acc.expected += parseFloat(a.totalAmount as string)
       acc.collected += parseFloat(a.amountPaid as string)
