@@ -64,21 +64,25 @@ export async function getDashboardData(userId: string) {
     .where(eq(transactions.userId, userId))
     .orderBy(desc(transactions.date))
 
-  // Payment method breakdown first (so we can derive totals from it)
+  // Payment method breakdown - correctly track available balance per method
   const paymentMethodBreakdown = {
     cash: { available: 0, income: 0, expense: 0 },
     transfer: { available: 0, income: 0, expense: 0 },
     deposit: { available: 0, income: 0, expense: 0 },
   }
 
+  // Process each transaction and calculate the correct available balance
   allTransactions.forEach((t) => {
     const method = (t.paymentMethod || 'cash') as keyof typeof paymentMethodBreakdown
     const amount = parseFloat(t.amount as string)
+    
     if (method in paymentMethodBreakdown) {
       if (t.type === 'income') {
+        // Income: adds to both income count and available balance
         paymentMethodBreakdown[method].income += amount
         paymentMethodBreakdown[method].available += amount
       } else {
+        // Expense: adds to expense count and subtracts from available balance
         paymentMethodBreakdown[method].expense += amount
         paymentMethodBreakdown[method].available -= amount
       }
@@ -88,12 +92,6 @@ export async function getDashboardData(userId: string) {
   // Calculate totals from payment method breakdown (ensures they match)
   const totalIncome = Object.values(paymentMethodBreakdown).reduce((sum, m) => sum + m.income, 0)
   const totalExpense = Object.values(paymentMethodBreakdown).reduce((sum, m) => sum + m.expense, 0)
-  
-  console.log('[v0] DEBUG: Total transactions:', allTransactions.length)
-  console.log('[v0] DEBUG: Cash - Income:', paymentMethodBreakdown.cash.income, 'Expense:', paymentMethodBreakdown.cash.expense, 'Available:', paymentMethodBreakdown.cash.available)
-  console.log('[v0] DEBUG: Transfer - Income:', paymentMethodBreakdown.transfer.income, 'Expense:', paymentMethodBreakdown.transfer.expense, 'Available:', paymentMethodBreakdown.transfer.available)
-  console.log('[v0] DEBUG: Deposit - Income:', paymentMethodBreakdown.deposit.income, 'Expense:', paymentMethodBreakdown.deposit.expense, 'Available:', paymentMethodBreakdown.deposit.available)
-  console.log('[v0] DEBUG: Total Income:', totalIncome, 'Total Expense:', totalExpense, 'Balance:', totalIncome - totalExpense)
 
   // Last 6 months
   const monthlyMap: Record<string, { income: number; expense: number }> = {}
