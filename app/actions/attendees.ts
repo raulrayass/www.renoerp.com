@@ -289,62 +289,32 @@ export async function bulkCreateAttendees(
     emergencyContactPhone2?: string
     allergies?: string
     totalAmount: number
-    initialPayment?: number
     notes?: string
   }>
 ) {
   if (!attendeesList || attendeesList.length === 0) return
 
-  try {
-    // Get existing attendees to avoid duplicates
-    const existingAttendees = await db
-      .select({ name: attendees.name })
-      .from(attendees)
-      .where(eq(attendees.userId, userId))
-
-    const existingNames = new Set(existingAttendees.map((a) => a.name.trim().toLowerCase()))
-
-    // Filter unique attendees
-    const uniqueAttendees = attendeesList.filter((a) => {
-      return !existingNames.has(a.name.trim().toLowerCase())
-    })
-
-    if (uniqueAttendees.length === 0) {
-      throw new Error('Todos los registros ya existen como camperos')
-    }
-
-    // Insert attendees
-    await db
-      .insert(attendees)
-      .values(
-        uniqueAttendees.map((a) => ({
-          userId,
-          name: a.name.trim(),
-          age: a.age ?? null,
-          sex: a.sex?.trim() || null,
-          shirtSize: a.shirtSize?.trim() || null,
-          phone: (a.phone || '').trim(),
-          church: (a.church || '').trim(),
-          emergencyContactName: (a.emergencyContactName || '').trim(),
-          emergencyContactPhone: (a.emergencyContactPhone || '').trim(),
-          emergencyContactName2: (a.emergencyContactName2 || '').trim(),
-          emergencyContactPhone2: (a.emergencyContactPhone2 || '').trim(),
-          allergies: (a.allergies || '').trim(),
-          totalAmount: Math.max(0, parseFloat(a.totalAmount?.toString() || '0')),
-          amountPaid: Math.max(0, parseFloat((a.initialPayment || 0).toString())),
-          status:
-            a.initialPayment && a.initialPayment > 0
-              ? a.initialPayment >= a.totalAmount
-                ? 'paid'
-                : 'partial'
-              : 'pending',
-          notes: (a.notes || '').trim(),
-        }))
-      )
-  } catch (error) {
-    console.error('[bulkCreateAttendees] Error:', error)
-    throw error
-  }
+  // Insert attendees - simple and clean
+  await db.insert(attendees).values(
+    attendeesList.map((a) => ({
+      userId,
+      name: a.name?.trim() || 'Sin nombre',
+      age: a.age ?? null,
+      sex: a.sex?.trim() || null,
+      shirtSize: a.shirtSize?.trim() || null,
+      phone: a.phone?.trim() || '',
+      church: a.church?.trim() || '',
+      emergencyContactName: a.emergencyContactName?.trim() || '',
+      emergencyContactPhone: a.emergencyContactPhone?.trim() || '',
+      emergencyContactName2: a.emergencyContactName2?.trim() || '',
+      emergencyContactPhone2: a.emergencyContactPhone2?.trim() || '',
+      allergies: a.allergies?.trim() || '',
+      totalAmount: Math.max(0, parseFloat(a.totalAmount?.toString() || '0')),
+      amountPaid: 0, // Pagos se agregan manualmente
+      status: 'pending',
+      notes: a.notes?.trim() || '',
+    }))
+  )
 }
 
 export async function bulkDeleteAttendees(userId: string, attendeeIds: number[]) {
