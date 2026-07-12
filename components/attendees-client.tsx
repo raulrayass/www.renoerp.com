@@ -582,18 +582,19 @@ export function AttendeesClient({ userId }: Props) {
               </SelectContent>
             </Select>
             <Button
-              variant="outline"
+              variant={Object.values(filters).some(v => v && v !== 'all') || search ? "default" : "outline"}
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
               className="gap-2 w-full sm:w-auto"
             >
               <Filter className="w-4 h-4" />
               <span className="hidden sm:inline">Filtros</span>
+              {Object.values(filters).some(v => v && v !== 'all') || search ? <span className="text-xs bg-primary/20 px-1.5 rounded">({Object.values(filters).filter(v => v && v !== 'all').length + (search ? 1 : 0)})</span> : null}
             </Button>
           </div>
 
-          {/* Advanced Filters Panel */}
-          {showFilters && (
+          {/* Advanced Filters Panel - Always show on desktop, toggle on mobile */}
+          {(showFilters || typeof window !== 'undefined' && window.innerWidth >= 1024) && (
             <Card className="p-4 border-primary/20 bg-muted/50">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
                 <div>
@@ -683,9 +684,9 @@ export function AttendeesClient({ userId }: Props) {
                   />
                 </div>
 
-                <div className="sm:col-span-2 lg:col-span-2 flex gap-2">
+                <div className="sm:col-span-2 lg:col-span-2 flex gap-2 pt-2 border-t">
                   <Button
-                    variant="outline"
+                    variant="destructive"
                     size="sm"
                     onClick={() => {
                       setFilters({churchId: '', teamId: '', roomId: '', minAmount: '', maxAmount: '', checkedIn: 'all'})
@@ -695,7 +696,7 @@ export function AttendeesClient({ userId }: Props) {
                     className="flex-1 gap-2"
                   >
                     <X className="w-3 h-3" />
-                    Limpiar filtros
+                    Limpiar todos
                   </Button>
                 </div>
               </div>
