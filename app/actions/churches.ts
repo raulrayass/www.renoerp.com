@@ -78,34 +78,3 @@ export async function updateChurch(userId: string, churchId: number, name: strin
 export async function deleteChurch(userId: string, churchId: number) {
   await db.delete(churches).where(and(eq(churches.userId, userId), eq(churches.id, churchId)))
 }
-
-export async function initializeDefaultChurches(userId: string) {
-  const existing = await db.query.churches.findFirst({
-    where: eq(churches.userId, userId),
-  })
-
-  // If user already has churches, don't add defaults
-  if (existing) return
-
-  const defaultChurches = [
-    'Iglesia Central',
-    'Iglesia del Calvario',
-    'Iglesia de la Paz',
-    'Iglesia Evangélica',
-    'Iglesia de la Gracia',
-    'Iglesia Nueva Vida',
-    'Iglesia Pentecostés',
-    'Iglesia Redención',
-    'Iglesia Santidad',
-    'Iglesia Esperanza',
-    'Iglesia Jesucristo',
-    'Iglesia Bendición',
-  ]
-
-  await db.insert(churches).values(
-    defaultChurches.map((name) => ({
-      userId,
-      name,
-    }))
-  )
-}
