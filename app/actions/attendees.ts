@@ -382,6 +382,7 @@ export async function bulkDeleteAttendees(userId: string, attendeeIds: number[])
 
   const paymentsToDelete = payments.filter((p) => attendeeIds.includes(p.attendeeId))
 
+  // Delete transactions for each payment
   for (const payment of paymentsToDelete) {
     await db
       .delete(transactions)
@@ -395,14 +396,9 @@ export async function bulkDeleteAttendees(userId: string, attendeeIds: number[])
   }
 
   // Delete all payments for these attendees
-  await db
-    .delete(attendeePayments)
-    .where(
-      and(
-        eq(attendeePayments.userId, userId),
-        // Use a filter condition to match any of the attendee IDs
-      )
-    )
+  for (const id of attendeeIds) {
+    await db.delete(attendeePayments).where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, id)))
+  }
 
   // Delete attendees
   for (const id of attendeeIds) {
