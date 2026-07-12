@@ -27,11 +27,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { FilterPanel, type FilterConfig } from '@/components/filter-panel'
+import { SectionHeader } from '@/components/section-header'
+import { StatCard } from '@/components/stat-card'
 
 interface Props {
   userId: string
@@ -562,32 +564,31 @@ export function AttendeesClient({ userId }: Props) {
       {/* Summary Cards */}
       {!loading && attendeeList.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Esperado</p>
-              <p className="text-lg sm:text-xl font-bold">{formatMXN(summary.expected)}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Recaudado</p>
-              <p className="text-lg sm:text-xl font-bold text-accent">{formatMXN(summary.collected)}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Pendiente</p>
-              <p className="text-lg sm:text-xl font-bold text-red-600">{formatMXN(pendingAmount)}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Estado</p>
-              <p className="text-sm font-semibold mt-1">
-                {paidCount} pagados · {partialCount} parciales · {pendingCount} pendientes
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            label="Esperado"
+            value={formatMXN(summary.expected)}
+            color="blue"
+            icon={DollarSign}
+          />
+          <StatCard
+            label="Recaudado"
+            value={formatMXN(summary.collected)}
+            color="green"
+            icon={CreditCard}
+          />
+          <StatCard
+            label="Pendiente"
+            value={formatMXN(pendingAmount)}
+            color="red"
+            icon={History}
+          />
+          <StatCard
+            label="Check-in"
+            value={`${filteredAttendees.filter((a) => a.checkedIn).length}/${filteredAttendees.length}`}
+            color="primary"
+            icon={UserCheck}
+            subtitle={`${paidCount} pagados • ${partialCount} parciales`}
+          />
         </div>
       )}
 

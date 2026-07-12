@@ -51,58 +51,33 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Balance Total</p>
-              <p className={`text-2xl font-bold mt-1 ${balance >= 0 ? 'text-foreground' : 'text-destructive'}`}>
-                {formatCurrency(balance)}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-primary" />
-            </div>
-          </div>
-          <Badge variant={balance >= 0 ? 'outline' : 'destructive'} className="mt-3 text-xs font-normal">
-            {balance >= 0 ? 'Saldo positivo' : 'Saldo negativo'}
-          </Badge>
-        </Card>
-
-        <Card>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Ingresos</p>
-              <p className="text-2xl font-bold mt-1 text-green-600">
-                {formatCurrency(totalIncome)}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-green-50">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-3">Acumulado total</p>
-        </Card>
-
-        <Card>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Egresos</p>
-              <p className="text-2xl font-bold mt-1 text-orange-600">
-                {formatCurrency(totalExpense)}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-orange-50">
-              <TrendingDown className="w-5 h-5 text-orange-600" />
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-3">Acumulado total</p>
-        </Card>
+        <StatCard
+          label="Balance Total"
+          value={formatCurrency(balance)}
+          icon={Wallet}
+          color={balance >= 0 ? 'primary' : 'red'}
+          subtitle={balance >= 0 ? 'Saldo positivo' : 'Saldo negativo'}
+        />
+        <StatCard
+          label="Total Ingresos"
+          value={formatCurrency(totalIncome)}
+          icon={TrendingUp}
+          color="green"
+          subtitle="Acumulado total"
+        />
+        <StatCard
+          label="Total Egresos"
+          value={formatCurrency(totalExpense)}
+          icon={TrendingDown}
+          color="orange"
+          subtitle="Acumulado total"
+        />
       </div>
 
       {/* Monthly chart + Expense pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-2">
-          <h2 className="font-semibold text-foreground mb-4">Ingresos vs Egresos por mes</h2>
+          <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-4">Ingresos vs Egresos por mes</h2>
           {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={monthlyData} barGap={4}>
