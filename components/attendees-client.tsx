@@ -76,6 +76,7 @@ export function AttendeesClient({ userId }: Props) {
   const [paymentForm, setPaymentForm] = useState({
     amount: '',
     date: new Date().toISOString().split('T')[0],
+    paymentMethod: 'cash',
     notes: '',
   })
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
@@ -208,12 +209,13 @@ export function AttendeesClient({ userId }: Props) {
 
     startTransition(async () => {
       try {
-        await addAttendeePayment(userId, selectedAttendeeId, amount, paymentForm.date, paymentForm.notes)
+        await addAttendeePayment(userId, selectedAttendeeId, amount, paymentForm.date, paymentForm.paymentMethod, paymentForm.notes)
         toast.success(`Pago de $${amount.toFixed(2)} registrado para ${attendee.name}`)
         setPaymentDialogOpen(false)
         setPaymentForm({
           amount: '',
           date: new Date().toISOString().split('T')[0],
+          paymentMethod: 'cash',
           notes: '',
         })
         setSelectedAttendeeId(null)
@@ -1021,6 +1023,19 @@ export function AttendeesClient({ userId }: Props) {
                 value={paymentForm.date}
                 onChange={(e) => setPaymentForm({ ...paymentForm, date: e.target.value })}
               />
+            </div>
+            <div>
+              <Label>Método de Pago *</Label>
+              <Select value={paymentForm.paymentMethod} onValueChange={(v) => setPaymentForm({ ...paymentForm, paymentMethod: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Efectivo</SelectItem>
+                  <SelectItem value="digital">Digital</SelectItem>
+                  <SelectItem value="mobile">Banca Móvil</SelectItem>
+                  <SelectItem value="card">Tarjeta</SelectItem>
+                  <SelectItem value="other">Otro</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="payment-notes">Notas (opcional)</Label>
