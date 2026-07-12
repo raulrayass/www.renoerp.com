@@ -341,14 +341,11 @@ export function AttendeesClient({ userId }: Props) {
       'Contacto Emergencia 2',
       'Teléfono Emergencia 2',
       'Alergias',
-      'Equipo',
-      'Habitación',
       'Monto Total ($)',
-      'Pago Inicial ($)',
       'Notas',
     ]
 
-    // Template con instrucciones en comentarios
+    // Template simple - solo datos básicos de camperos
     const rows = [
       headers,
       [
@@ -363,10 +360,7 @@ export function AttendeesClient({ userId }: Props) {
         '',
         '',
         'Ninguna',
-        '',
-        '',
         '1000',
-        '500',
         '',
       ],
       [
@@ -381,17 +375,12 @@ export function AttendeesClient({ userId }: Props) {
         'Patricia López',
         '3325555555',
         'Alergia a mariscos',
-        '',
-        '',
         '800',
-        '0',
-        'Será contactado',
+        'Contactar después',
       ],
     ]
 
     const ws = XLSX.utils.aoa_to_sheet(rows)
-    
-    // Establecer ancho de columnas
     ws['!cols'] = [
       { wch: 20 }, // Nombre
       { wch: 8 },  // Edad
@@ -404,17 +393,14 @@ export function AttendeesClient({ userId }: Props) {
       { wch: 20 }, // Contacto Emergencia 2
       { wch: 14 }, // Teléfono Emergencia 2
       { wch: 18 }, // Alergias
-      { wch: 14 }, // Equipo
-      { wch: 14 }, // Habitación
       { wch: 12 }, // Monto Total
-      { wch: 12 }, // Pago Inicial
       { wch: 20 }, // Notas
     ]
     
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Camperos')
     XLSX.writeFile(wb, 'Plantilla_Camperos.xlsx')
-    toast.success('Plantilla descargada - Completa los datos y sube el archivo')
+    toast.success('Plantilla descargada - Los pagos se agregan después manualmente')
   }
 
   async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
@@ -445,9 +431,8 @@ export function AttendeesClient({ userId }: Props) {
           emergencyContactName2: String(row[8] || '').trim() || undefined,
           emergencyContactPhone2: String(row[9] || '').trim() || undefined,
           allergies: String(row[10] || '').trim() || undefined,
-          totalAmount: parseFloat(String(row[13] || '0')),
-          initialPayment: parseFloat(String(row[14] || '0')) || 0,
-          notes: String(row[17] || '').trim() || undefined,
+          totalAmount: parseFloat(String(row[11] || '0')),
+          notes: String(row[12] || '').trim() || undefined,
         }))
 
         // Validar solo campos requeridos: nombre y monto total
