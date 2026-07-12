@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
@@ -23,179 +21,169 @@ interface FilterPanelProps {
   filters: FilterConfig[]
   onFilterChange: (filterId: string, value: string) => void
   onClearAll: () => void
-  showMobile?: boolean
 }
 
 export function FilterPanel({
   filters,
   onFilterChange,
   onClearAll,
-  showMobile = false,
 }: FilterPanelProps) {
-  const [showFilters, setShowFilters] = useState(false)
-  const activeFilterCount = filters.filter((f) => f.value && f.value !== 'all').length
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const activeFilters = filters.filter((f) => f.value && f.value !== 'all')
+  const activeCount = activeFilters.length
 
-  const filterContent = (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      {filters.map((filter) => (
-        <div key={filter.id}>
-          <Label className="text-xs font-semibold mb-1.5 block">{filter.label}</Label>
-          {filter.type === 'search' && (
+  // Separate search from advanced filters
+  const searchFilter = filters.find((f) => f.id === 'search')
+  const statusFilter = filters.find((f) => f.id === 'status')
+  const advancedFilters = filters.filter((f) => f.id !== 'search' && f.id !== 'status')
+
+  return (
+    <div className="space-y-2">
+      {/* Search + Status row - always visible */}
+      <div className="flex flex-col sm:flex-row gap-2 items-end">
+        {/* Search */}
+        {searchFilter && (
+          <div className="flex-1">
             <Input
               type="text"
-              value={filter.value}
-              onChange={(e) => onFilterChange(filter.id, e.target.value)}
-              placeholder={filter.placeholder || 'Buscar...'}
-              className="h-9"
+              value={searchFilter.value}
+              onChange={(e) => onFilterChange('search', e.target.value)}
+              placeholder={searchFilter.placeholder || 'Buscar...'}
+              className="h-9 text-sm"
             />
-          )}
-          {filter.type === 'number' && (
-            <Input
-              type="number"
-              value={filter.value}
-              onChange={(e) => onFilterChange(filter.id, e.target.value)}
-              placeholder={filter.placeholder || '$0'}
-              className="h-9"
-            />
-          )}
-          {filter.type === 'select' && filter.options && (
-            <Select value={filter.value} onValueChange={(v) => onFilterChange(filter.id, v)}>
-              <SelectTrigger className="h-9">
-                {filter.value && filter.value !== 'all' ? (
-                  <span>{filter.options.find((o) => o.value === filter.value)?.label}</span>
+          </div>
+        )}
+
+        {/* Status Select */}
+        {statusFilter && (
+          <div className="w-full sm:w-48">
+            <Select value={statusFilter.value} onValueChange={(v) => onFilterChange('status', v)}>
+              <SelectTrigger className="h-9 text-sm">
+                {statusFilter.value && statusFilter.value !== 'all' ? (
+                  <span>{statusFilter.options?.find((o) => o.value === statusFilter.value)?.label}</span>
                 ) : (
-                  <SelectValue placeholder={filter.placeholder || 'Selecciona...'} />
+                  <SelectValue placeholder={statusFilter.placeholder} />
                 )}
               </SelectTrigger>
               <SelectContent>
-                {filter.options.map((opt) => (
+                {statusFilter.options?.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          )}
-        </div>
-      ))}
-    </div>
-  )
-
-  // Desktop inline display
-  if (!showMobile) {
-    return showFilters && (
-      <Card className="p-4 border-primary/20 bg-muted/50 space-y-3">
-        {filterContent}
-        <div className="flex gap-2 pt-2 border-t">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={onClearAll}
-            className="flex-1 gap-2"
-          >
-            <X className="w-3 h-3" />
-            Limpiar todos
-          </Button>
-        </div>
-      </Card>
-    )
-  }
-
-  // Mobile drawer display
-  return (
-    <>
-      <Button
-        variant={activeFilterCount > 0 ? 'default' : 'outline'}
-        size="sm"
-        onClick={() => setShowFilters(!showFilters)}
-        className="gap-2 w-full sm:w-auto"
-      >
-        <Filter className="w-4 h-4" />
-        <span className="hidden sm:inline">Filtros</span>
-        {activeFilterCount > 0 && (
-          <span className="text-xs bg-primary/20 px-1.5 rounded">({activeFilterCount})</span>
+          </div>
         )}
-      </Button>
 
-      {showFilters && (
-        <div className="fixed lg:hidden inset-0 z-50 bg-black/50" onClick={() => setShowFilters(false)}>
-          <div
-            className="fixed bottom-0 left-0 right-0 bg-background rounded-t-lg shadow-lg max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="sticky top-0 bg-background border-b px-4 py-3 flex items-center justify-between">
-              <h3 className="font-semibold">Filtros avanzados</h3>
+        {/* Advanced Filters Toggle */}
+        <Button
+          variant={activeCount > 0 ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="gap-1.5 h-9 text-sm w-full sm:w-auto"
+        >
+          <Filter className="w-3.5 h-3.5" />
+          <span>Más</span>
+          {activeCount > 0 && (
+            <span className="ml-1 inline-flex items-center justify-center w-5 h-5 text-xs font-medium bg-primary/20 rounded-full">
+              {activeCount}
+            </span>
+          )}
+        </Button>
+      </div>
+
+      {/* Advanced Filters - collapsible */}
+      {showAdvanced && advancedFilters.length > 0 && (
+        <div className="border border-border/50 rounded-lg p-3 bg-muted/30 backdrop-blur-sm space-y-3">
+          {/* Filters Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {advancedFilters.map((filter) => (
+              <div key={filter.id} className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-muted-foreground">
+                  {filter.label}
+                </label>
+                {filter.type === 'search' && (
+                  <Input
+                    type="text"
+                    value={filter.value}
+                    onChange={(e) => onFilterChange(filter.id, e.target.value)}
+                    placeholder={filter.placeholder || 'Buscar...'}
+                    className="h-8 text-sm"
+                  />
+                )}
+                {filter.type === 'number' && (
+                  <Input
+                    type="number"
+                    value={filter.value}
+                    onChange={(e) => onFilterChange(filter.id, e.target.value)}
+                    placeholder={filter.placeholder || '0'}
+                    className="h-8 text-sm"
+                  />
+                )}
+                {filter.type === 'select' && filter.options && (
+                  <Select value={filter.value} onValueChange={(v) => onFilterChange(filter.id, v)}>
+                    <SelectTrigger className="h-8 text-sm">
+                      {filter.value && filter.value !== 'all' ? (
+                        <span className="text-sm">{filter.options.find((o) => o.value === filter.value)?.label}</span>
+                      ) : (
+                        <SelectValue placeholder={filter.placeholder || 'Selecciona'} />
+                      )}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filter.options.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Actions */}
+          {activeCount > 0 && (
+            <div className="flex gap-2 pt-2 border-t border-border/50">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowFilters(false)}
-                className="h-8 w-8 p-0"
+                onClick={onClearAll}
+                className="h-8 text-xs gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3 h-3" />
+                Limpiar
               </Button>
             </div>
-            <div className="p-4 space-y-4">
-              {filters.map((filter) => (
-                <div key={filter.id}>
-                  <Label className="text-xs font-semibold mb-2 block">{filter.label}</Label>
-                  {filter.type === 'search' && (
-                    <Input
-                      type="text"
-                      value={filter.value}
-                      onChange={(e) => onFilterChange(filter.id, e.target.value)}
-                      placeholder={filter.placeholder || 'Buscar...'}
-                      className="h-9"
-                    />
-                  )}
-                  {filter.type === 'number' && (
-                    <Input
-                      type="number"
-                      value={filter.value}
-                      onChange={(e) => onFilterChange(filter.id, e.target.value)}
-                      placeholder={filter.placeholder || '$0'}
-                      className="h-9"
-                    />
-                  )}
-                  {filter.type === 'select' && filter.options && (
-                    <Select
-                      value={filter.value}
-                      onValueChange={(v) => onFilterChange(filter.id, v)}
-                    >
-                      <SelectTrigger className="h-9">
-                        {filter.value && filter.value !== 'all' ? (
-                          <span>{filter.options.find((o) => o.value === filter.value)?.label}</span>
-                        ) : (
-                          <SelectValue placeholder={filter.placeholder || 'Selecciona...'} />
-                        )}
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filter.options.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              ))}
-              <div className="flex gap-2 pt-4 border-t">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    onClearAll()
-                  }}
-                  className="flex-1 gap-2"
-                >
-                  <X className="w-3 h-3" />
-                  Limpiar todos
-                </Button>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       )}
-    </>
+
+      {/* Active Filter Tags - shown below filters */}
+      {activeCount > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {activeFilters.map((filter) => (
+            <div
+              key={filter.id}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15 transition-colors"
+            >
+              <span>{filter.label}:</span>
+              <span className="font-semibold">
+                {filter.type === 'select'
+                  ? filter.options?.find((o) => o.value === filter.value)?.label || filter.value
+                  : filter.value}
+              </span>
+              <button
+                onClick={() => onFilterChange(filter.id, filter.id === 'status' || filter.id === 'checkedIn' ? 'all' : '')}
+                className="ml-1 hover:opacity-70 transition-opacity"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
