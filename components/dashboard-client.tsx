@@ -249,11 +249,11 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* Shirt sizes distribution */}
-      <Card>
+      <Card className="p-5">
         <h2 className="font-semibold text-foreground mb-1">Distribución de Tallas</h2>
         <p className="text-xs text-muted-foreground mb-4">Cantidad de camperos por talla de camiseta</p>
         {sizeData && sizeData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={isMobile ? 250 : 280}>
             <PieChart>
               <Pie
                 data={sizeData}
@@ -261,7 +261,7 @@ export function DashboardClient({ userId }: { userId: string }) {
                 cy="50%"
                 labelLine={false}
                 label={({ name, value }) => `${name}: ${value}`}
-                outerRadius={window.innerWidth < 768 ? 60 : 80}
+                outerRadius={isMobile ? 60 : 80}
                 fill="#8884d8"
                 dataKey="value"
               >
