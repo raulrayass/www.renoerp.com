@@ -27,10 +27,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, Filter, X } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { FilterPanel, type FilterConfig } from '@/components/filter-panel'
 
 interface Props {
   userId: string
@@ -79,17 +80,25 @@ export function AttendeesClient({ userId }: Props) {
   const [paymentHistory, setPaymentHistory] = useState<AttendeePayment[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [showFilters, setShowFilters] = useState(false)
-  const [filters, setFilters] = useState({
-    churchId: '',
-    teamId: '',
-    roomId: '',
-    minAmount: '',
-    maxAmount: '',
-    checkedIn: 'all', // all, yes, no
-  })
+  const [filterConfigs, setFilterConfigs] = useState<FilterConfig[]>([
+    { id: 'search', label: 'Buscar', type: 'search', placeholder: 'Nombre, iglesia o teléfono', value: '' },
+    { id: 'status', label: 'Estado', type: 'select', placeholder: 'Todos', options: [
+      { value: 'all', label: 'Todos los estados' },
+      { value: 'paid', label: 'Pagados' },
+      { value: 'partial', label: 'Parciales' },
+      { value: 'pending', label: 'Pendientes' },
+    ], value: 'all' },
+    { id: 'churchId', label: 'Iglesia', type: 'select', placeholder: 'Todas', options: [], value: '' },
+    { id: 'teamId', label: 'Equipo', type: 'select', placeholder: 'Todos', options: [], value: '' },
+    { id: 'roomId', label: 'Habitación', type: 'select', placeholder: 'Todas', options: [], value: '' },
+    { id: 'checkedIn', label: 'Check-in', type: 'select', placeholder: 'Todos', options: [
+      { value: 'all', label: 'Todos' },
+      { value: 'yes', label: 'Check-in hecho' },
+      { value: 'no', label: 'Sin check-in' },
+    ], value: 'all' },
+    { id: 'minAmount', label: 'Monto mínimo', type: 'number', placeholder: '$0', value: '' },
+    { id: 'maxAmount', label: 'Monto máximo', type: 'number', placeholder: 'Sin límite', value: '' },
+  ])
 
   useEffect(() => {
     initializeDefaults()
@@ -118,16 +127,25 @@ export function AttendeesClient({ userId }: Props) {
   async function loadChurches() {
     const data = await getChurches(userId)
     setChurches(data)
+    setFilterConfigs(prev => prev.map(f => f.id === 'churchId' ? {
+      ...f, options: [{ value: '', label: 'Todas las iglesias' }, ...data.map(c => ({ value: c.id.toString(), label: c.name }))]
+    } : f))
   }
 
   async function loadTeams() {
     const data = await getTeams(userId)
     setTeams(data)
+    setFilterConfigs(prev => prev.map(f => f.id === 'teamId' ? {
+      ...f, options: [{ value: '', label: 'Todos los equipos' }, ...data.map(t => ({ value: t.id.toString(), label: t.name }))]
+    } : f))
   }
 
   async function loadRooms() {
     const data = await getRooms(userId)
     setRooms(data)
+    setFilterConfigs(prev => prev.map(f => f.id === 'roomId' ? {
+      ...f, options: [{ value: '', label: 'Todas las habitaciones' }, ...data.map(r => ({ value: r.id.toString(), label: r.name }))]
+    } : f))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -436,6 +454,17 @@ export function AttendeesClient({ userId }: Props) {
     toast.success('Reporte exportado correctamente')
   }
 
+  // Get current filter values from filterConfigs
+  const getFilterValue = (id: string) => filterConfigs.find(f => f.id === id)?.value || ''
+  const search = getFilterValue('search')
+  const statusFilter = getFilterValue('status')
+  const churchId = getFilterValue('churchId')
+  const teamId = getFilterValue('teamId')
+  const roomId = getFilterValue('roomId')
+  const checkedInFilter = getFilterValue('checkedIn')
+  const minAmount = getFilterValue('minAmount')
+  const maxAmount = getFilterValue('maxAmount')
+
   // Apply all filters
   const filteredAttendees = attendeeList.filter((a) => {
     // Search filter
@@ -449,24 +478,24 @@ export function AttendeesClient({ userId }: Props) {
     const matchesStatus = statusFilter === 'all' || a.status === statusFilter
 
     // Church filter
-    const matchesChurch = !filters.churchId || a.church === churches.find(c => c.id === parseInt(filters.churchId))?.name
+    const matchesChurch = !churchId || a.church === churches.find(c => c.id === parseInt(churchId))?.name
 
     // Team filter
-    const matchesTeam = !filters.teamId || a.teamId === parseInt(filters.teamId)
+    const matchesTeam = !teamId || a.teamId === parseInt(teamId)
 
     // Room filter
-    const matchesRoom = !filters.roomId || a.roomId === parseInt(filters.roomId)
+    const matchesRoom = !roomId || a.roomId === parseInt(roomId)
 
     // Amount range filter
     const total = parseFloat(a.totalAmount as string)
-    const minAmt = filters.minAmount ? parseFloat(filters.minAmount) : 0
-    const maxAmt = filters.maxAmount ? parseFloat(filters.maxAmount) : Infinity
+    const minAmt = minAmount ? parseFloat(minAmount) : 0
+    const maxAmt = maxAmount ? parseFloat(maxAmount) : Infinity
     const matchesAmount = total >= minAmt && total <= maxAmt
 
     // Check-in filter
-    const matchesCheckIn = filters.checkedIn === 'all' || 
-      (filters.checkedIn === 'yes' && a.checkedIn) ||
-      (filters.checkedIn === 'no' && !a.checkedIn)
+    const matchesCheckIn = checkedInFilter === 'all' || 
+      (checkedInFilter === 'yes' && a.checkedIn) ||
+      (checkedInFilter === 'no' && !a.checkedIn)
 
     return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom && matchesAmount && matchesCheckIn
   })
@@ -562,273 +591,30 @@ export function AttendeesClient({ userId }: Props) {
         </div>
       )}
 
-      {/* Search & Advanced Filters */}
+      {/* Filters using FilterPanel component */}
       {!loading && attendeeList.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className="space-y-3">
           <div className="flex flex-col sm:flex-row gap-2">
+            {/* Search input with icon */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={getFilterValue('search')}
+                onChange={(e) => setFilterConfigs(prev => prev.map(f => f.id === 'search' ? {...f, value: e.target.value} : f))}
                 placeholder="Buscar por nombre, iglesia o teléfono"
                 className="pl-9"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="paid">Pagados</SelectItem>
-                <SelectItem value="partial">Parciales</SelectItem>
-                <SelectItem value="pending">Pendientes</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              variant={Object.values(filters).some(v => v && v !== 'all') || search ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="gap-2 w-full sm:w-auto"
-            >
-              <Filter className="w-4 h-4" />
-              <span className="hidden sm:inline">Filtros</span>
-              {Object.values(filters).some(v => v && v !== 'all') || search ? <span className="text-xs bg-primary/20 px-1.5 rounded">({Object.values(filters).filter(v => v && v !== 'all').length + (search ? 1 : 0)})</span> : null}
-            </Button>
           </div>
-
-          {/* Advanced Filters Panel - Desktop only inline */}
-          <div className="hidden lg:block">
-            {showFilters && (
-              <Card className="p-4 border-primary/20 bg-muted/50">
-                <div className="grid grid-cols-4 gap-3 mb-3">
-                  <div>
-                    <Label className="text-xs font-semibold mb-1.5 block">Iglesia</Label>
-                    <Select value={filters.churchId} onValueChange={(v) => setFilters({...filters, churchId: v})}>
-                      <SelectTrigger className="h-9">
-                        {filters.churchId ? <span>{getChurchName(filters.churchId)}</span> : <SelectValue placeholder="Todas" />}
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Todas las iglesias</SelectItem>
-                        {churches.map((c) => (
-                          <SelectItem key={c.id} value={c.id.toString()}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-1.5 block">Equipo</Label>
-                    <Select value={filters.teamId} onValueChange={(v) => setFilters({...filters, teamId: v})}>
-                      <SelectTrigger className="h-9">
-                        {filters.teamId ? <span>{getTeamName(filters.teamId)}</span> : <SelectValue placeholder="Todos" />}
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Todos los equipos</SelectItem>
-                        {teams.map((t) => (
-                          <SelectItem key={t.id} value={t.id.toString()}>
-                            {t.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-1.5 block">Habitación</Label>
-                    <Select value={filters.roomId} onValueChange={(v) => setFilters({...filters, roomId: v})}>
-                      <SelectTrigger className="h-9">
-                        {filters.roomId ? <span>{getRoomName(filters.roomId)}</span> : <SelectValue placeholder="Todas" />}
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Todas las habitaciones</SelectItem>
-                        {rooms.map((r) => (
-                          <SelectItem key={r.id} value={r.id.toString()}>
-                            {r.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-1.5 block">Check-in</Label>
-                    <Select value={filters.checkedIn} onValueChange={(v) => setFilters({...filters, checkedIn: v})}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Todos" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="yes">Check-in hecho</SelectItem>
-                        <SelectItem value="no">Sin check-in</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-1.5 block">Monto mín</Label>
-                    <Input
-                      type="number"
-                      value={filters.minAmount}
-                      onChange={(e) => setFilters({...filters, minAmount: e.target.value})}
-                      placeholder="$0"
-                      className="h-9"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-1.5 block">Monto máx</Label>
-                    <Input
-                      type="number"
-                      value={filters.maxAmount}
-                      onChange={(e) => setFilters({...filters, maxAmount: e.target.value})}
-                      placeholder="Sin límite"
-                      className="h-9"
-                    />
-                  </div>
-
-                  <div className="col-span-4 flex gap-2 pt-2 border-t">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        setFilters({churchId: '', teamId: '', roomId: '', minAmount: '', maxAmount: '', checkedIn: 'all'})
-                        setSearch('')
-                        setStatusFilter('all')
-                      }}
-                      className="flex-1 gap-2"
-                    >
-                      <X className="w-3 h-3" />
-                      Limpiar todos
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            )}
-          </div>
-
-          {/* Mobile Filter Drawer - shows as compact modal on mobile/tablet */}
-          {showFilters && (
-            <div className="fixed lg:hidden inset-0 z-50 bg-black/50" onClick={() => setShowFilters(false)}>
-              <div className="fixed bottom-0 left-0 right-0 bg-background rounded-t-lg shadow-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                <div className="sticky top-0 bg-background border-b px-4 py-3 flex items-center justify-between">
-                  <h3 className="font-semibold">Filtros avanzados</h3>
-                  <Button variant="ghost" size="sm" onClick={() => setShowFilters(false)} className="h-8 w-8 p-0">
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="p-4 space-y-4">
-                  <div>
-                    <Label className="text-xs font-semibold mb-2 block">Iglesia</Label>
-                    <Select value={filters.churchId} onValueChange={(v) => setFilters({...filters, churchId: v})}>
-                      <SelectTrigger className="h-9">
-                        {filters.churchId ? <span>{getChurchName(filters.churchId)}</span> : <SelectValue placeholder="Todas" />}
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Todas las iglesias</SelectItem>
-                        {churches.map((c) => (
-                          <SelectItem key={c.id} value={c.id.toString()}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-2 block">Equipo</Label>
-                    <Select value={filters.teamId} onValueChange={(v) => setFilters({...filters, teamId: v})}>
-                      <SelectTrigger className="h-9">
-                        {filters.teamId ? <span>{getTeamName(filters.teamId)}</span> : <SelectValue placeholder="Todos" />}
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Todos los equipos</SelectItem>
-                        {teams.map((t) => (
-                          <SelectItem key={t.id} value={t.id.toString()}>
-                            {t.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-2 block">Habitación</Label>
-                    <Select value={filters.roomId} onValueChange={(v) => setFilters({...filters, roomId: v})}>
-                      <SelectTrigger className="h-9">
-                        {filters.roomId ? <span>{getRoomName(filters.roomId)}</span> : <SelectValue placeholder="Todas" />}
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Todas las habitaciones</SelectItem>
-                        {rooms.map((r) => (
-                          <SelectItem key={r.id} value={r.id.toString()}>
-                            {r.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-2 block">Check-in</Label>
-                    <Select value={filters.checkedIn} onValueChange={(v) => setFilters({...filters, checkedIn: v})}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Todos" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        <SelectItem value="yes">Check-in hecho</SelectItem>
-                        <SelectItem value="no">Sin check-in</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-2 block">Monto mínimo</Label>
-                    <Input
-                      type="number"
-                      value={filters.minAmount}
-                      onChange={(e) => setFilters({...filters, minAmount: e.target.value})}
-                      placeholder="$0"
-                      className="h-9"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold mb-2 block">Monto máximo</Label>
-                    <Input
-                      type="number"
-                      value={filters.maxAmount}
-                      onChange={(e) => setFilters({...filters, maxAmount: e.target.value})}
-                      placeholder="Sin límite"
-                      className="h-9"
-                    />
-                  </div>
-
-                  <div className="flex gap-2 pt-4 border-t">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        setFilters({churchId: '', teamId: '', roomId: '', minAmount: '', maxAmount: '', checkedIn: 'all'})
-                        setSearch('')
-                        setStatusFilter('all')
-                      }}
-                      className="flex-1 gap-2"
-                    >
-                      <X className="w-3 h-3" />
-                      Limpiar todos
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          <FilterPanel
+            filters={filterConfigs}
+            onFilterChange={(id, value) => setFilterConfigs(prev => prev.map(f => f.id === id ? {...f, value} : f))}
+            onClearAll={() => setFilterConfigs(prev => prev.map(f => ({...f, value: f.id === 'status' || f.id === 'checkedIn' ? 'all' : ''})))}
+            showMobile={true}
+          />
         </div>
       )}
+
 
       {/* Attendees List */}
       {loading ? (
