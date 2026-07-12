@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import {
-  Gauge3,
+  Gauge,
   ReceiptText,
   Layers,
   LogOut,
@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: Gauge3 },
+  { href: '/', label: 'Dashboard', icon: Gauge },
   { href: '/transactions', label: 'Transacciones', icon: ReceiptText },
   { href: '/categories', label: 'Categorías', icon: Layers },
 ]
@@ -99,7 +99,7 @@ export function Sidebar({ user }: SidebarProps) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-sidebar flex items-center justify-between px-4 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
-            <TrendingUp className="w-4 h-4 text-primary-foreground" />
+            <Compass className="w-4 h-4 text-primary-foreground" />
           </div>
           <span className="font-bold text-sidebar-foreground">FinanzApp</span>
         </div>
