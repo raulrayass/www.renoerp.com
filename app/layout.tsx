@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Permanece Camp - Control de Finanzas',
+  title: 'Permanece Camp',
   description: 'Control de ingresos y egresos del campamento Permanece Camp de Nueva Creacion. Registra comida, hospedaje, pago de camperos y mas.',
   generator: 'v0.app',
   icons: {
