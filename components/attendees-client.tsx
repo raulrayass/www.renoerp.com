@@ -1123,7 +1123,7 @@ export function AttendeesClient({ userId }: Props) {
                 >
                   <div className="min-w-0">
                     <p className="font-semibold text-sm">
-                      {formatMXN(parseFloat(payment.amount as string))} • {payment.paymentMethod === 'cash' ? 'Efectivo' : payment.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
+                      {formatMXN(parseFloat(payment.amount as string))} • {!payment.paymentMethod || payment.paymentMethod === 'cash' ? 'Efectivo' : payment.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(payment.paymentDate + 'T00:00:00').toLocaleDateString('es-MX', {
