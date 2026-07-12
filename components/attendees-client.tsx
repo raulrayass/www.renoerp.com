@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils'
 import { FilterPanel, type FilterConfig } from '@/components/filter-panel'
 import { SectionHeader } from '@/components/section-header'
 import { StatCard } from '@/components/stat-card'
+import { PageHeader } from '@/components/page-header'
 
 interface Props {
   userId: string
@@ -524,46 +525,41 @@ export function AttendeesClient({ userId }: Props) {
   const getRoomName = (id: string) => rooms.find(r => r.id === parseInt(id))?.name || ''
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+    <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-5 flex flex-col gap-4 max-w-7xl mx-auto w-full">
       {/* Header */}
-      <div className="flex flex-col gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Camperos</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Total: {filteredAttendees.length} / {attendeeList.length} | Pagados: {filteredAttendees.filter((a) => a.status === 'paid').length} | Check-in: {filteredAttendees.filter((a) => a.checkedIn).length}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs sm:text-sm hover:bg-slate-100">
-            <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Plantilla</span>
+      <PageHeader
+        title="Camperos"
+        description={`Total: ${filteredAttendees.length} / ${attendeeList.length} | Pagados: ${filteredAttendees.filter((a) => a.status === 'paid').length} | Check-in: ${filteredAttendees.filter((a) => a.checkedIn).length}`}
+      >
+        <Button onClick={downloadTemplate} variant="outline" size="xs" className="gap-1 text-xs">
+          <Download className="w-3 h-3" />
+          <span className="hidden sm:inline">Plantilla</span>
+        </Button>
+        <label className="relative inline-block">
+          <Button variant="outline" size="xs" className="gap-1 text-xs pointer-events-none">
+            <Upload className="w-3 h-3" />
+            <span className="hidden sm:inline">Importar</span>
           </Button>
-          <label className="relative inline-block">
-            <Button variant="outline" size="sm" className="gap-1 text-xs sm:text-sm hover:bg-slate-100 pointer-events-none">
-              <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Importar</span>
-            </Button>
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleImportExcel}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </label>
-          <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1 text-xs sm:text-sm hover:bg-slate-100">
-            <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Exportar</span>
-          </Button>
-          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1 text-xs sm:text-sm ml-auto bg-green-600 hover:bg-green-700 text-white">
-            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Agregar</span>
-          </Button>
-        </div>
-      </div>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleImportExcel}
+            className="absolute inset-0 opacity-0 cursor-pointer"
+          />
+        </label>
+        <Button onClick={exportCurrentData} variant="outline" size="xs" className="gap-1 text-xs">
+          <Download className="w-3 h-3" />
+          <span className="hidden sm:inline">Exportar</span>
+        </Button>
+        <Button onClick={() => setDialogOpen(true)} size="xs" className="gap-1 text-xs bg-green-600 hover:bg-green-700 text-white">
+          <Plus className="w-3 h-3" />
+          <span className="hidden sm:inline">Agregar</span>
+        </Button>
+      </PageHeader>
 
       {/* Summary Cards */}
       {!loading && attendeeList.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           <StatCard
             label="Esperado"
             value={formatMXN(summary.expected)}
@@ -594,8 +590,8 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Filters using FilterPanel component */}
       {!loading && attendeeList.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row gap-2">
+        <div className="space-y-2">
+          <div className="flex flex-col sm:flex-row gap-1.5">
             {/* Search input with icon */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

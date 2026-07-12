@@ -49,10 +49,10 @@ export function DashboardClient({ userId }: { userId: string }) {
 
   return (
     <div className="w-full h-full overflow-y-auto">
-      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
+      <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-5 flex flex-col gap-4 max-w-7xl mx-auto">
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <StatCard
           label="Balance Total"
           value={formatCurrency(balance)}
@@ -77,7 +77,7 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* Monthly chart + Expense pie */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <Card className="lg:col-span-2">
           <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-4">Ingresos vs Egresos por mes</h2>
           {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
@@ -172,7 +172,7 @@ export function DashboardClient({ userId }: { userId: string }) {
       </Card>
 
       {/* Income pie + Recent */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <Card>
           <h2 className="font-semibold text-foreground mb-1">Ingresos por categoria</h2>
           {incomeByCategory.length > 0 ? (
