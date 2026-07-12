@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { getDashboardData } from '@/app/actions/transactions'
-import { getChurchDistribution } from '@/app/actions/attendees'
+import { getChurchDistribution, getShirtSizeDistribution } from '@/app/actions/attendees'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -25,10 +25,12 @@ const EXPENSE_COLOR = '#f97316'
 export function DashboardClient({ userId }: { userId: string }) {
   const [data, setData] = useState<DashboardData | null>(null)
   const [churchData, setChurchData] = useState<any[]>([])
+  const [sizeData, setSizeData] = useState<any[]>([])
 
   useEffect(() => {
     getDashboardData(userId).then(setData)
     getChurchDistribution(userId).then(setChurchData)
+    getShirtSizeDistribution(userId).then(setSizeData)
   }, [userId])
 
   if (!data) {
@@ -232,6 +234,36 @@ export function DashboardClient({ userId }: { userId: string }) {
           ) : (
             <div className="text-center py-12 text-muted-foreground text-sm">
               No hay datos de iglesias. Verifica que los camperos tengan iglesia asignada.
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Shirt sizes distribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <Card>
+          <h2 className="font-semibold text-foreground mb-1">Distribución de Tallas</h2>
+          <p className="text-xs text-muted-foreground mb-4">Cantidad de camperos por talla de camiseta</p>
+          {sizeData && sizeData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={sizeData} barGap={2}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
+                <YAxis tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
+                <Tooltip
+                  formatter={(value: number) => `${value} camperos`}
+                  contentStyle={{ borderRadius: '8px', fontSize: '13px', border: '1px solid var(--border)' }}
+                />
+                <Bar dataKey="value" name="Camperos" radius={[4, 4, 0, 0]}>
+                  {sizeData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground text-sm">
+              No hay datos de tallas. Verifica que los camperos tengan talla asignada.
             </div>
           )}
         </Card>
