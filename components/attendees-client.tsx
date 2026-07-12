@@ -13,7 +13,7 @@ import {
   bulkCreateAttendees,
   toggleCheckIn,
 } from '@/app/actions/attendees'
-import { getChurches, initializeDefaultChurches } from '@/app/actions/churches'
+import { getChurches } from '@/app/actions/churches'
 import { getTeams } from '@/app/actions/teams'
 import { getRooms } from '@/app/actions/rooms'
 import { Attendee, AttendeePayment, Church, Team, Room } from '@/lib/db/schema'
@@ -95,14 +95,13 @@ export function AttendeesClient({ userId }: Props) {
   async function initializeDefaults() {
     setLoading(true)
     try {
-      await initializeDefaultChurches(userId)
+      await loadAttendees()
+      await loadChurches()
+      await loadTeams()
+      await loadRooms()
     } catch (error) {
-      console.error('Error initializing default churches:', error)
+      console.error('Error loading data:', error)
     }
-    await loadAttendees()
-    await loadChurches()
-    await loadTeams()
-    await loadRooms()
     setLoading(false)
   }
 
