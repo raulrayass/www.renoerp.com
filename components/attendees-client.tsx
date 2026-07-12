@@ -487,6 +487,11 @@ export function AttendeesClient({ userId }: Props) {
   const partialCount = attendeeList.filter((a) => a.status === 'partial').length
   const pendingCount = attendeeList.filter((a) => a.status === 'pending').length
 
+  // Helper functions to get display names from IDs
+  const getChurchName = (id: string) => churches.find(c => c.id === parseInt(id))?.name || ''
+  const getTeamName = (id: string) => teams.find(t => t.id === parseInt(id))?.name || ''
+  const getRoomName = (id: string) => rooms.find(r => r.id === parseInt(id))?.name || ''
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
       {/* Header */}
@@ -602,7 +607,7 @@ export function AttendeesClient({ userId }: Props) {
                     <Label className="text-xs font-semibold mb-1.5 block">Iglesia</Label>
                     <Select value={filters.churchId} onValueChange={(v) => setFilters({...filters, churchId: v})}>
                       <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Todas" />
+                        {filters.churchId ? <span>{getChurchName(filters.churchId)}</span> : <SelectValue placeholder="Todas" />}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Todas las iglesias</SelectItem>
@@ -619,7 +624,7 @@ export function AttendeesClient({ userId }: Props) {
                     <Label className="text-xs font-semibold mb-1.5 block">Equipo</Label>
                     <Select value={filters.teamId} onValueChange={(v) => setFilters({...filters, teamId: v})}>
                       <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Todos" />
+                        {filters.teamId ? <span>{getTeamName(filters.teamId)}</span> : <SelectValue placeholder="Todos" />}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Todos los equipos</SelectItem>
