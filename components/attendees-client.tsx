@@ -11,6 +11,7 @@ import {
   deleteAttendeePayment,
   getAttendeePayments,
   bulkCreateAttendees,
+  bulkDeleteAttendees,
   toggleCheckIn,
 } from '@/app/actions/attendees'
 import { getChurches, initializeDefaultChurches } from '@/app/actions/churches'
@@ -27,7 +28,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Trash } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -87,6 +89,8 @@ export function AttendeesClient({ userId }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [churchFilter, setChurchFilter] = useState('')
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
 
   useEffect(() => {
     initializeDefaults()
@@ -240,6 +244,44 @@ export function AttendeesClient({ userId }: Props) {
     })
   }
 
+  function toggleSelectAll() {
+    if (selectedIds.size === filteredAttendees.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filteredAttendees.map((a) => a.id)))
+    }
+  }
+
+  function toggleSelectId(id: number) {
+    const newSet = new Set(selectedIds)
+    if (newSet.has(id)) {
+      newSet.delete(id)
+    } else {
+      newSet.add(id)
+    }
+    setSelectedIds(newSet)
+  }
+
+  async function handleBulkDelete() {
+    if (selectedIds.size === 0) {
+      toast.error('Selecciona al menos un campero')
+      return
+    }
+
+    startTransition(async () => {
+      try {
+        await bulkDeleteAttendees(userId, Array.from(selectedIds))
+        toast.success(`${selectedIds.size} camperos eliminados`)
+        setSelectedIds(new Set())
+        setBulkDeleteDialogOpen(false)
+        await loadAttendees()
+      } catch (error) {
+        toast.error('Error al eliminar los camperos')
+        console.error(error)
+      }
+    })
+  }
+
   async function handleToggleCheckIn(attendee: Attendee) {
     const next = !attendee.checkedIn
     startTransition(async () => {
@@ -374,18 +416,33 @@ export function AttendeesClient({ userId }: Props) {
         }))
 
         // Validar solo campos requeridos: nombre y monto total
-        if (
-          attendeesToImport.every(
-            (a) =>
-              a.name && // Nombre es requerido
-              a.totalAmount > 0 // Monto total es requerido y debe ser > 0
-          )
-        ) {
-          await bulkCreateAttendees(userId, attendeesToImport)
-          toast.success(`${attendeesToImport.length} camperos importados correctamente`)
-          await loadAttendees()
-        } else {
+        const validAttendees = attendeesToImport.filter(
+          (a) =>
+            a.name && // Nombre es requerido
+            a.totalAmount > 0 // Monto total es requerido y debe ser > 0
+        )
+
+        if (validAttendees.length === 0) {
           toast.error('Verifica que todos los registros tengan Nombre y Monto Total válidos.')
+          return
+        }
+
+        try {
+          await bulkCreateAttendees(userId, validAttendees)
+          const skipped = attendeesToImport.length - validAttendees.length
+          if (skipped > 0) {
+            toast.success(`${validAttendees.length} camperos importados. ${skipped} registros omitidos (duplicados o inválidos).`)
+          } else {
+            toast.success(`${validAttendees.length} camperos importados correctamente`)
+          }
+          await loadAttendees()
+        } catch (importError: any) {
+          if (importError.message?.includes('ya existen')) {
+            toast.error('Algunos camperos ya existen. Se importaron solo los nuevos.')
+            await loadAttendees()
+          } else {
+            toast.error('Error al importar: ' + (importError.message || 'Error desconocido'))
+          }
         }
       }
       reader.readAsBinaryString(file)
@@ -479,7 +536,7 @@ export function AttendeesClient({ userId }: Props) {
       {/* Header */}
       <PageHeader
         title="Camperos"
-        description={`Total: ${attendeeList.length} | Pagados: ${paidCount} | Check-in: ${checkedInCount}`}
+        description={`Total: ${attendeeList.length} | Pagados: ${paidCount} | Check-in: ${checkedInCount}${selectedIds.size > 0 ? ` | Seleccionados: ${selectedIds.size}` : ''}`}
       >
         <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs">
           <Download className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -501,6 +558,12 @@ export function AttendeesClient({ userId }: Props) {
           <Download className="w-3 h-3 sm:w-4 sm:h-4" />
           <span>Exportar</span>
         </Button>
+        {selectedIds.size > 0 && (
+          <Button onClick={() => setBulkDeleteDialogOpen(true)} variant="destructive" size="sm" className="gap-1 text-xs">
+            <Trash className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span>Eliminar ({selectedIds.size})</span>
+          </Button>
+        )}
         <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1 text-xs bg-green-600 hover:bg-green-700 text-white">
           <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
           <span>Agregar</span>
@@ -602,11 +665,17 @@ export function AttendeesClient({ userId }: Props) {
               const percentage = (paid / total) * 100
 
               return (
-                <Card key={attendee.id} className="overflow-hidden">
+                <Card key={attendee.id} className={`overflow-hidden transition-colors ${selectedIds.has(attendee.id) ? 'bg-blue-50 border-blue-200' : ''}`}>
                   <CardContent className="p-3 sm:p-6">
                     <div className="flex flex-col gap-3">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-2 flex-1 min-w-0">
+                          <Checkbox
+                            checked={selectedIds.has(attendee.id)}
+                            onCheckedChange={() => toggleSelectId(attendee.id)}
+                            className="mt-1 shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="font-semibold text-sm sm:text-base truncate">{attendee.name}</h3>
                             <Badge
@@ -1152,6 +1221,22 @@ export function AttendeesClient({ userId }: Props) {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Bulk Delete Dialog */}
+      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar {selectedIds.size} campero(s)</AlertDialogTitle>
+            <AlertDialogDescription>
+              Estás a punto de eliminar {selectedIds.size} campero(s). Esta acción no se puede deshacer. Se eliminarán todos los registros de pagos asociados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogAction onClick={handleBulkDelete} disabled={isPending} className="bg-destructive hover:bg-destructive/90 text-white">
+            {isPending ? 'Eliminando...' : 'Eliminar'}
+          </AlertDialogAction>
+          <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -295,11 +295,29 @@ export async function bulkCreateAttendees(
 ) {
   if (attendeesList.length === 0) return
 
+  // Get existing attendees to avoid duplicates
+  const existingAttendees = await db
+    .select({ id: attendees.id, name: attendees.name, phone: attendees.phone })
+    .from(attendees)
+    .where(eq(attendees.userId, userId))
+
+  const existingSet = new Set(existingAttendees.map((a) => `${a.name.trim().toLowerCase()}-${a.phone?.trim().toLowerCase()}`))
+
+  // Filter out duplicates
+  const uniqueAttendees = attendeesList.filter((a) => {
+    const key = `${a.name.trim().toLowerCase()}-${a.phone?.trim().toLowerCase()}`
+    return !existingSet.has(key)
+  })
+
+  if (uniqueAttendees.length === 0) {
+    throw new Error('Todos los camperos ya existen en la base de datos')
+  }
+
   // Insert attendees
   const createdAttendees = await db
     .insert(attendees)
     .values(
-      attendeesList.map((a) => ({
+      uniqueAttendees.map((a) => ({
         userId,
         name: a.name.trim(),
         age: a.age ?? null,
@@ -335,14 +353,14 @@ export async function bulkCreateAttendees(
   // Create transactions for initial payments
   const transactionsToInsert: any[] = []
   for (let i = 0; i < createdAttendees.length; i++) {
-    const initialPayment = parseFloat((attendeesList[i].initialPayment || 0).toString())
+    const initialPayment = parseFloat((uniqueAttendees[i].initialPayment || 0).toString())
     if (initialPayment > 0) {
       transactionsToInsert.push({
         userId,
         categoryId: campPaymentCat.id,
         type: 'income',
         amount: initialPayment,
-        description: `Pago inicial de ${attendeesList[i].name}`,
+        description: `Pago inicial de ${uniqueAttendees[i].name}`,
         date: new Date().toISOString().split('T')[0],
       })
     }
@@ -350,6 +368,45 @@ export async function bulkCreateAttendees(
 
   if (transactionsToInsert.length > 0) {
     await db.insert(transactions).values(transactionsToInsert)
+  }
+}
+
+export async function bulkDeleteAttendees(userId: string, attendeeIds: number[]) {
+  if (attendeeIds.length === 0) return
+
+  // Delete all payments and transactions for these attendees
+  const payments = await db
+    .select()
+    .from(attendeePayments)
+    .where(and(eq(attendeePayments.userId, userId)))
+
+  const paymentsToDelete = payments.filter((p) => attendeeIds.includes(p.attendeeId))
+
+  for (const payment of paymentsToDelete) {
+    await db
+      .delete(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          eq(transactions.type, 'income'),
+          eq(transactions.amount, payment.amount)
+        )
+      )
+  }
+
+  // Delete all payments for these attendees
+  await db
+    .delete(attendeePayments)
+    .where(
+      and(
+        eq(attendeePayments.userId, userId),
+        // Use a filter condition to match any of the attendee IDs
+      )
+    )
+
+  // Delete attendees
+  for (const id of attendeeIds) {
+    await db.delete(attendees).where(and(eq(attendees.userId, userId), eq(attendees.id, id)))
   }
 }
 
