@@ -72,17 +72,19 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* User area */}
       <div className="px-3 py-4 border-t border-sidebar-border">
-        <div className="px-3 py-2 mb-2">
-          <p className="text-sm font-medium text-sidebar-foreground truncate">{user.name}</p>
-          <p className="text-xs text-sidebar-foreground/50 truncate">{user.email}</p>
+        <div className="px-3 py-2.5 mb-3 bg-sidebar-accent/40 rounded-lg">
+          <p className="text-sm font-semibold text-sidebar-foreground truncate">{user.name}</p>
+          <p className="text-xs text-sidebar-foreground/60 truncate mt-0.5">{user.email}</p>
         </div>
         <Button
           variant="ghost"
-          className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 group"
           onClick={handleSignOut}
         >
-          <LogOut className="w-4 h-4" />
-          Cerrar sesión
+          <div className="w-4 h-4 flex items-center justify-center rounded bg-destructive/5 group-hover:bg-destructive/15 transition-colors duration-200">
+            <LogOut className="w-3.5 h-3.5" />
+          </div>
+          <span className="font-medium group-hover:font-semibold transition-all">Cerrar sesión</span>
         </Button>
       </div>
     </div>

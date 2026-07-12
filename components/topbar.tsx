@@ -78,29 +78,31 @@ export function Topbar() {
           {/* User area */}
           {user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-muted transition-colors">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary via-primary to-primary/70 flex items-center justify-center shrink-0 shadow-md border border-primary/20">
+              <DropdownMenuTrigger className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-all duration-200 group">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/80 to-primary/60 flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md group-hover:from-primary group-hover:to-primary/70 transition-all duration-200">
                   <User className="w-4 h-4 text-primary-foreground" />
                 </div>
                 <span className="hidden sm:block truncate text-foreground text-sm font-medium max-w-[120px]">
                   {user.name || user.email?.split('@')[0] || 'Usuario'}
                 </span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 mt-2">
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel className="font-normal py-2">
-                    <p className="text-xs text-muted-foreground">Sesión activa</p>
-                    <p className="text-sm font-semibold text-foreground truncate">{user.email}</p>
+                  <DropdownMenuLabel className="font-normal px-2 py-3 bg-muted/30 rounded-t-lg">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sesión activa</p>
+                    <p className="text-sm font-semibold text-foreground truncate mt-1">{user.email}</p>
                   </DropdownMenuLabel>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="my-2" />
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     onClick={signOut}
-                    className="text-destructive focus:text-destructive focus:bg-destructive/10 gap-2 cursor-pointer"
+                    className="text-destructive/80 focus:text-destructive focus:bg-destructive/5 hover:bg-destructive/5 gap-2.5 cursor-pointer py-2.5 px-3 transition-all duration-200 group/logout"
                   >
-                    <LogOut className="w-4 h-4" />
-                    Cerrar sesión
+                    <div className="w-3.5 h-3.5 flex items-center justify-center rounded-md bg-destructive/10 group-hover/logout:bg-destructive/15">
+                      <LogOut className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="font-medium">Cerrar sesión</span>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
