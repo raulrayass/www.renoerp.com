@@ -104,6 +104,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
       description: t.description,
       date: t.date,
       categoryId: String(t.categoryId),
+      paymentMethod: t.paymentMethod || 'cash',
     })
     setDialogOpen(true)
   }
@@ -327,7 +328,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
                       <span className="text-sm text-foreground">
-                        {t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
+                        {!t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
