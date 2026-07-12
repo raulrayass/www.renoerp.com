@@ -37,6 +37,7 @@ const defaultForm = {
   description: '',
   date: new Date().toISOString().split('T')[0],
   categoryId: '',
+  paymentMethod: 'cash',
 }
 
 export function TransactionsClient({ userId }: { userId: string }) {
@@ -136,6 +137,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
             amount: form.amount,
             description: form.description,
             date: form.date,
+            paymentMethod: form.paymentMethod,
           })
           toast.success('Transacción actualizada')
         } else {
@@ -145,6 +147,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
             amount: form.amount,
             description: form.description,
             date: form.date,
+            paymentMethod: form.paymentMethod,
           })
           toast.success('Transacción registrada')
         }
@@ -420,6 +423,19 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 <Label htmlFor="date">Fecha</Label>
                 <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
               </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Método de Pago</Label>
+              <Select value={form.paymentMethod} onValueChange={(v) => setForm({ ...form, paymentMethod: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Efectivo</SelectItem>
+                  <SelectItem value="digital">Digital</SelectItem>
+                  <SelectItem value="mobile">Banca Móvil</SelectItem>
+                  <SelectItem value="card">Tarjeta</SelectItem>
+                  <SelectItem value="other">Otro</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex justify-end gap-2 mt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="hover:bg-slate-100">Cancelar</Button>

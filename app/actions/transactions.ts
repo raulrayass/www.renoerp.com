@@ -142,9 +142,9 @@ export async function getDashboardData(userId: string) {
 
 export async function createTransaction(
   userId: string,
-  data: { categoryId: number; type: string; amount: string; description: string; date: string }
+  data: { categoryId: number; type: string; amount: string; description: string; date: string; paymentMethod?: string }
 ) {
-  await db.insert(transactions).values({ userId, ...data })
+  await db.insert(transactions).values({ userId, ...data, paymentMethod: data.paymentMethod || 'cash' })
   revalidatePath('/')
   revalidatePath('/transactions')
 }
@@ -152,11 +152,11 @@ export async function createTransaction(
 export async function updateTransaction(
   userId: string,
   id: number,
-  data: { categoryId: number; type: string; amount: string; description: string; date: string }
+  data: { categoryId: number; type: string; amount: string; description: string; date: string; paymentMethod?: string }
 ) {
   await db
     .update(transactions)
-    .set({ ...data, updatedAt: new Date() })
+    .set({ ...data, paymentMethod: data.paymentMethod || 'cash', updatedAt: new Date() })
     .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
   revalidatePath('/')
   revalidatePath('/transactions')
