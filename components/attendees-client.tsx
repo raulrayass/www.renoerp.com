@@ -27,7 +27,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck } from 'lucide-react'
+import { Plus, Trash2, Banknote, Upload, Download, Pencil, Users2, Clock, Search, CheckCircle2, Circle, Banknote as PaymentIcon, UserCheck } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -512,19 +512,19 @@ export function AttendeesClient({ userId }: Props) {
             label="Esperado"
             value={formatMXN(summary.expected)}
             color="blue"
-            icon={DollarSign}
+            icon={Banknote}
           />
           <StatCard
             label="Recaudado"
             value={formatMXN(summary.collected)}
             color="green"
-            icon={CreditCard}
+            icon={PaymentIcon}
           />
           <StatCard
             label="Pendiente"
             value={formatMXN(pendingAmount)}
             color="red"
-            icon={History}
+            icon={Clock}
           />
           <StatCard
             label="Check-in"
@@ -677,16 +677,10 @@ export function AttendeesClient({ userId }: Props) {
                             className="h-8 w-8 p-0"
                             title="Registrar pago"
                           >
-                            <DollarSign className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            onClick={() => openHistory(attendee.id)}
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0 hover:bg-accent/15"
-                            title="Ver historial de pagos"
-                          >
-                            <History className="w-4 h-4 text-accent" />
+              <Banknote className="w-4 h-4" />
+              Pagar</Button>
+            <Button onClick={() => openHistory(attendee.id)} variant="outline" size="sm" className="gap-1">
+              <Clock className="w-4 h-4 text-accent" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -715,7 +709,7 @@ export function AttendeesClient({ userId }: Props) {
                             className="h-8 w-8 p-0 hover:bg-blue-100"
                             title="Editar campero"
                           >
-                            <Edit2 className="w-4 h-4 text-blue-600" />
+                            <Pencil className="w-4 h-4 text-blue-600" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -1086,7 +1080,7 @@ export function AttendeesClient({ userId }: Props) {
             </div>
           ) : paymentHistory.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <History className="w-10 h-10 text-muted-foreground/40" />
+                  <Clock className="w-10 h-10 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">Aún no hay abonos registrados</p>
             </div>
           ) : (
