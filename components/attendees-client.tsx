@@ -345,41 +345,76 @@ export function AttendeesClient({ userId }: Props) {
       'Habitación',
       'Monto Total ($)',
       'Pago Inicial ($)',
-      'Estado',
-      'Check-in',
       'Notas',
     ]
 
-    // Descargar template vacío con una fila de ejemplo
+    // Template con instrucciones en comentarios
     const rows = [
       headers,
       [
-        'Nombre completo',
+        'Juan Pérez',
         '18',
-        'M',
+        'Hombre',
         'M',
         '3326094596',
-        'Nombre iglesia',
-        'Contacto emergencia',
-        '3326094596',
+        'Iglesia Central',
+        'María García',
+        '3327654321',
         '',
         '',
+        'Ninguna',
         '',
-        'Nombre equipo',
-        'Nombre habitación',
+        '',
         '1000',
-        '0',
-        'Pendiente',
-        'No',
+        '500',
         '',
+      ],
+      [
+        'María López',
+        '17',
+        'Mujer',
+        'S',
+        '3321234567',
+        'Iglesia de la Paz',
+        'Carlos López',
+        '3329876543',
+        'Patricia López',
+        '3325555555',
+        'Alergia a mariscos',
+        '',
+        '',
+        '800',
+        '0',
+        'Será contactado',
       ],
     ]
 
     const ws = XLSX.utils.aoa_to_sheet(rows)
+    
+    // Establecer ancho de columnas
+    ws['!cols'] = [
+      { wch: 20 }, // Nombre
+      { wch: 8 },  // Edad
+      { wch: 12 }, // Sexo
+      { wch: 14 }, // Talla Camisa
+      { wch: 14 }, // Teléfono
+      { wch: 18 }, // Iglesia
+      { wch: 20 }, // Contacto Emergencia 1
+      { wch: 14 }, // Teléfono Emergencia 1
+      { wch: 20 }, // Contacto Emergencia 2
+      { wch: 14 }, // Teléfono Emergencia 2
+      { wch: 18 }, // Alergias
+      { wch: 14 }, // Equipo
+      { wch: 14 }, // Habitación
+      { wch: 12 }, // Monto Total
+      { wch: 12 }, // Pago Inicial
+      { wch: 20 }, // Notas
+    ]
+    
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Camperos')
     XLSX.writeFile(wb, 'Plantilla_Camperos.xlsx')
-    toast.success('Plantilla descargada')
+    toast.success('Plantilla descargada - Completa los datos y sube el archivo')
   }
 
   async function handleImportExcel(e: React.ChangeEvent<HTMLInputElement>) {
@@ -431,17 +466,26 @@ export function AttendeesClient({ userId }: Props) {
           await bulkCreateAttendees(userId, validAttendees)
           const skipped = attendeesToImport.length - validAttendees.length
           if (skipped > 0) {
-            toast.success(`${validAttendees.length} camperos importados. ${skipped} registros omitidos (duplicados o inválidos).`)
+            toast.success(`${validAttendees.length} camperos importados. ${skipped} registros omitidos (inválidos).`)
           } else {
             toast.success(`${validAttendees.length} camperos importados correctamente`)
           }
           await loadAttendees()
         } catch (importError: any) {
-          if (importError.message?.includes('ya existen')) {
-            toast.error('Algunos camperos ya existen. Se importaron solo los nuevos.')
+          const errorMsg = importError.message || 'Error desconocido'
+          if (errorMsg.includes('ya existen')) {
+            // Extract duplicate names from error message
+            const duplicates = errorMsg.split(': ')[1] || ''
+            if (duplicates) {
+              toast.error(`Duplicados encontrados: ${duplicates}\n\nElimina estos nombres del archivo e intenta nuevamente.`)
+            } else {
+              toast.error('Algunos camperos ya existen en la base de datos. Verifica que los nombres no se repitan.')
+            }
             await loadAttendees()
+          } else if (errorMsg.includes('Todos los camperos ya existen')) {
+            toast.error('Todos estos camperos ya están registrados. Verifica el archivo e intenta con datos nuevos.')
           } else {
-            toast.error('Error al importar: ' + (importError.message || 'Error desconocido'))
+            toast.error('Error al importar: ' + errorMsg)
           }
         }
       }

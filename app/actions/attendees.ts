@@ -295,22 +295,28 @@ export async function bulkCreateAttendees(
 ) {
   if (attendeesList.length === 0) return
 
-  // Get existing attendees to avoid duplicates
+  // Get existing attendees to avoid duplicates (by name only - most reliable identifier)
   const existingAttendees = await db
-    .select({ id: attendees.id, name: attendees.name, phone: attendees.phone })
+    .select({ id: attendees.id, name: attendees.name })
     .from(attendees)
     .where(eq(attendees.userId, userId))
 
-  const existingSet = new Set(existingAttendees.map((a) => `${a.name.trim().toLowerCase()}-${a.phone?.trim().toLowerCase()}`))
+  const existingNameSet = new Set(existingAttendees.map((a) => a.name.trim().toLowerCase()))
+  const duplicatesInList = new Set<string>()
 
-  // Filter out duplicates
+  // Filter out duplicates and track them
   const uniqueAttendees = attendeesList.filter((a) => {
-    const key = `${a.name.trim().toLowerCase()}-${a.phone?.trim().toLowerCase()}`
-    return !existingSet.has(key)
+    const nameLower = a.name.trim().toLowerCase()
+    if (existingNameSet.has(nameLower)) {
+      duplicatesInList.add(a.name)
+      return false
+    }
+    return true
   })
 
   if (uniqueAttendees.length === 0) {
-    throw new Error('Todos los camperos ya existen en la base de datos')
+    const duplicatesList = Array.from(duplicatesInList).join(', ')
+    throw new Error(`Todos los camperos ya existen: ${duplicatesList}`)
   }
 
   // Insert attendees
