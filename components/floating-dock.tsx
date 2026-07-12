@@ -2,18 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ArrowLeftRight, Tag, Users, Church, Zap, Home, Trophy } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { LineChart, CreditCard, Layers, Users, Building, Briefcase, Package, Trophy } from 'lucide-react'
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/', label: 'Dashboard', icon: LineChart },
   { href: '/attendees', label: 'Camperos', icon: Users },
-  { href: '/teams', label: 'Equipos', icon: Zap },
-  { href: '/rooms', label: 'Habitaciones', icon: Home },
+  { href: '/teams', label: 'Equipos', icon: Briefcase },
+  { href: '/rooms', label: 'Habitaciones', icon: Package },
   { href: '/games', label: 'Juegos', icon: Trophy },
-  { href: '/churches', label: 'Iglesias', icon: Church },
-  { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
-  { href: '/categories', label: 'Categorías', icon: Tag },
+  { href: '/churches', label: 'Iglesias', icon: Building },
+  { href: '/transactions', label: 'Transacciones', icon: CreditCard },
+  { href: '/categories', label: 'Categorías', icon: Layers },
 ]
 
 export function FloatingDock() {
