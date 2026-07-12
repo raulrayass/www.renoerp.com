@@ -5,11 +5,11 @@ import { usePathname, useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import {
-  Gauge,
-  ReceiptText,
-  Layers,
+  LayoutDashboard,
+  ArrowLeftRight,
+  Tag,
   LogOut,
-  Compass,
+  TrendingUp,
   Menu,
   X,
 } from 'lucide-react'
@@ -17,9 +17,9 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: Gauge },
-  { href: '/transactions', label: 'Transacciones', icon: ReceiptText },
-  { href: '/categories', label: 'Categorías', icon: Layers },
+  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
+  { href: '/categories', label: 'Categorías', icon: Tag },
 ]
 
 interface SidebarProps {
@@ -42,7 +42,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Logo */}
       <div className="px-6 py-5 flex items-center gap-3 border-b border-sidebar-border">
         <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
-          <Compass className="w-5 h-5 text-primary-foreground" />
+          <TrendingUp className="w-5 h-5 text-primary-foreground" />
         </div>
         <span className="text-lg font-bold text-sidebar-foreground">FinanzApp</span>
       </div>
@@ -99,7 +99,7 @@ export function Sidebar({ user }: SidebarProps) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-sidebar flex items-center justify-between px-4 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
-            <Compass className="w-4 h-4 text-primary-foreground" />
+            <TrendingUp className="w-4 h-4 text-primary-foreground" />
           </div>
           <span className="font-bold text-sidebar-foreground">FinanzApp</span>
         </div>
