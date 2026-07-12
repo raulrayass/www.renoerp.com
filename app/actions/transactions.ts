@@ -129,27 +129,28 @@ export async function getDashboardData(userId: string) {
     color: incomeByCat[name]?.color ?? expenseByCat[name]?.color ?? '#888',
   })).sort((a, b) => (b.income + b.expense) - (a.income + a.expense))
 
-  // Payment method breakdown
+  // Payment method breakdown (available balance per method)
   const paymentMethodBreakdown = {
-    cash: { total: 0, income: 0, expense: 0 },
-    transfer: { total: 0, income: 0, expense: 0 },
-    deposit: { total: 0, income: 0, expense: 0 },
+    cash: { available: 0, income: 0, expense: 0 },
+    transfer: { available: 0, income: 0, expense: 0 },
+    deposit: { available: 0, income: 0, expense: 0 },
   }
 
   allTransactions.forEach((t) => {
     const method = (t.paymentMethod || 'cash') as keyof typeof paymentMethodBreakdown
     const amount = parseFloat(t.amount as string)
     if (method in paymentMethodBreakdown) {
-      paymentMethodBreakdown[method].total += amount
       if (t.type === 'income') {
         paymentMethodBreakdown[method].income += amount
+        paymentMethodBreakdown[method].available += amount
       } else {
         paymentMethodBreakdown[method].expense += amount
+        paymentMethodBreakdown[method].available -= amount
       }
     }
   })
 
-  const mobileBanking = paymentMethodBreakdown.transfer.total + paymentMethodBreakdown.deposit.total
+  const mobileBanking = paymentMethodBreakdown.transfer.available + paymentMethodBreakdown.deposit.available
 
   return {
     totalIncome,
