@@ -114,25 +114,16 @@ export function AttendeesClient({ userId }: Props) {
   async function loadChurches() {
     const data = await getChurches(userId)
     setChurches(data)
-    setFilterConfigs(prev => prev.map(f => f.id === 'churchId' ? {
-      ...f, options: [{ value: '', label: 'Todas las iglesias' }, ...data.map(c => ({ value: c.id.toString(), label: c.name }))]
-    } : f))
   }
 
   async function loadTeams() {
     const data = await getTeams(userId)
     setTeams(data)
-    setFilterConfigs(prev => prev.map(f => f.id === 'teamId' ? {
-      ...f, options: [{ value: '', label: 'Todos los equipos' }, ...data.map(t => ({ value: t.id.toString(), label: t.name }))]
-    } : f))
   }
 
   async function loadRooms() {
     const data = await getRooms(userId)
     setRooms(data)
-    setFilterConfigs(prev => prev.map(f => f.id === 'roomId' ? {
-      ...f, options: [{ value: '', label: 'Todas las habitaciones' }, ...data.map(r => ({ value: r.id.toString(), label: r.name }))]
-    } : f))
   }
 
   async function handleSubmit(e: React.FormEvent) {
