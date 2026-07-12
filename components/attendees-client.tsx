@@ -87,6 +87,10 @@ export function AttendeesClient({ userId }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [churchFilter, setChurchFilter] = useState('')
+  const [teamFilter, setTeamFilter] = useState('')
+  const [roomFilter, setRoomFilter] = useState('')
+  const [minAmount, setMinAmount] = useState('')
+  const [maxAmount, setMaxAmount] = useState('')
 
   useEffect(() => {
     initializeDefaults()
@@ -448,7 +452,19 @@ export function AttendeesClient({ userId }: Props) {
     // Church quick filter
     const matchesChurch = !churchFilter || a.church === churches.find(c => c.id === parseInt(churchFilter))?.name
 
-    return matchesSearch && matchesStatus && matchesChurch
+    // Team filter
+    const matchesTeam = !teamFilter || a.teamId === parseInt(teamFilter)
+
+    // Room filter
+    const matchesRoom = !roomFilter || a.roomId === parseInt(roomFilter)
+
+    // Amount range filter
+    const amount = parseFloat(a.totalAmount as string)
+    const min = minAmount ? parseFloat(minAmount) : 0
+    const max = maxAmount ? parseFloat(maxAmount) : Infinity
+    const matchesAmount = amount >= min && amount <= max
+
+    return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom && matchesAmount
   })
 
   // Calculate totals based on ALL attendees (not filtered)
@@ -547,10 +563,24 @@ export function AttendeesClient({ userId }: Props) {
           churchFilter={churchFilter}
           onChurchChange={setChurchFilter}
           churches={churches}
+          teamFilter={teamFilter}
+          onTeamChange={setTeamFilter}
+          teams={teams}
+          roomFilter={roomFilter}
+          onRoomChange={setRoomFilter}
+          rooms={rooms}
+          minAmount={minAmount}
+          onMinAmountChange={setMinAmount}
+          maxAmount={maxAmount}
+          onMaxAmountChange={setMaxAmount}
           onClearFilters={() => {
             setSearch('')
             setStatusFilter('all')
             setChurchFilter('')
+            setTeamFilter('')
+            setRoomFilter('')
+            setMinAmount('')
+            setMaxAmount('')
           }}
         />
       )}
