@@ -89,7 +89,7 @@ export function Topbar() {
               <DropdownMenuContent align="end" className="w-56 mt-2">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel className="font-normal px-2 py-3 bg-muted/30 rounded-t-lg">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sesión activa</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide"></p>
                     <p className="text-sm font-semibold text-foreground truncate mt-1">{user.email}</p>
                   </DropdownMenuLabel>
                 </DropdownMenuGroup>
