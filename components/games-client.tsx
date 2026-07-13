@@ -170,9 +170,9 @@ export function GamesClient({ userId }: Props) {
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Juegos y Puntaje</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-              Total: {gameList.length} juegos
+          <h1 className="text-2xl sm:text-3xl font-bold">Juegos y Puntaje</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
+            Total: {gameList.length} juegos
           </p>
         </div>
         <Button onClick={() => setDialogOpen(true)} className="gap-2">
@@ -480,13 +480,16 @@ export function GamesClient({ userId }: Props) {
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-4 border-t">
             <AlertDialogCancel className="px-4">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white px-4">
+            <AlertDialogAction onClick={() => {
+              if (deletingId) {
+                handleDelete(deletingId)
+              }
+            }} className="bg-red-600 hover:bg-red-700 text-white px-4">
               {isPending ? 'Eliminando...' : 'Eliminar'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      </div>
     </div>
   )
 }
