@@ -599,7 +599,7 @@ export function AttendeesClient({ userId }: Props) {
           onTeamChange={setTeamFilter}
           teams={teams}
           roomFilter={roomFilter}
-          onRoomChange={setRoomChange}
+          onRoomChange={setRoomFilter}
           rooms={rooms}
           onClearFilters={() => {
             setSearch('')
