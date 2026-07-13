@@ -20,10 +20,6 @@ export interface SmartFilterProps {
   roomFilter?: string
   onRoomChange?: (value: string) => void
   rooms?: Array<{ id: number; name: string }>
-  minAmount?: string
-  onMinAmountChange?: (value: string) => void
-  maxAmount?: string
-  onMaxAmountChange?: (value: string) => void
   onClearFilters: () => void
 }
 
@@ -41,10 +37,6 @@ export function SmartFilter({
   roomFilter,
   onRoomChange,
   rooms = [],
-  minAmount,
-  onMinAmountChange,
-  maxAmount,
-  onMaxAmountChange,
   onClearFilters,
 }: SmartFilterProps) {
   const activeFiltersCount = [
@@ -53,7 +45,6 @@ export function SmartFilter({
     churchFilter ? 1 : 0,
     teamFilter ? 1 : 0,
     roomFilter ? 1 : 0,
-    minAmount || maxAmount ? 1 : 0,
   ].reduce((a, b) => a + b, 0)
 
   return (
@@ -173,26 +164,6 @@ export function SmartFilter({
           </Select>
         )}
       </div>
-
-      {/* Amount range filter */}
-      {(onMinAmountChange || onMaxAmountChange) && (
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            type="number"
-            placeholder="Monto mín"
-            value={minAmount || ''}
-            onChange={(e) => onMinAmountChange?.(e.target.value)}
-            className="h-9 text-xs"
-          />
-          <Input
-            type="number"
-            placeholder="Monto máx"
-            value={maxAmount || ''}
-            onChange={(e) => onMaxAmountChange?.(e.target.value)}
-            className="h-9 text-xs"
-          />
-        </div>
-      )}
 
       {/* Active filters indicator */}
       {activeFiltersCount > 0 && (
