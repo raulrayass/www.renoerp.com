@@ -599,7 +599,7 @@ export function AttendeesClient({ userId }: Props) {
           onTeamChange={setTeamFilter}
           teams={teams}
           roomFilter={roomFilter}
-          onRoomChange={setRoomFilter}
+          onRoomChange={setRoomChange}
           rooms={rooms}
           onClearFilters={() => {
             setSearch('')
@@ -1223,10 +1223,16 @@ export function AttendeesClient({ userId }: Props) {
               Estás a punto de eliminar {selectedIds.size} campero(s). Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogAction onClick={handleBulkDelete} disabled={isPending} className="bg-destructive hover:bg-destructive/90 text-white">
-            {isPending ? 'Eliminando...' : 'Eliminar'}
-          </AlertDialogAction>
-          <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleBulkDelete} 
+              disabled={isPending}
+              className="bg-destructive hover:bg-destructive/90 text-white"
+            >
+              {isPending ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>
