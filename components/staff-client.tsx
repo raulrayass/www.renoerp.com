@@ -13,7 +13,7 @@ import {
   bulkCreateStaff,
   bulkDeleteStaff,
 } from '@/app/actions/staff'
-import { getAllChurches } from '@/app/actions/churches'
+import { getChurches } from '@/app/actions/churches'
 import { getTeams } from '@/app/actions/teams'
 import { getRooms } from '@/app/actions/rooms'
 import { Staff, StaffPayment, Church, Team, Room } from '@/lib/db/schema'
@@ -106,7 +106,7 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function loadChurches() {
-    const data = await getAllChurches(userId)
+    const data = await getChurches(userId)
     setChurches(data)
   }
 
@@ -142,18 +142,12 @@ export function StaffClient({ userId }: Props) {
 
     const payload = {
       name: form.name,
-      age: form.age ? parseInt(form.age, 10) : null,
-      shirtSize: form.shirtSize,
-      sex: form.sex,
       phone: form.phone,
       church: form.church,
-      emergencyContactName: form.emergencyContactName,
-      emergencyContactPhone: form.emergencyContactPhone,
-      emergencyContactName2: form.emergencyContactName2,
-      emergencyContactPhone2: form.emergencyContactPhone2,
-      allergies: form.allergies,
-      roomId: form.roomId ? parseInt(form.roomId, 10) : null,
-      teamId: form.teamId ? parseInt(form.teamId, 10) : null,
+      ministry: form.ministry,
+      role: form.role,
+      isTeamLead: form.isTeamLead,
+      leadTeamId: form.leadTeamId ? parseInt(form.leadTeamId, 10) : null,
       totalAmount: amount,
       notes: form.notes,
     }
