@@ -12,7 +12,6 @@ import {
   getStaffPayments,
   bulkCreateStaff,
   bulkDeleteStaff,
-  toggleCheckIn,
 } from '@/app/actions/staff'
 import { getChurches } from '@/app/actions/churches'
 import { getTeams } from '@/app/actions/teams'
@@ -43,23 +42,15 @@ interface Props {
 
 const emptyForm = {
   name: '',
-  age: '',
-  shirtSize: '',
-  sex: '',
   phone: '',
   church: '',
-  emergencyContactName: '',
-  emergencyContactPhone: '',
-  emergencyContactName2: '',
-  emergencyContactPhone2: '',
-  allergies: '',
-  roomId: '',
-  teamId: '',
+  ministry: '',
+  role: '',
+  isTeamLead: false,
+  leadTeamId: '',
   totalAmount: '',
   notes: '',
 }
-
-const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export function StaffClient({ userId }: Props) {
   const [staffList, setStaffList] = useState<Staff[]>([])
@@ -237,20 +228,6 @@ export function StaffClient({ userId }: Props) {
         await loadStaff()
       } catch (error) {
         toast.error('Error al eliminar el staff member')
-        console.error(error)
-      }
-    })
-  }
-
-  async function handleToggleCheckIn(staff: Staff) {
-    const next = !staff.checkedIn
-    startTransition(async () => {
-      try {
-        await toggleCheckIn(userId, staff.id, next)
-        toast.success(next ? `${staff.name} registró Check-in` : `Check-in cancelado para ${staff.name}`)
-        await loadStaff()
-      } catch (error) {
-        toast.error('Error al actualizar el check-in')
         console.error(error)
       }
     })
@@ -471,23 +448,19 @@ export function StaffClient({ userId }: Props) {
   )
   const pendingAmount = summary.expected - summary.collected
   const teamMap = new Map(teams.map((t) => [t.id, t]))
-  const roomMap = new Map(rooms.map((r) => [r.id, r]))
-  const checkedInCount = staffList.filter((a) => a.checkedIn).length
   const paidCount = staffList.filter((a) => a.status === 'paid').length
   const partialCount = staffList.filter((a) => a.status === 'partial').length
   const pendingCount = staffList.filter((a) => a.status === 'pending').length
 
   // Helper functions to get display names from IDs
   const getChurchName = (id: string) => churches.find(c => c.id === parseInt(id))?.name || ''
-  const getTeamName = (id: string) => teams.find(t => t.id === parseInt(id))?.name || ''
-  const getRoomName = (id: string) => rooms.find(r => r.id === parseInt(id))?.name || ''
 
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-5 flex flex-col gap-4 max-w-7xl mx-auto w-full">
       {/* Header */}
       <PageHeader
         title="Staff Members"
-        description={`Total: ${staffList.length} | Pagados: ${paidCount} | Check-in: ${checkedInCount}`}
+        description={`Total: ${staffList.length} | Pagados: ${paidCount} | Pendientes: ${pendingCount}`}
       >
         <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs">
           <Download className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -795,48 +768,8 @@ export function StaffClient({ userId }: Props) {
                 placeholder="Enrique Medina"
               />
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <Label htmlFor="age">Edad</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  min="0"
-                  value={form.age}
-                  onChange={(e) => setForm({ ...form, age: e.target.value })}
-                  placeholder="21"
-                />
-              </div>
-              <div>
-                <Label htmlFor="shirtSize">Talla</Label>
-                <Select value={form.shirtSize} onValueChange={(value) => setForm({ ...form, shirtSize: value })}>
-                  <SelectTrigger id="shirtSize">
-                    <SelectValue placeholder="—" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SHIRT_SIZES.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="sex">Sexo</Label>
-                <Select value={form.sex} onValueChange={(value) => setForm({ ...form, sex: value })}>
-                  <SelectTrigger id="sex">
-                    <SelectValue placeholder="—" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Hombre">Hombre</SelectItem>
-                    <SelectItem value="Mujer">Mujer</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
             <div>
-              <Label htmlFor="phone">Contacto Personal (Teléfono) *</Label>
+              <Label htmlFor="phone">Teléfono *</Label>
               <Input
                 id="phone"
                 value={form.phone}
@@ -865,88 +798,52 @@ export function StaffClient({ userId }: Props) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label htmlFor="emergencyContactName">Contacto emergencia 1 *</Label>
-                <Input
-                  id="emergencyContactName"
-                  value={form.emergencyContactName}
-                  onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })}
-                  placeholder="Mamá"
-                />
-              </div>
-              <div>
-                <Label htmlFor="emergencyContactPhone">Teléfono 1 *</Label>
-                <Input
-                  id="emergencyContactPhone"
-                  value={form.emergencyContactPhone}
-                  onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
-                  placeholder="3326094596"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label htmlFor="emergencyContactName2">Contacto emergencia 2</Label>
-                <Input
-                  id="emergencyContactName2"
-                  value={form.emergencyContactName2}
-                  onChange={(e) => setForm({ ...form, emergencyContactName2: e.target.value })}
-                  placeholder="Papá"
-                />
-              </div>
-              <div>
-                <Label htmlFor="emergencyContactPhone2">Teléfono 2</Label>
-                <Input
-                  id="emergencyContactPhone2"
-                  value={form.emergencyContactPhone2}
-                  onChange={(e) => setForm({ ...form, emergencyContactPhone2: e.target.value })}
-                  placeholder="3324255466"
-                />
-              </div>
-            </div>
             <div>
-              <Label htmlFor="allergies">Alergias</Label>
+              <Label htmlFor="ministry">Ministerio</Label>
               <Input
-                id="allergies"
-                value={form.allergies}
-                onChange={(e) => setForm({ ...form, allergies: e.target.value })}
-                placeholder="Ninguna / paraceamol / etc."
+                id="ministry"
+                value={form.ministry}
+                onChange={(e) => setForm({ ...form, ministry: e.target.value })}
+                placeholder="Ej: Música, Adoración, Jóvenes, etc."
               />
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-            <Label htmlFor="teamId">Equipo</Label>
-            <Select value={form.teamId || 'none'} onValueChange={(value) => setForm({ ...form, teamId: value === 'none' ? '' : value })}>
-              <SelectTrigger id="teamId">
-                {form.teamId ? <span>{getTeamName(form.teamId)}</span> : <SelectValue placeholder="Selecciona un equipo" />}
-              </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin equipo</SelectItem>
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={String(team.id)}>
-                        {team.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div>
+              <Label htmlFor="role">Rol/Posición</Label>
+              <Input
+                id="role"
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+                placeholder="Ej: Pastor, Diácono, Coordinador, etc."
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  id="isTeamLead"
+                  type="checkbox"
+                  checked={form.isTeamLead}
+                  onChange={(e) => setForm({ ...form, isTeamLead: e.target.checked })}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <Label htmlFor="isTeamLead" className="cursor-pointer">Es Líder de Equipo</Label>
               </div>
-              <div>
-            <Label htmlFor="roomId">Habitación</Label>
-            <Select value={form.roomId || 'none'} onValueChange={(value) => setForm({ ...form, roomId: value === 'none' ? '' : value })}>
-              <SelectTrigger id="roomId">
-                {form.roomId ? <span>{getRoomName(form.roomId)}</span> : <SelectValue placeholder="Selecciona una habitación" />}
-              </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin habitación</SelectItem>
-                    {rooms.map((room) => (
-                      <SelectItem key={room.id} value={String(room.id)}>
-                        {room.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {form.isTeamLead && (
+                <div>
+                  <Label htmlFor="leadTeamId">Equipo que Lidera *</Label>
+                  <Select value={form.leadTeamId} onValueChange={(value) => setForm({ ...form, leadTeamId: value })}>
+                    <SelectTrigger id="leadTeamId">
+                      <SelectValue placeholder="Selecciona el equipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={String(team.id)}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
             <div>
               <Label htmlFor="totalAmount">Monto Total ($) *</Label>

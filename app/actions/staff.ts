@@ -48,18 +48,12 @@ export async function createStaff(
   userId: string,
   data: {
     name: string
-    age?: number | null
-    shirtSize?: string
-    sex?: string
     phone?: string
     church?: string
-    emergencyContactName?: string
-    emergencyContactPhone?: string
-    emergencyContactName2?: string
-    emergencyContactPhone2?: string
-    allergies?: string
-    roomId?: number | null
-    teamId?: number | null
+    ministry?: string
+    role?: string
+    isTeamLead?: boolean
+    leadTeamId?: number | null
     totalAmount: number
     notes?: string
   }
@@ -67,18 +61,12 @@ export async function createStaff(
   await db.insert(staff).values({
     userId,
     name: data.name,
-    age: data.age ?? null,
-    shirtSize: data.shirtSize || null,
-    sex: data.sex || null,
     phone: data.phone || '',
     church: data.church || '',
-    emergencyContactName: data.emergencyContactName || '',
-    emergencyContactPhone: data.emergencyContactPhone || '',
-    emergencyContactName2: data.emergencyContactName2 || '',
-    emergencyContactPhone2: data.emergencyContactPhone2 || '',
-    allergies: data.allergies || '',
-    roomId: data.roomId ?? null,
-    teamId: data.teamId ?? null,
+    ministry: data.ministry || '',
+    role: data.role || '',
+    isTeamLead: data.isTeamLead ?? false,
+    leadTeamId: data.leadTeamId ?? null,
     totalAmount: parseFloat(data.totalAmount.toString()),
     status: 'pending',
     notes: data.notes || '',
@@ -90,18 +78,12 @@ export async function updateStaff(
   staffId: number,
   data: Partial<{
     name: string
-    age: number | null
-    shirtSize: string
-    sex: string
     phone: string
     church: string
-    emergencyContactName: string
-    emergencyContactPhone: string
-    emergencyContactName2: string
-    emergencyContactPhone2: string
-    allergies: string
-    roomId: number | null
-    teamId: number | null
+    ministry: string
+    role: string
+    isTeamLead: boolean
+    leadTeamId: number | null
     totalAmount: number
     notes: string
   }>

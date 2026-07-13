@@ -71,19 +71,12 @@ export const staff = pgTable('staff', {
   id: serial('id').primaryKey(),
   userId: text('userId').notNull(),
   name: text('name').notNull(),
-  age: integer('age'),
-  shirtSize: text('shirtSize'), // 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
-  sex: text('sex'), // 'Hombre' | 'Mujer'
   phone: text('phone'),
   church: text('church'),
-  emergencyContactName: text('emergencyContactName'),
-  emergencyContactPhone: text('emergencyContactPhone'),
-  emergencyContactName2: text('emergencyContactName2'),
-  emergencyContactPhone2: text('emergencyContactPhone2'),
-  allergies: text('allergies'),
-  checkedIn: boolean('checkedIn').notNull().default(false),
-  roomId: integer('roomId'),
-  teamId: integer('teamId'),
+  ministry: text('ministry'), // Ministerio asignado
+  role: text('role'), // Descripción de rol/posición
+  isTeamLead: boolean('isTeamLead').notNull().default(false),
+  leadTeamId: integer('leadTeamId'), // Equipo que lidera (si es team lead)
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
   amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
   status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
