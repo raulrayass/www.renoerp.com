@@ -743,6 +743,7 @@ export function StaffClient({ userId }: Props) {
       <Dialog
         open={dialogOpen}
         onOpenChange={(open) => {
+          console.log('[v0] Dialog opening, churches:', churches)
           setDialogOpen(open)
           if (open) {
             if (!editingId) {
