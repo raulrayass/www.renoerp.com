@@ -106,8 +106,11 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function loadChurches() {
+    console.log('[v0] loadChurches called with userId:', userId)
     const data = await getChurches(userId)
+    console.log('[v0] getChurches returned:', data)
     setChurches(data)
+    console.log('[v0] setChurches called with data length:', data?.length || 0)
   }
 
   async function loadTeams() {
@@ -743,7 +746,6 @@ export function StaffClient({ userId }: Props) {
       <Dialog
         open={dialogOpen}
         onOpenChange={(open) => {
-          console.log('[v0] Dialog opening, churches:', churches)
           setDialogOpen(open)
           if (open) {
             if (!editingId) {
