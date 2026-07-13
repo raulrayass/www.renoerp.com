@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Square, ArrowLeftRight, Tag, Users, Church, Zap, Home, Trophy, Briefcase } from 'lucide-react'
+import { Square, ArrowLeftRight, Tag, Users, Church, Zap, Home, Briefcase } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -11,7 +11,6 @@ const navItems = [
   { href: '/staff', label: 'Staff', icon: Briefcase },
   { href: '/teams', label: 'Equipos', icon: Zap },
   { href: '/rooms', label: 'Habitaciones', icon: Home },
-  { href: '/games', label: 'Juegos', icon: Trophy },
   { href: '/churches', label: 'Iglesias', icon: Church },
   { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
   { href: '/categories', label: 'Categorías', icon: Tag },
