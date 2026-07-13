@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ArrowLeftRight, Tag, Users, LogOut, User, Church, Zap, Home, Trophy, Briefcase } from 'lucide-react'
+import { Square, ArrowLeftRight, Tag, Users, LogOut, User, Church, Zap, Home, Trophy, Briefcase } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/', label: 'Dashboard', icon: Square },
   { href: '/attendees', label: 'Camperos', icon: Users },
   { href: '/staff', label: 'Staff', icon: Briefcase },
   { href: '/teams', label: 'Equipos', icon: Zap },
