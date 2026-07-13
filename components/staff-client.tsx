@@ -89,15 +89,10 @@ export function StaffClient({ userId }: Props) {
   async function initializeDefaults() {
     setLoading(true)
     try {
-      console.log('[v0] Starting staff initialization')
       await loadStaff()
-      console.log('[v0] Staff loaded, loading churches...')
       await loadChurches()
-      console.log('[v0] Churches loaded:', churches)
       await loadTeams()
-      console.log('[v0] Teams loaded')
       await loadRooms()
-      console.log('[v0] Rooms loaded')
     } catch (error) {
       console.error('Error loading data:', error)
     }
