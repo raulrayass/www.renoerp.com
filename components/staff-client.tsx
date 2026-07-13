@@ -14,9 +14,7 @@ import {
   bulkDeleteStaff,
 } from '@/app/actions/staff'
 import { getChurches } from '@/app/actions/churches'
-import { getTeams } from '@/app/actions/teams'
-import { getRooms } from '@/app/actions/rooms'
-import { Staff, StaffPayment, Church, Team, Room } from '@/lib/db/schema'
+import { Staff, StaffPayment, Church } from '@/lib/db/schema'
 import { formatMXN } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -55,8 +53,6 @@ const emptyForm = {
 export function StaffClient({ userId }: Props) {
   const [staffList, setStaffList] = useState<Staff[]>([])
   const [churches, setChurches] = useState<Church[]>([])
-  const [teams, setTeams] = useState<Team[]>([])
-  const [rooms, setRooms] = useState<Room[]>([])
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
@@ -79,8 +75,6 @@ export function StaffClient({ userId }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [churchFilter, setChurchFilter] = useState('')
-  const [teamFilter, setTeamFilter] = useState('')
-  const [roomFilter, setRoomFilter] = useState('')
 
   useEffect(() => {
     initializeDefaults()
@@ -91,8 +85,6 @@ export function StaffClient({ userId }: Props) {
     try {
       await loadStaff()
       await loadChurches()
-      await loadTeams()
-      await loadRooms()
     } catch (error) {
       console.error('Error loading data:', error)
     }
@@ -108,16 +100,6 @@ export function StaffClient({ userId }: Props) {
   async function loadChurches() {
     const data = await getChurches(userId)
     setChurches(data)
-  }
-
-  async function loadTeams() {
-    const data = await getTeams(userId)
-    setTeams(data)
-  }
-
-  async function loadRooms() {
-    const data = await getRooms(userId)
-    setRooms(data)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -262,22 +244,11 @@ export function StaffClient({ userId }: Props) {
   function downloadTemplate() {
     const headers = [
       'Nombre',
-      'Edad',
-      'Sexo',
-      'Talla Camisa',
       'Teléfono',
       'Iglesia',
-      'Contacto Emergencia 1',
-      'Teléfono Emergencia 1',
-      'Contacto Emergencia 2',
-      'Teléfono Emergencia 2',
-      'Alergias',
-      'Equipo',
-      'Habitación',
+      'Ministerio',
+      'Rol',
       'Monto Total ($)',
-      'Pago Inicial ($)',
-      'Estado',
-      'Check-in',
       'Notas',
     ]
 
@@ -286,22 +257,11 @@ export function StaffClient({ userId }: Props) {
       headers,
       [
         'Nombre completo',
-        '18',
-        'M',
-        'M',
         '3326094596',
         'Nombre iglesia',
-        'Contacto emergencia',
-        '3326094596',
-        '',
-        '',
-        '',
-        'Nombre equipo',
-        'Nombre habitación',
+        'Música',
+        'Pastor',
         '1000',
-        '0',
-        'Pendiente',
-        'No',
         '',
       ],
     ]
@@ -331,19 +291,13 @@ export function StaffClient({ userId }: Props) {
 
         const staffToImport = rows.slice(1).map((row) => ({
           name: String(row[0] || '').trim(),
-          age: row[1] ? parseInt(String(row[1])) : undefined,
-          sex: String(row[2] || '').trim() || undefined,
-          shirtSize: String(row[3] || '').trim() || undefined,
-          phone: String(row[4] || '').trim() || undefined,
-          church: String(row[5] || '').trim() || undefined,
-          emergencyContactName: String(row[6] || '').trim() || undefined,
-          emergencyContactPhone: String(row[7] || '').trim() || undefined,
-          emergencyContactName2: String(row[8] || '').trim() || undefined,
-          emergencyContactPhone2: String(row[9] || '').trim() || undefined,
-          allergies: String(row[10] || '').trim() || undefined,
-          totalAmount: parseFloat(String(row[13] || '0')),
-          initialPayment: parseFloat(String(row[14] || '0')) || 0,
-          notes: String(row[17] || '').trim() || undefined,
+          phone: String(row[1] || '').trim() || undefined,
+          church: String(row[2] || '').trim() || undefined,
+          ministry: String(row[3] || '').trim() || undefined,
+          role: String(row[4] || '').trim() || undefined,
+          totalAmount: parseFloat(String(row[5] || '0')),
+          initialPayment: parseFloat(String(row[5] || '0')) || 0,
+          notes: String(row[6] || '').trim() || undefined,
         }))
 
         // Validar solo campos requeridos: nombre y monto total
@@ -380,23 +334,14 @@ export function StaffClient({ userId }: Props) {
       const remaining = total - paid
       return {
         Nombre: a.name,
-        Edad: a.age || '',
-        Sexo: a.sex || '',
-        'Talla Camisa': a.shirtSize || '',
         Teléfono: a.phone || '',
         Iglesia: a.church || '',
-        'Contacto Emergencia 1': a.emergencyContactName || '',
-        'Teléfono Emergencia 1': a.emergencyContactPhone || '',
-        'Contacto Emergencia 2': a.emergencyContactName2 || '',
-        'Teléfono Emergencia 2': a.emergencyContactPhone2 || '',
-        Alergias: a.allergies || '',
-        Equipo: teamMap.get(a.teamId)?.name || '',
-        Habitación: roomMap.get(a.roomId)?.name || '',
+        Ministerio: (a as any).ministry || '',
+        Rol: (a as any).role || '',
         'Monto Total ($)': total.toFixed(2),
         'Pagado ($)': paid.toFixed(2),
         'Falta Pagar ($)': remaining.toFixed(2),
         Estado: a.status === 'paid' ? 'Pagado' : a.status === 'partial' ? 'Parcial' : 'Pendiente',
-        'Check-in': a.checkedIn ? 'Sí' : 'No',
         Notas: a.notes || '',
       }
     })
@@ -422,13 +367,7 @@ export function StaffClient({ userId }: Props) {
     // Church quick filter
     const matchesChurch = !churchFilter || a.church === churches.find(c => c.id === parseInt(churchFilter))?.name
 
-    // Team filter
-    const matchesTeam = !teamFilter || a.teamId === parseInt(teamFilter)
-
-    // Room filter
-    const matchesRoom = !roomFilter || a.roomId === parseInt(roomFilter)
-
-    return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom
+    return matchesSearch && matchesStatus && matchesChurch
   })
 
   // Calculate totals based on ALL attendees (not filtered)
@@ -441,7 +380,6 @@ export function StaffClient({ userId }: Props) {
     { expected: 0, collected: 0 }
   )
   const pendingAmount = summary.expected - summary.collected
-  const teamMap = new Map(teams.map((t) => [t.id, t]))
   const paidCount = staffList.filter((a) => a.status === 'paid').length
   const partialCount = staffList.filter((a) => a.status === 'partial').length
   const pendingCount = staffList.filter((a) => a.status === 'pending').length
@@ -504,8 +442,8 @@ export function StaffClient({ userId }: Props) {
             icon={History}
           />
           <StatCard
-            label="Check-in"
-            value={`${checkedInCount}/${staffList.length}`}
+            label="Por Pagar"
+            value={`${pendingCount}/${staffList.length}`}
             color="primary"
             icon={UserCheck}
             subtitle={`${paidCount} pagados • ${partialCount} parciales`}
@@ -523,18 +461,10 @@ export function StaffClient({ userId }: Props) {
           churchFilter={churchFilter}
           onChurchChange={setChurchFilter}
           churches={churches}
-          teamFilter={teamFilter}
-          onTeamChange={setTeamFilter}
-          teams={teams}
-          roomFilter={roomFilter}
-          onRoomChange={setRoomFilter}
-          rooms={rooms}
           onClearFilters={() => {
             setSearch('')
             setStatusFilter('all')
             setChurchFilter('')
-            setTeamFilter('')
-            setRoomFilter('')
           }}
         />
       )}
