@@ -780,11 +780,12 @@ export function AttendeesClient({ userId }: Props) {
           }
         }}
       >
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-              <DialogTitle>{editingId ? 'Editar campero' : 'Agregar campero'}</DialogTitle>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-3 border-b">
+              <DialogTitle className="text-lg font-semibold">{editingId ? 'Editar Campero' : 'Nuevo Campero'}</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">{editingId ? 'Actualiza los datos del campero' : 'Agrega un nuevo campero a la lista'}</p>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5 py-4">
             <div>
               <Label htmlFor="name">Nombre *</Label>
               <Input
@@ -982,11 +983,11 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Registrar Pago</DialogTitle>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-lg font-semibold">Registrar Pago</DialogTitle>
             {selectedAttendeeId && (
-              <DialogDescription className="pt-2">
+              <DialogDescription className="text-sm text-muted-foreground mt-1">
                 {attendeeList.find((a) => a.id === selectedAttendeeId)?.name}
               </DialogDescription>
             )}
@@ -1073,15 +1074,15 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
-            <AlertDialogDescription>
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader className="pb-3 border-b">
+            <AlertDialogTitle className="text-lg font-semibold text-red-600">Eliminar Campero</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground mt-2">
               ¿Estás seguro que deseas eliminar este campero y todos sus registros de pago? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-2 justify-end pt-4">
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <div className="flex gap-2 justify-end pt-4 border-t">
+            <AlertDialogCancel className="px-4">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (deletingId) {
@@ -1089,7 +1090,7 @@ export function AttendeesClient({ userId }: Props) {
                   setDeleteDialogOpen(false)
                 }
               }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-600 hover:bg-red-700 text-white px-4"
             >
               Eliminar
             </AlertDialogAction>
@@ -1099,11 +1100,11 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Payment History Dialog */}
       <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Historial de pagos</DialogTitle>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-lg font-semibold">Historial de Pagos</DialogTitle>
             {historyAttendeeId && (
-              <DialogDescription>
+              <DialogDescription className="text-sm text-muted-foreground mt-1">
                 {attendeeList.find((a) => a.id === historyAttendeeId)?.name}
               </DialogDescription>
             )}

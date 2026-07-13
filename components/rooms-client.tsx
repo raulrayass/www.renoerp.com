@@ -239,8 +239,8 @@ export function RoomsClient({ userId }: Props) {
         }
       }}>
         <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar habitación' : 'Agregar habitación'}</DialogTitle>
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-lg font-semibold">{editingId ? 'Editar habitación' : 'Agregar habitación'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -263,7 +263,7 @@ export function RoomsClient({ userId }: Props) {
                 placeholder="8"
               />
             </div>
-            <div className="flex gap-2 justify-end pt-4">
+            <div className="flex gap-2 justify-end pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"

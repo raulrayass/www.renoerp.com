@@ -253,8 +253,8 @@ export function TeamsClient({ userId }: Props) {
         }
       }}>
         <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar equipo' : 'Agregar equipo'}</DialogTitle>
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-lg font-semibold">{editingId ? 'Editar equipo' : 'Agregar equipo'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -302,7 +302,7 @@ export function TeamsClient({ userId }: Props) {
                 />
               </div>
             </div>
-            <div className="flex gap-2 justify-end pt-4">
+            <div className="flex gap-2 justify-end pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"

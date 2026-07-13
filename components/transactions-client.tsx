@@ -357,8 +357,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar transacción' : 'Nueva transacción'}</DialogTitle>
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-lg font-semibold">{editingId ? 'Editar transacción' : 'Nueva transacción'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
             <div className="grid grid-cols-2 gap-3">

@@ -754,11 +754,12 @@ export function StaffClient({ userId }: Props) {
           }
         }}
       >
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-              <DialogTitle>{editingId ? 'Editar staff member' : 'Agregar staff member'}</DialogTitle>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-3 border-b">
+              <DialogTitle className="text-lg font-semibold">{editingId ? 'Editar Staff Member' : 'Nuevo Staff Member'}</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">{editingId ? 'Actualiza los datos del staff' : 'Agrega un nuevo staff member'}</p>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5 py-4">
             <div>
               <Label htmlFor="name">Nombre *</Label>
               <Input
@@ -880,11 +881,11 @@ export function StaffClient({ userId }: Props) {
 
       {/* Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Registrar Pago</DialogTitle>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-lg font-semibold">Registrar Pago</DialogTitle>
             {selectedStaffId && (
-              <DialogDescription className="pt-2">
+              <DialogDescription className="text-sm text-muted-foreground mt-1">
                 {staffList.find((a) => a.id === selectedStaffId)?.name}
               </DialogDescription>
             )}
@@ -971,15 +972,15 @@ export function StaffClient({ userId }: Props) {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
-            <AlertDialogDescription>
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader className="pb-3 border-b">
+            <AlertDialogTitle className="text-lg font-semibold text-red-600">Eliminar Staff Member</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground mt-2">
               ¿Estás seguro que deseas eliminar este staff member y todos sus registros de pago? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-2 justify-end pt-4">
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <div className="flex gap-2 justify-end pt-4 border-t">
+            <AlertDialogCancel className="px-4">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (deletingId) {
@@ -987,7 +988,7 @@ export function StaffClient({ userId }: Props) {
                   setDeleteDialogOpen(false)
                 }
               }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-600 hover:bg-red-700 text-white px-4"
             >
               Eliminar
             </AlertDialogAction>
@@ -997,11 +998,11 @@ export function StaffClient({ userId }: Props) {
 
       {/* Payment History Dialog */}
       <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Historial de pagos</DialogTitle>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-lg font-semibold">Historial de Pagos</DialogTitle>
             {historyStaffId && (
-              <DialogDescription>
+              <DialogDescription className="text-sm text-muted-foreground mt-1">
                 {staffList.find((a) => a.id === historyStaffId)?.name}
               </DialogDescription>
             )}

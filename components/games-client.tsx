@@ -312,11 +312,12 @@ export function GamesClient({ userId }: Props) {
           setEditingId(null)
         }
       }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar juego' : 'Crear juego'}</DialogTitle>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-lg font-semibold">{editingId ? 'Editar Juego' : 'Crear Juego'}</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">{editingId ? 'Actualiza los detalles del juego' : 'Agrega un nuevo juego a la lista'}</p>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5 py-4">
             <div>
               <Label htmlFor="name">Nombre *</Label>
               <Input
@@ -344,15 +345,16 @@ export function GamesClient({ userId }: Props) {
                 onChange={(e) => setForm({ ...form, gameDate: e.target.value })}
               />
             </div>
-            <div className="flex gap-2 justify-end pt-4">
+            <div className="flex gap-2 justify-end pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
+                className="px-5"
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="px-5 bg-blue-600 hover:bg-blue-700">
                 {editingId ? 'Guardar cambios' : 'Crear juego'}
               </Button>
             </div>
@@ -362,10 +364,10 @@ export function GamesClient({ userId }: Props) {
 
       {/* Scoring Dialog */}
       <Dialog open={scoringDialogOpen} onOpenChange={setScoringDialogOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Registrar puntos</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-3 border-b">
+            <DialogTitle className="text-lg font-semibold">Registrar Puntos</DialogTitle>
+            <DialogDescription className="text-sm mt-1">
               {selectedGameId && gameList.find((g) => g.id === selectedGameId)?.name}
             </DialogDescription>
           </DialogHeader>
@@ -469,22 +471,19 @@ export function GamesClient({ userId }: Props) {
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar juego?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminarán el juego y todos los puntos registrados para este juego.
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader className="pb-3 border-b">
+            <AlertDialogTitle className="text-lg font-semibold text-red-600">Eliminar Juego</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground mt-2">
+              ¿Estás seguro de que deseas eliminar este juego? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-2 justify-end">
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deletingId && handleDelete(deletingId)}
-              disabled={isPending}
-            >
-              Eliminar
+          <AlertDialogFooter className="pt-4 border-t">
+            <AlertDialogCancel className="px-4">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white px-4">
+              {isPending ? 'Eliminando...' : 'Eliminar'}
             </AlertDialogAction>
-          </div>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
       </div>
