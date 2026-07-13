@@ -11,7 +11,6 @@ import {
   deleteAttendeePayment,
   getAttendeePayments,
   bulkCreateAttendees,
-  bulkDeleteAttendees,
   toggleCheckIn,
 } from '@/app/actions/attendees'
 import { getChurches } from '@/app/actions/churches'
@@ -28,8 +27,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Trash } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -91,8 +89,6 @@ export function AttendeesClient({ userId }: Props) {
   const [churchFilter, setChurchFilter] = useState('')
   const [teamFilter, setTeamFilter] = useState('')
   const [roomFilter, setRoomFilter] = useState('')
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
-  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
 
   useEffect(() => {
     initializeDefaults()
@@ -240,36 +236,6 @@ export function AttendeesClient({ userId }: Props) {
         await loadAttendees()
       } catch (error) {
         toast.error('Error al eliminar el campero')
-        console.error(error)
-      }
-    })
-  }
-
-  function toggleSelectId(id: number) {
-    const newSet = new Set(selectedIds)
-    if (newSet.has(id)) {
-      newSet.delete(id)
-    } else {
-      newSet.add(id)
-    }
-    setSelectedIds(newSet)
-  }
-
-  async function handleBulkDelete() {
-    if (selectedIds.size === 0) {
-      toast.error('Selecciona al menos un campero')
-      return
-    }
-
-    startTransition(async () => {
-      try {
-        await bulkDeleteAttendees(userId, Array.from(selectedIds))
-        toast.success(`${selectedIds.size} camperos eliminados`)
-        setSelectedIds(new Set())
-        setBulkDeleteDialogOpen(false)
-        await loadAttendees()
-      } catch (error) {
-        toast.error('Error al eliminar los camperos')
         console.error(error)
       }
     })
@@ -542,12 +508,6 @@ export function AttendeesClient({ userId }: Props) {
           <Download className="w-3 h-3 sm:w-4 sm:h-4" />
           <span>Exportar</span>
         </Button>
-        {selectedIds.size > 0 && (
-          <Button onClick={() => setBulkDeleteDialogOpen(true)} variant="destructive" size="sm" className="gap-1 text-xs">
-            <Trash className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span>Eliminar ({selectedIds.size})</span>
-          </Button>
-        )}
         <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1 text-xs bg-green-600 hover:bg-green-700 text-white">
           <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
           <span>Agregar</span>
@@ -657,18 +617,12 @@ export function AttendeesClient({ userId }: Props) {
               const percentage = (paid / total) * 100
 
               return (
-                <Card key={attendee.id} className={`overflow-hidden transition-colors ${selectedIds.has(attendee.id) ? 'bg-blue-50 border-blue-200' : ''}`}>
+                <Card key={attendee.id} className="overflow-hidden">
                   <CardContent className="p-3 sm:p-6">
                     <div className="flex flex-col gap-3">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <Checkbox
-                            checked={selectedIds.has(attendee.id)}
-                            onCheckedChange={() => toggleSelectId(attendee.id)}
-                            className="mt-1 shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="font-semibold text-sm sm:text-base truncate">{attendee.name}</h3>
                             <Badge
                               variant={attendee.status === 'paid' ? 'default' : attendee.status === 'partial' ? 'secondary' : 'outline'}
@@ -1213,28 +1167,6 @@ export function AttendeesClient({ userId }: Props) {
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Bulk Delete Dialog */}
-      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar {selectedIds.size} campero(s)</AlertDialogTitle>
-            <AlertDialogDescription>
-              Estás a punto de eliminar {selectedIds.size} campero(s). Esta acción no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex gap-2 justify-end">
-            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleBulkDelete} 
-              disabled={isPending}
-              className="bg-destructive hover:bg-destructive/90 text-white"
-            >
-              {isPending ? 'Eliminando...' : 'Eliminar'}
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }
