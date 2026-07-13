@@ -13,7 +13,7 @@ import {
   bulkCreateStaff,
   bulkDeleteStaff,
 } from '@/app/actions/staff'
-import { getChurches } from '@/app/actions/churches'
+import { getAllChurches } from '@/app/actions/churches'
 import { getTeams } from '@/app/actions/teams'
 import { getRooms } from '@/app/actions/rooms'
 import { Staff, StaffPayment, Church, Team, Room } from '@/lib/db/schema'
@@ -106,11 +106,8 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function loadChurches() {
-    console.log('[v0] loadChurches called with userId:', userId)
-    const data = await getChurches(userId)
-    console.log('[v0] getChurches returned:', data)
+    const data = await getAllChurches(userId)
     setChurches(data)
-    console.log('[v0] setChurches called with data length:', data?.length || 0)
   }
 
   async function loadTeams() {
