@@ -170,16 +170,16 @@ export function GamesClient({ userId }: Props) {
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Juegos y Puntaje</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-            Total: {gameList.length} juegos
-          </p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Juegos y Puntaje</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
+              Total: {gameList.length} juegos
+            </p>
+          </div>
+          <Button onClick={() => setDialogOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Nuevo juego
+          </Button>
         </div>
-        <Button onClick={() => setDialogOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Nuevo juego
-        </Button>
-      </div>
 
       {/* Leaderboard */}
       {teams.length > 0 && (
@@ -490,6 +490,8 @@ export function GamesClient({ userId }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
+    </div>
     </div>
   )
 }
