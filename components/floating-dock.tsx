@@ -21,8 +21,8 @@ export function FloatingDock() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 lg:hidden px-3">
-      <div className="flex items-center gap-2 px-2.5 py-2 rounded-2xl bg-card border border-border shadow-lg backdrop-blur-sm">
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 lg:hidden px-2 sm:px-4">
+      <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-2.5 py-2 rounded-2xl bg-card border border-border shadow-lg backdrop-blur-sm overflow-x-auto max-w-[calc(100vw-1rem)] sm:max-w-none">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href
           return (
@@ -30,14 +30,14 @@ export function FloatingDock() {
               key={href}
               href={href}
               className={cn(
-                'flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-200 p-0',
+                'flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg transition-all duration-200 p-0 flex-shrink-0',
                 active
                   ? 'bg-accent text-accent-foreground shadow-md scale-110'
                   : 'text-foreground hover:bg-muted'
               )}
               title={label}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Link>
           )
         })}
