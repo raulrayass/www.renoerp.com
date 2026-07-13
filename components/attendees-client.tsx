@@ -89,8 +89,6 @@ export function AttendeesClient({ userId }: Props) {
   const [churchFilter, setChurchFilter] = useState('')
   const [teamFilter, setTeamFilter] = useState('')
   const [roomFilter, setRoomFilter] = useState('')
-  const [minAmount, setMinAmount] = useState('')
-  const [maxAmount, setMaxAmount] = useState('')
 
   useEffect(() => {
     initializeDefaults()
@@ -458,13 +456,7 @@ export function AttendeesClient({ userId }: Props) {
     // Room filter
     const matchesRoom = !roomFilter || a.roomId === parseInt(roomFilter)
 
-    // Amount range filter
-    const amount = parseFloat(a.totalAmount as string)
-    const min = minAmount ? parseFloat(minAmount) : 0
-    const max = maxAmount ? parseFloat(maxAmount) : Infinity
-    const matchesAmount = amount >= min && amount <= max
-
-    return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom && matchesAmount
+    return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom
   })
 
   // Calculate totals based on ALL attendees (not filtered)
@@ -569,18 +561,12 @@ export function AttendeesClient({ userId }: Props) {
           roomFilter={roomFilter}
           onRoomChange={setRoomFilter}
           rooms={rooms}
-          minAmount={minAmount}
-          onMinAmountChange={setMinAmount}
-          maxAmount={maxAmount}
-          onMaxAmountChange={setMaxAmount}
           onClearFilters={() => {
             setSearch('')
             setStatusFilter('all')
             setChurchFilter('')
             setTeamFilter('')
             setRoomFilter('')
-            setMinAmount('')
-            setMaxAmount('')
           }}
         />
       )}
