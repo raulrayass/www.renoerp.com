@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { attendees, attendeePayments, transactions, categories, transactionItems } from '@/lib/db/schema'
+import { attendees, attendeePayments, transactions, categories } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { desc } from 'drizzle-orm'
 
@@ -219,27 +219,14 @@ export async function addAttendeePayment(
   }
 
   // Create transaction for this payment
-  const [transaction] = await db
-    .insert(transactions)
-    .values({
-      userId,
-      categoryId: campPaymentCat!.id,
-      type: 'income',
-      amount,
-      description: `Pago de ${attendee.name}`,
-      date: paymentDate,
-    })
-    .returning()
-
-  // Create transaction_item to link attendee with transaction
-  if (transaction) {
-    await db.insert(transactionItems).values({
-      transactionId: transaction.id,
-      itemType: 'attendee',
-      attendeeId,
-      amount,
-    })
-  }
+  await db.insert(transactions).values({
+    userId,
+    categoryId: campPaymentCat!.id,
+    type: 'income',
+    amount,
+    description: `Pago de ${attendee.name}`,
+    date: paymentDate,
+  })
 }
 
 export async function deleteAttendeePayment(userId: string, paymentId: number) {
@@ -257,10 +244,9 @@ export async function deleteAttendeePayment(userId: string, paymentId: number) {
 
   if (!attendee) throw new Error('Campero no encontrado')
 
-  // Find and delete corresponding transaction and transaction_item
-  const [txn] = await db
-    .select()
-    .from(transactions)
+  // Delete corresponding transaction
+  await db
+    .delete(transactions)
     .where(
       and(
         eq(transactions.userId, userId),
@@ -269,12 +255,6 @@ export async function deleteAttendeePayment(userId: string, paymentId: number) {
         eq(transactions.description, `Pago de ${attendee.name}`)
       )
     )
-    .limit(1)
-
-  if (txn) {
-    await db.delete(transactionItems).where(eq(transactionItems.transactionId, txn.id))
-    await db.delete(transactions).where(eq(transactions.id, txn.id))
-  }
 
   // Update attendee paid amount
   const newPaidAmount = Math.max(0, parseFloat(attendee.amountPaid as string) - parseFloat(payment.amount as string))

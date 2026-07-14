@@ -148,28 +148,26 @@ export function ChurchesClient({ userId }: Props) {
           }
         }}
       >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="pb-3 border-b">
-            <DialogTitle className="text-lg font-semibold">{editingId ? 'Editar Iglesia' : 'Nueva Iglesia'}</DialogTitle>
-            <p className="text-sm text-muted-foreground mt-1">{editingId ? 'Actualiza los datos de la iglesia' : 'Agrega una nueva iglesia a la lista'}</p>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingId ? 'Editar Iglesia' : 'Agregar Iglesia'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-5 py-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="church-name" className="text-sm font-medium">Nombre de la Iglesia *</Label>
+              <Label htmlFor="church-name">Nombre de la Iglesia *</Label>
               <Input
                 id="church-name"
                 value={churchName}
                 onChange={(e) => setChurchName(e.target.value)}
-                placeholder="Ej: Iglesia del Evangelio"
+                placeholder="Nombre de iglesia"
                 autoFocus
-                className="mt-1.5"
               />
             </div>
-            <div className="flex gap-2 justify-end pt-4 border-t">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="px-5">
+            <div className="flex gap-2 justify-end pt-4">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending} className="px-5 bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" disabled={isPending}>
                 {editingId ? 'Guardar Cambios' : 'Agregar Iglesia'}
               </Button>
             </div>
@@ -179,22 +177,22 @@ export function ChurchesClient({ userId }: Props) {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="sm:max-w-md">
-          <AlertDialogHeader className="pb-3 border-b">
-            <AlertDialogTitle className="text-lg font-semibold text-red-600">Eliminar Iglesia</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-muted-foreground mt-2">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
+            <AlertDialogDescription>
               ¿Estás seguro que deseas eliminar esta iglesia? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-2 justify-end pt-4 border-t">
-            <AlertDialogCancel className="px-4">Cancelar</AlertDialogCancel>
+          <div className="flex gap-2 justify-end pt-4">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (deletingId) {
                   handleDelete(deletingId)
                 }
               }}
-              className="bg-red-600 hover:bg-red-700 text-white px-4"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar
             </AlertDialogAction>
