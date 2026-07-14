@@ -133,23 +133,31 @@ export function TransactionSmartFilter({
 
       {/* Filters Row 2: Date range */}
       <div className="grid grid-cols-2 gap-1">
-        <div>
+        <div className="relative">
           <Input
             type="date"
             value={dateFrom}
             onChange={(e) => onDateFromChange(e.target.value)}
-            placeholder="Desde"
-            className="h-8 text-xs border-2 border-border rounded-md"
+            className="h-6 sm:h-8 text-xs border-2 border-border rounded-md"
           />
+          {!dateFrom && (
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+              Desde
+            </span>
+          )}
         </div>
-        <div>
+        <div className="relative">
           <Input
             type="date"
             value={dateTo}
             onChange={(e) => onDateToChange(e.target.value)}
-            placeholder="Hasta"
-            className="h-8 text-xs border-2 border-border rounded-md"
+            className="h-6 sm:h-8 text-xs border-2 border-border rounded-md"
           />
+          {!dateTo && (
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+              Hasta
+            </span>
+          )}
         </div>
       </div>
     </div>
