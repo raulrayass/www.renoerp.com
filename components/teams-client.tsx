@@ -12,6 +12,7 @@ import { Plus, Edit2, Trash2, ChevronDown, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { createTeam, updateTeam, deleteTeam, getTeams, getTeamMembers, getTeamMemberCounts } from '@/app/actions/teams'
 import { Team, Attendee } from '@/lib/db/schema'
+import { StatsBar } from '@/components/stats-bar'
 
 interface Props {
   userId: string
@@ -125,15 +126,21 @@ export function TeamsClient({ userId }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Equipos</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-              Total: {teamList.length}
-            </p>
           </div>
           <Button onClick={() => setDialogOpen(true)} className="gap-2">
             <Plus className="w-4 h-4" />
             Agregar equipo
           </Button>
         </div>
+
+      {/* Stats Bar */}
+      {!loading && teamList.length > 0 && (
+        <StatsBar
+          items={[
+            { label: 'Equipos Totales', value: teamList.length, icon: <Users className="w-5 h-5" />, color: 'primary' },
+          ]}
+        />
+      )}
 
       {loading ? (
         <div className="space-y-3">

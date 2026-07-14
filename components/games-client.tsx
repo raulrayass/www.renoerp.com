@@ -7,12 +7,13 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Plus, Edit2, Trash2, Gamepad2, Trophy, Minus } from 'lucide-react'
+import { Plus, Edit2, Trash2, Gamepad2, Trophy, Minus, Users2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createGame, updateGame, deleteGame, getGames, addGameScore, deleteGameScore, getGameScores, getAllGameScores } from '@/app/actions/games'
 import { getTeams } from '@/app/actions/teams'
 import { Game, GameScore, Team } from '@/lib/db/schema'
 import { cn } from '@/lib/utils'
+import { StatsBar } from '@/components/stats-bar'
 
 interface Props {
   userId: string
@@ -189,15 +190,22 @@ export function GamesClient({ userId }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Juegos y Puntaje</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-              Total: {gameList.length} juegos
-          </p>
         </div>
         <Button onClick={() => setDialogOpen(true)} className="gap-2">
           <Plus className="w-4 h-4" />
           Nuevo juego
         </Button>
       </div>
+
+      {/* Stats Bar */}
+      {!loading && gameList.length > 0 && (
+        <StatsBar
+          items={[
+            { label: 'Juegos Creados', value: gameList.length, icon: <Gamepad2 className="w-5 h-5" />, color: 'primary' },
+            { label: 'Equipos Participando', value: teams.length, icon: <Users2 className="w-5 h-5" />, color: 'success' },
+          ]}
+        />
+      )}
 
       {/* Leaderboard */}
       {teams.length > 0 && (

@@ -78,13 +78,21 @@ export function ChurchesClient({ userId }: Props) {
       <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Iglesias</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Total: {churches.length}</p>
         </div>
         <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-2 bg-green-600 hover:bg-green-700 text-white">
           <Plus className="w-4 h-4" />
           Agregar Iglesia
         </Button>
       </div>
+
+      {/* Stats Bar */}
+      {churches.length > 0 && (
+        <StatsBar
+          items={[
+            { label: 'Iglesias Totales', value: churches.length, icon: <MapPin className="w-5 h-5" />, color: 'primary' },
+          ]}
+        />
+      )}
 
       {/* Churches Grid */}
       {churches.length === 0 ? (

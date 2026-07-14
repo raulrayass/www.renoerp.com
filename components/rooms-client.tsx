@@ -114,15 +114,21 @@ export function RoomsClient({ userId }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Habitaciones</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-              Total: {roomList.length}
-            </p>
           </div>
           <Button onClick={() => setDialogOpen(true)} className="gap-2">
             <Plus className="w-4 h-4" />
             Agregar habitación
           </Button>
         </div>
+
+      {/* Stats Bar */}
+      {!loading && roomList.length > 0 && (
+        <StatsBar
+          items={[
+            { label: 'Habitaciones Totales', value: roomList.length, icon: <Home className="w-5 h-5" />, color: 'primary' },
+          ]}
+        />
+      )}
 
       {loading ? (
         <div className="space-y-3">

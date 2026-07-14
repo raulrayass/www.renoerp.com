@@ -27,7 +27,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -35,6 +35,7 @@ import { SmartFilter } from '@/components/smart-filter'
 import { SectionHeader } from '@/components/section-header'
 import { StatCard } from '@/components/stat-card'
 import { PageHeader } from '@/components/page-header'
+import { StatsBar } from '@/components/stats-bar'
 
 interface Props {
   userId: string
@@ -495,10 +496,7 @@ export function AttendeesClient({ userId }: Props) {
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-5 flex flex-col gap-4 max-w-7xl mx-auto w-full">
       {/* Header */}
-      <PageHeader
-        title="Camperos"
-        description={`Total: ${attendeeList.length} | Pagados: ${paidCount} | Check-in: ${checkedInCount}`}
-      >
+      <PageHeader title="Camperos">
         <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs">
           <Download className="w-3 h-3 sm:w-4 sm:h-4" />
           <span>Plantilla</span>
@@ -524,6 +522,17 @@ export function AttendeesClient({ userId }: Props) {
           <span>Agregar</span>
         </Button>
       </PageHeader>
+
+      {/* Stats Bar */}
+      {!loading && attendeeList.length > 0 && (
+        <StatsBar
+          items={[
+            { label: 'Total Camperos', value: attendeeList.length, icon: <Users2 className="w-5 h-5" />, color: 'primary' },
+            { label: 'Pagados', value: paidCount, icon: <CreditCard className="w-5 h-5" />, color: 'success' },
+            { label: 'Check-in', value: checkedInCount, icon: <LogIn className="w-5 h-5" />, color: 'primary' },
+          ]}
+        />
+      )}
 
       {/* Summary Cards */}
       {!loading && attendeeList.length > 0 && (
