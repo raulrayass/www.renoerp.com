@@ -1018,17 +1018,57 @@ export function AttendeesClient({ userId }: Props) {
             </div>
           )}
           <form onSubmit={handleAddPayment} className="space-y-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="payment-amount">Monto del Pago ($) *</Label>
-              <Input
-                id="payment-amount"
-                type="number"
-                step="0.01"
-                min="0"
-                value={paymentForm.amount}
-                onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                placeholder="0"
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="payment-amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={paymentForm.amount}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                  placeholder="0"
+                  className="flex-1"
+                />
+                {(() => {
+                  const attendee = selectedAttendeeId ? attendeeList.find((a) => a.id === selectedAttendeeId) : null
+                  if (!attendee) return null
+                  const total = parseFloat(attendee.totalAmount as string) || 0
+                  const paid = attendee.paidAmount || 0
+                  const remaining = total - paid
+                  if (remaining > 0) {
+                    return (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setPaymentForm({ ...paymentForm, amount: remaining.toFixed(2) })}
+                        className="whitespace-nowrap"
+                        title={`Pagar lo faltante: ${formatMXN(remaining)}`}
+                      >
+                        Falta
+                      </Button>
+                    )
+                  }
+                  return null
+                })()}
+              </div>
+              {(() => {
+                const attendee = selectedAttendeeId ? attendeeList.find((a) => a.id === selectedAttendeeId) : null
+                if (!attendee) return null
+                const total = parseFloat(attendee.totalAmount as string) || 0
+                const paid = attendee.paidAmount || 0
+                const remaining = total - paid
+                if (remaining > 0) {
+                  const suggested = parseFloat(paymentForm.amount) || 0
+                  return (
+                    <p className="text-xs text-muted-foreground">
+                      Falta por pagar: <span className="font-semibold">{formatMXN(remaining)}</span>
+                    </p>
+                  )
+                }
+                return null
+              })()}
             </div>
             <div>
               <Label htmlFor="payment-date">Fecha del Pago *</Label>
@@ -1042,11 +1082,19 @@ export function AttendeesClient({ userId }: Props) {
             <div>
               <Label>Método de Pago *</Label>
               <Select value={paymentForm.paymentMethod} onValueChange={(v) => setPaymentForm({ ...paymentForm, paymentMethod: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="flex items-center">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="cash">Efectivo</SelectItem>
-                  <SelectItem value="transfer">Transferencia</SelectItem>
-                  <SelectItem value="deposit">Depósito</SelectItem>
+                  <SelectItem value="cash" className="flex items-center">
+                    💵 Efectivo
+                  </SelectItem>
+                  <SelectItem value="transfer" className="flex items-center">
+                    🏦 Transferencia
+                  </SelectItem>
+                  <SelectItem value="deposit" className="flex items-center">
+                    📱 Depósito/Banca Móvil
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
