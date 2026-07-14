@@ -61,6 +61,7 @@ export async function createAttendee(
     roomId?: number | null
     teamId?: number | null
     totalAmount: number
+    discount?: number // 0, 10, 20, 30
     notes?: string
   }
 ) {
@@ -80,6 +81,7 @@ export async function createAttendee(
     roomId: data.roomId ?? null,
     teamId: data.teamId ?? null,
     totalAmount: parseFloat(data.totalAmount.toString()),
+    discount: data.discount ?? 0,
     status: 'pending',
     notes: data.notes || '',
   })
@@ -103,6 +105,7 @@ export async function updateAttendee(
     roomId: number | null
     teamId: number | null
     totalAmount: number
+    discount: number
     notes: string
   }>
 ) {

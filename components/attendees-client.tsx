@@ -55,6 +55,7 @@ const emptyForm = {
   roomId: '',
   teamId: '',
   totalAmount: '',
+  discount: 0,
   notes: '',
 }
 
@@ -163,6 +164,7 @@ export function AttendeesClient({ userId }: Props) {
       roomId: form.roomId ? parseInt(form.roomId, 10) : null,
       teamId: form.teamId ? parseInt(form.teamId, 10) : null,
       totalAmount: amount,
+      discount: form.discount,
       notes: form.notes,
     }
 
@@ -403,7 +405,9 @@ export function AttendeesClient({ userId }: Props) {
       return
     }
     const data = attendeeList.map((a) => {
-      const total = parseFloat(a.totalAmount as string)
+      const originalTotal = parseFloat(a.totalAmount as string)
+      const discount = a.discount || 0
+      const total = originalTotal * (1 - discount / 100)
       const paid = parseFloat(a.amountPaid as string)
       const remaining = total - paid
       return {
@@ -420,6 +424,8 @@ export function AttendeesClient({ userId }: Props) {
         Alergias: a.allergies || '',
         Equipo: teamMap.get(a.teamId)?.name || '',
         Habitación: roomMap.get(a.roomId)?.name || '',
+        'Monto Original ($)': originalTotal.toFixed(2),
+        'Descuento (%)': discount,
         'Monto Total ($)': total.toFixed(2),
         'Pagado ($)': paid.toFixed(2),
         'Falta Pagar ($)': remaining.toFixed(2),
@@ -612,7 +618,9 @@ export function AttendeesClient({ userId }: Props) {
         <div className="space-y-3">
           {filteredAttendees
             .map((attendee) => {
-              const total = parseFloat(attendee.totalAmount as string)
+              const originalTotal = parseFloat(attendee.totalAmount as string)
+              const discount = attendee.discount || 0
+              const total = originalTotal * (1 - discount / 100)
               const paid = parseFloat(attendee.amountPaid as string)
               const percentage = (paid / total) * 100
 
@@ -723,6 +731,7 @@ export function AttendeesClient({ userId }: Props) {
                                 roomId: attendee.roomId != null ? String(attendee.roomId) : '',
                                 teamId: attendee.teamId != null ? String(attendee.teamId) : '',
                                 totalAmount: total.toString(),
+                                discount: attendee.discount || 0,
                                 notes: attendee.notes || '',
                               })
                               setDialogOpen(true)
@@ -990,6 +999,35 @@ export function AttendeesClient({ userId }: Props) {
                   placeholder="0"
                   className="mt-1"
                 />
+              </div>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Descuento</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {[0, 10, 20, 30].map((discountPercent) => (
+                    <label key={discountPercent} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border-2 transition-all" 
+                      style={{
+                        borderColor: form.discount === discountPercent ? '#22c55e' : '#e5e7eb',
+                        backgroundColor: form.discount === discountPercent ? '#f0fdf4' : 'transparent',
+                      }}>
+                      <input
+                        type="radio"
+                        name="discount"
+                        value={discountPercent}
+                        checked={form.discount === discountPercent}
+                        onChange={(e) => setForm({ ...form, discount: parseInt(e.target.value, 10) })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm font-medium">
+                        {discountPercent === 0 ? 'Sin descuento' : `${discountPercent}%`}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                {form.discount > 0 && (
+                  <div className="text-xs text-muted-foreground bg-blue-50 p-2 rounded">
+                    Monto con descuento: {formatMXN((parseFloat(form.totalAmount) || 0) * (1 - form.discount / 100))}
+                  </div>
+                )}
               </div>
               <div>
                 <Label htmlFor="notes" className="text-sm font-medium">Notas</Label>
