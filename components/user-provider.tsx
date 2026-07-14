@@ -16,31 +16,21 @@ export function useUser() {
   return useContext(UserContext)
 }
 
-// Habilita modo demo sin autenticación
-const DEMO_MODE = true
-
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession()
   const [oauthError, setOAuthError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   
-  // Si DEMO_MODE está habilitado, usa usuario demo
-  const user = DEMO_MODE ? {
-    id: 'demo-user-123',
-    email: 'demo@permanece.camp',
-    name: 'Usuario Demo',
-  } : (session?.user ? {
+  const user = session?.user ? {
     id: session.user.id,
     email: session.user.email,
     name: session.user.name || null,
-  } : null)
+  } : null
 
   const signOut = async () => {
     setOAuthError(null)
     setIsLoading(false)
-    if (!DEMO_MODE) {
-      await authClient.signOut()
-    }
+    await authClient.signOut()
   }
 
   const handleGoogleSignIn = async () => {
@@ -71,7 +61,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  if (!DEMO_MODE && isPending) {
+  if (isPending) {
     return (
       <div className="min-h-svh bg-background flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -79,7 +69,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (!DEMO_MODE && !user) {
+  if (!user) {
     return (
       <div className="min-h-svh bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
