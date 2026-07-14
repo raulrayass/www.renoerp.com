@@ -67,35 +67,6 @@ export const attendeePayments = pgTable('attendee_payments', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
-export const staff = pgTable('staff', {
-  id: serial('id').primaryKey(),
-  userId: text('userId').notNull(),
-  name: text('name').notNull(),
-  phone: text('phone'),
-  church: text('church'),
-  ministry: text('ministry'), // Ministerio asignado
-  role: text('role'), // Descripción de rol/posición
-  isTeamLead: boolean('isTeamLead').notNull().default(false),
-  leadTeamId: integer('leadTeamId'), // Equipo que lidera (si es team lead)
-  totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
-  amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
-  status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
-  notes: text('notes'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
-})
-
-export const staffPayments = pgTable('staff_payments', {
-  id: serial('id').primaryKey(),
-  staffId: integer('staffId').notNull(),
-  userId: text('userId').notNull(),
-  amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
-  paymentDate: date('paymentDate').notNull(),
-  paymentMethod: text('paymentMethod').default('cash'), // 'cash' | 'transfer' | 'deposit'
-  notes: text('notes'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-})
-
 export const churches = pgTable('churches', {
   id: serial('id').primaryKey(),
   userId: text('userId').notNull(),
@@ -141,16 +112,6 @@ export const gameScores = pgTable('game_scores', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
-export const transactionItems = pgTable('transaction_items', {
-  id: serial('id').primaryKey(),
-  transactionId: integer('transactionId').notNull(),
-  itemType: text('itemType').notNull(), // 'attendee' | 'staff' | 'other'
-  attendeeId: integer('attendeeId'), // null si no es de campero
-  staffId: integer('staffId'), // null si no es de staff
-  amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-})
-
 export type AppUser = typeof appUsers.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
@@ -160,10 +121,6 @@ export type Attendee = typeof attendees.$inferSelect
 export type NewAttendee = typeof attendees.$inferInsert
 export type AttendeePayment = typeof attendeePayments.$inferSelect
 export type NewAttendeePayment = typeof attendeePayments.$inferInsert
-export type Staff = typeof staff.$inferSelect
-export type NewStaff = typeof staff.$inferInsert
-export type StaffPayment = typeof staffPayments.$inferSelect
-export type NewStaffPayment = typeof staffPayments.$inferInsert
 export type Church = typeof churches.$inferSelect
 export type NewChurch = typeof churches.$inferInsert
 export type Team = typeof teams.$inferSelect
@@ -174,5 +131,3 @@ export type Game = typeof games.$inferSelect
 export type NewGame = typeof games.$inferInsert
 export type GameScore = typeof gameScores.$inferSelect
 export type NewGameScore = typeof gameScores.$inferInsert
-export type TransactionItem = typeof transactionItems.$inferSelect
-export type NewTransactionItem = typeof transactionItems.$inferInsert

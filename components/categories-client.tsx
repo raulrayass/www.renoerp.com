@@ -244,12 +244,11 @@ export function CategoriesClient({ userId }: Props) {
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="pb-3 border-b">
-            <DialogTitle className="text-lg font-semibold">{editingId ? 'Editar Categoría' : 'Nueva Categoría'}</DialogTitle>
-            <p className="text-sm text-muted-foreground mt-1">{editingId ? 'Actualiza los detalles de la categoría' : 'Crea una nueva categoría para organizar transacciones'}</p>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{editingId ? 'Editar categoría' : 'Nueva categoría'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5 py-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
             <div className="flex flex-col gap-2">
               <Label htmlFor="cat-name">Nombre</Label>
               <Input
@@ -311,11 +310,11 @@ export function CategoriesClient({ userId }: Props) {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t mt-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="px-5">
+            <div className="flex justify-end gap-2 mt-2">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending} className="px-5 bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" disabled={isPending}>
                 {isPending ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
               </Button>
             </div>
@@ -325,16 +324,16 @@ export function CategoriesClient({ userId }: Props) {
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="sm:max-w-md">
-          <AlertDialogHeader className="pb-3 border-b">
-            <AlertDialogTitle className="text-lg font-semibold text-red-600">Eliminar Categoría</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-muted-foreground mt-2">
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar categoría?</AlertDialogTitle>
+            <AlertDialogDescription>
               Esta acción no se puede deshacer. Las transacciones asociadas perderán su categoría.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="pt-4 border-t">
-            <AlertDialogCancel className="px-4">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white px-4">
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90 text-white">
               {isPending ? 'Eliminando...' : 'Eliminar'}
             </AlertDialogAction>
           </AlertDialogFooter>

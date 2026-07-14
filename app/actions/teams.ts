@@ -34,15 +34,14 @@ export async function getTeamsCount(userId: string) {
 
 export async function createTeam(
   userId: string,
-  name: string,
-  color: string = '#4a9d67'
+  data: { name: string; color?: string }
 ) {
-  if (!name.trim()) {
+  if (!data.name.trim()) {
     throw new Error('El nombre del equipo es requerido')
   }
 
   const existing = await db.query.teams.findFirst({
-    where: and(eq(teams.userId, userId), eq(teams.name, name.trim())),
+    where: and(eq(teams.userId, userId), eq(teams.name, data.name.trim())),
   })
 
   if (existing) {
@@ -51,34 +50,42 @@ export async function createTeam(
 
   await db.insert(teams).values({
     userId,
-    name: name.trim(),
-    color: color || '#4a9d67',
+    name: data.name.trim(),
+    color: data.color || '#4a9d67',
   })
 }
 
 export async function updateTeam(
+  userId: string,
   teamId: number,
-  name: string,
-  color: string = '#4a9d67'
+  data: { name: string; color?: string }
 ) {
-  if (!name.trim()) {
+  if (!data.name.trim()) {
     throw new Error('El nombre del equipo es requerido')
+  }
+
+  const existing = await db.query.teams.findFirst({
+    where: and(eq(teams.userId, userId), eq(teams.name, data.name.trim())),
+  })
+
+  if (existing && existing.id !== teamId) {
+    throw new Error('Este equipo ya existe')
   }
 
   await db
     .update(teams)
-    .set({ name: name.trim(), color: color || '#4a9d67', updatedAt: new Date() })
-    .where(eq(teams.id, teamId))
+    .set({ name: data.name.trim(), color: data.color || '#4a9d67', updatedAt: new Date() })
+    .where(and(eq(teams.userId, userId), eq(teams.id, teamId)))
 }
 
-export async function deleteTeam(teamId: number) {
+export async function deleteTeam(userId: string, teamId: number) {
   // Unassign team from any campers first
   await db
     .update(attendees)
     .set({ teamId: null })
-    .where(eq(attendees.teamId, teamId))
+    .where(and(eq(attendees.userId, userId), eq(attendees.teamId, teamId)))
 
-  await db.delete(teams).where(eq(teams.id, teamId))
+  await db.delete(teams).where(and(eq(teams.userId, userId), eq(teams.id, teamId)))
 }
 
 export async function getTeamMemberCounts(userId: string) {
@@ -93,9 +100,9 @@ export async function getTeamMemberCounts(userId: string) {
   return counts
 }
 
-export async function getTeamMembers(teamId: number) {
+export async function getTeamMembers(userId: string, teamId: number) {
   return await db.query.attendees.findMany({
-    where: eq(attendees.teamId, teamId),
+    where: and(eq(attendees.userId, userId), eq(attendees.teamId, teamId)),
     orderBy: (attendees, { asc }) => [asc(attendees.name)],
   })
 }
