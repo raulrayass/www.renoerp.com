@@ -494,17 +494,17 @@ export function AttendeesClient({ userId }: Props) {
   const getRoomName = (id: string) => rooms.find(r => r.id === parseInt(id))?.name || ''
 
   return (
-    <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-5 flex flex-col gap-4 max-w-7xl mx-auto w-full">
+    <div className="px-2 sm:px-4 lg:px-6 py-2 sm:py-4 flex flex-col gap-2 sm:gap-4 max-w-7xl mx-auto w-full">
       {/* Header */}
       <PageHeader title="Camperos">
-        <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs">
+        <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs h-8">
           <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span>Plantilla</span>
+          <span className="hidden sm:inline">Plantilla</span>
         </Button>
         <label className="relative inline-block">
-          <Button variant="outline" size="sm" className="gap-1 text-xs pointer-events-none">
+          <Button variant="outline" size="sm" className="gap-1 text-xs h-8 pointer-events-none">
             <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span>Importar</span>
+            <span className="hidden sm:inline">Importar</span>
           </Button>
           <input
             type="file"
@@ -513,13 +513,13 @@ export function AttendeesClient({ userId }: Props) {
             className="absolute inset-0 opacity-0 cursor-pointer"
           />
         </label>
-        <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1 text-xs">
+        <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1 text-xs h-8">
           <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span>Exportar</span>
+          <span className="hidden sm:inline">Exportar</span>
         </Button>
-        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1 text-xs bg-green-600 hover:bg-green-700 text-white">
+        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white">
           <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span>Agregar</span>
+          <span className="hidden sm:inline">Agregar</span>
         </Button>
       </PageHeader>
 
@@ -536,7 +536,7 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Summary Cards */}
       {!loading && attendeeList.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2">
           <StatCard
             label="Esperado"
             value={formatMXN(summary.expected)}
@@ -640,12 +640,12 @@ export function AttendeesClient({ userId }: Props) {
 
               return (
                 <Card key={attendee.id} className="overflow-hidden">
-                  <CardContent className="p-3 sm:p-6">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-start justify-between gap-2">
+                  <CardContent className="p-2 sm:p-4">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-start justify-between gap-1.5">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h3 className="font-semibold text-sm sm:text-base truncate">{attendee.name}</h3>
+                          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                            <h3 className="font-semibold text-xs sm:text-sm truncate">{attendee.name}</h3>
                             <Badge
                               variant={attendee.status === 'paid' ? 'default' : attendee.status === 'partial' ? 'secondary' : 'outline'}
                               className="shrink-0 text-xs"
