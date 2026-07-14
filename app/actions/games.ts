@@ -75,10 +75,18 @@ export async function deleteGame(userId: string, gameId: number) {
   await db.delete(games).where(and(eq(games.userId, userId), eq(games.id, gameId)))
 }
 
+export async function getAllGameScores(userId: string) {
+  return db
+    .select()
+    .from(gameScores)
+    .where(eq(gameScores.userId, userId))
+}
+
 export async function getGameScores(userId: string, gameId: number) {
-  return await db.query.gameScores.findMany({
-    where: and(eq(gameScores.userId, userId), eq(gameScores.gameId, gameId)),
-  })
+  return db
+    .select()
+    .from(gameScores)
+    .where(and(eq(gameScores.userId, userId), eq(gameScores.gameId, gameId)))
 }
 
 // Add points for a team in a specific game (accumulative)
