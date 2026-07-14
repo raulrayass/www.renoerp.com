@@ -361,11 +361,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
             <DialogTitle>{editingId ? 'Editar transacción' : 'Nueva transacción'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900">Detalles de la Transacción</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-2">
-                  <Label>Tipo</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-2">
+                <Label>Tipo</Label>
                 <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v, categoryId: '' })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -381,24 +379,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
                   value={form.amount}
                   onChange={(e) => setForm({ ...form, amount: e.target.value })}
                   required
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-bold text-blue-900">Descripción y Fecha</h3>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="desc">Descripción</Label>
-                <Input
-                  id="desc" placeholder="Ej: Compra de suministros"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  required
                 />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="date">Fecha</Label>
-                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
               </div>
             </div>
             <div className="flex flex-col gap-2">
@@ -410,8 +391,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 required
               />
             </div>
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-bold text-amber-900">Categoría y Método</h3>
+            <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
                 <Label>Categoría</Label>
                 <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
@@ -446,7 +426,12 @@ export function TransactionsClient({ userId }: { userId: string }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-3">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="date">Fecha</Label>
+                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
+              </div>
+            </div>
+            <div className="space-y-3">
               <Label>Método de Pago</Label>
               <div className="flex gap-3 flex-wrap">
                 {[
