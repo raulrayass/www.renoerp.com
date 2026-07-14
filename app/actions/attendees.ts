@@ -198,27 +198,40 @@ export async function addAttendeePayment(
     })
     .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
 
-  // Find or create "Pago de Camperos" category
+  // Determine category name based on payment method
+  const categoryNameMap: Record<string, string> = {
+    'cash': 'Pago de Camperos - Efectivo',
+    'transfer': 'Pago de Camperos - Transferencia/Depósito',
+    'deposit': 'Pago de Camperos - Transferencia/Depósito',
+    'mobile': 'Pago de Camperos - Transferencia/Depósito',
+  }
+  const categoryName = categoryNameMap[paymentMethod] || 'Pago de Camperos - Efectivo'
+
+  // Find or create category based on payment method
   let [campPaymentCat] = await db
     .select()
     .from(categories)
-    .where(and(eq(categories.userId, userId), eq(categories.name, 'Pago de Camperos')))
+    .where(and(eq(categories.userId, userId), eq(categories.name, categoryName)))
 
   if (!campPaymentCat) {
+    const colorMap: Record<string, string> = {
+      'Pago de Camperos - Efectivo': '#22c55e', // green
+      'Pago de Camperos - Transferencia/Depósito': '#3b82f6', // blue
+    }
     const [newCat] = await db
       .insert(categories)
       .values({
         userId,
-        name: 'Pago de Camperos',
+        name: categoryName,
         type: 'income',
-        color: '#22c55e',
+        color: colorMap[categoryName] || '#22c55e',
         icon: 'users',
       })
       .returning()
     campPaymentCat = newCat
   }
 
-  // Create transaction for this payment
+  // Create transaction for this payment with payment method
   await db.insert(transactions).values({
     userId,
     categoryId: campPaymentCat!.id,
@@ -226,6 +239,7 @@ export async function addAttendeePayment(
     amount,
     description: `Pago de ${attendee.name}`,
     date: paymentDate,
+    paymentMethod,
   })
 }
 
