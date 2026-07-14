@@ -49,6 +49,7 @@ export const attendees = pgTable('attendees', {
   roomId: integer('roomId'),
   teamId: integer('teamId'),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
+  discount: integer('discount').notNull().default(0), // porcentaje: 0, 10, 20, 30
   amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
   status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
   notes: text('notes'),
