@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Plus, Edit2, Trash2, Gamepad2, Trophy, Minus } from 'lucide-react'
 import { toast } from 'sonner'
-import { createGame, updateGame, deleteGame, getGames, addGameScore, deleteGameScore, getGameScores } from '@/app/actions/games'
+import { createGame, updateGame, deleteGame, getGames, addGameScore, deleteGameScore, getGameScores, getAllGameScores } from '@/app/actions/games'
 import { getTeams } from '@/app/actions/teams'
 import { Game, GameScore, Team } from '@/lib/db/schema'
 import { cn } from '@/lib/utils'
@@ -21,6 +21,7 @@ interface Props {
 export function GamesClient({ userId }: Props) {
   const [gameList, setGameList] = useState<Game[]>([])
   const [teams, setTeams] = useState<Team[]>([])
+  const [allGameScores, setAllGameScores] = useState<GameScore[]>([])
   const [gameScores, setGameScores] = useState<GameScore[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -42,12 +43,14 @@ export function GamesClient({ userId }: Props) {
   async function loadGames() {
     setLoading(true)
     try {
-      const [gamesData, teamsData] = await Promise.all([
+      const [gamesData, teamsData, allScoresData] = await Promise.all([
         getGames(userId),
         getTeams(userId),
+        getAllGameScores(userId),
       ])
       setGameList(gamesData)
       setTeams(teamsData)
+      setAllGameScores(allScoresData)
     } catch (error) {
       toast.error('Error al cargar datos')
       console.error(error)
@@ -58,8 +61,12 @@ export function GamesClient({ userId }: Props) {
 
   async function loadScoresForGame(gameId: number) {
     try {
-      const scores = await getGameScores(userId, gameId)
-      setGameScores(scores)
+      const [gameScoresData, allScoresData] = await Promise.all([
+        getGameScores(userId, gameId),
+        getAllGameScores(userId),
+      ])
+      setGameScores(gameScoresData)
+      setAllGameScores(allScoresData)
     } catch (error) {
       toast.error('Error al cargar puntuaciones')
       console.error(error)
@@ -153,7 +160,7 @@ export function GamesClient({ userId }: Props) {
   const teamMap = new Map(teams.map((t) => [t.id, t]))
 
   const getTeamTotalPoints = (teamId: number): number => {
-    return gameScores
+    return allGameScores
       .filter((gs) => gs.teamId === teamId)
       .reduce((sum, gs) => sum + gs.points, 0)
   }
