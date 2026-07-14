@@ -141,6 +141,16 @@ export const gameScores = pgTable('game_scores', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
+export const transactionItems = pgTable('transaction_items', {
+  id: serial('id').primaryKey(),
+  transactionId: integer('transactionId').notNull(),
+  itemType: text('itemType').notNull(), // 'attendee' | 'staff' | 'other'
+  attendeeId: integer('attendeeId'), // null si no es de campero
+  staffId: integer('staffId'), // null si no es de staff
+  amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
 export type AppUser = typeof appUsers.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
@@ -164,3 +174,5 @@ export type Game = typeof games.$inferSelect
 export type NewGame = typeof games.$inferInsert
 export type GameScore = typeof gameScores.$inferSelect
 export type NewGameScore = typeof gameScores.$inferInsert
+export type TransactionItem = typeof transactionItems.$inferSelect
+export type NewTransactionItem = typeof transactionItems.$inferInsert

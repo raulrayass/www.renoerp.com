@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { transactions, categories } from '@/lib/db/schema'
+import { transactions, categories, transactionItems } from '@/lib/db/schema'
 import { and, eq, desc, gte, lte } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 
@@ -237,4 +237,40 @@ export async function getPaymentMethodBreakdown(userId: string) {
       other: { total: 0, transactions: 0 },
     }
   }
+}
+
+export async function createTransactionItem(
+  transactionId: number,
+  itemType: 'attendee' | 'staff' | 'other',
+  amount: string,
+  attendeeId?: number,
+  staffId?: number
+) {
+  await db.insert(transactionItems).values({
+    transactionId,
+    itemType,
+    amount,
+    attendeeId,
+    staffId,
+  })
+}
+
+export async function getTransactionItems(transactionId: number) {
+  return await db.query.transactionItems.findMany({
+    where: eq(transactionItems.transactionId, transactionId),
+  })
+}
+
+export async function getTransactionsByAttendee(attendeeId: number) {
+  return await db
+    .select()
+    .from(transactionItems)
+    .where(eq(transactionItems.attendeeId, attendeeId))
+}
+
+export async function getTransactionsByStaff(staffId: number) {
+  return await db
+    .select()
+    .from(transactionItems)
+    .where(eq(transactionItems.staffId, staffId))
 }

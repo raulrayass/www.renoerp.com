@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { staff, staffPayments, transactions, categories } from '@/lib/db/schema'
+import { staff, staffPayments, transactions, categories, transactionItems } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { desc } from 'drizzle-orm'
 
@@ -201,14 +201,27 @@ export async function addStaffPayment(
   }
 
   // Create transaction for this payment
-  await db.insert(transactions).values({
-    userId,
-    categoryId: staffPaymentCat!.id,
-    type: 'income',
-    amount,
-    description: `Pago de ${staffMember.name}`,
-    date: paymentDate,
-  })
+  const [transaction] = await db
+    .insert(transactions)
+    .values({
+      userId,
+      categoryId: staffPaymentCat!.id,
+      type: 'income',
+      amount,
+      description: `Pago de ${staffMember.name}`,
+      date: paymentDate,
+    })
+    .returning()
+
+  // Create transaction_item to link staff with transaction
+  if (transaction) {
+    await db.insert(transactionItems).values({
+      transactionId: transaction.id,
+      itemType: 'staff',
+      staffId,
+      amount,
+    })
+  }
 }
 
 export async function deleteStaffPayment(userId: string, paymentId: number) {
@@ -226,9 +239,10 @@ export async function deleteStaffPayment(userId: string, paymentId: number) {
 
   if (!staffMember) throw new Error('Miembro de staff no encontrado')
 
-  // Delete corresponding transaction
-  await db
-    .delete(transactions)
+  // Find and delete corresponding transaction and transaction_item
+  const [txn] = await db
+    .select()
+    .from(transactions)
     .where(
       and(
         eq(transactions.userId, userId),
@@ -237,6 +251,12 @@ export async function deleteStaffPayment(userId: string, paymentId: number) {
         eq(transactions.description, `Pago de ${staffMember.name}`)
       )
     )
+    .limit(1)
+
+  if (txn) {
+    await db.delete(transactionItems).where(eq(transactionItems.transactionId, txn.id))
+    await db.delete(transactions).where(eq(transactions.id, txn.id))
+  }
 
   // Update staff paid amount
   const newPaidAmount = Math.max(0, parseFloat(staffMember.amountPaid as string) - parseFloat(payment.amount as string))
