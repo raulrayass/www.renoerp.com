@@ -412,18 +412,18 @@ export function TransactionsClient({ userId }: { userId: string }) {
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar transacción' : 'Nueva transacción'}</DialogTitle>
+            <DialogTitle className="text-sm sm:text-base">{editingId ? 'Editar transacción' : 'Nueva transacción'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-2">
-                <Label>Tipo</Label>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:gap-3 mt-1 sm:mt-2">
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs sm:text-sm">Tipo</Label>
                 <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v, categoryId: '' })}>
-                  <SelectTrigger>
-                    <span className="text-foreground">
-                      {form.type === 'income' ? 'Ingreso' : form.type === 'expense' ? 'Egreso' : 'Selecciona un tipo'}
+                  <SelectTrigger className="h-6 sm:h-8 text-xs">
+                    <span className="text-foreground text-xs">
+                      {form.type === 'income' ? 'Ingreso' : form.type === 'expense' ? 'Egreso' : 'Tipo'}
                     </span>
                   </SelectTrigger>
                   <SelectContent>
@@ -432,44 +432,46 @@ export function TransactionsClient({ userId }: { userId: string }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="amount">Monto</Label>
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="amount" className="text-xs sm:text-sm">Monto</Label>
                 <Input
                   id="amount" type="number" step="0.01" min="0.01" placeholder="0"
                   value={form.amount}
                   onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                  className="h-6 sm:h-8 text-xs"
                   required
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="desc">Descripción</Label>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="desc" className="text-xs sm:text-sm">Descripción</Label>
               <Input
                 id="desc" placeholder="Ej: Compra de suministros"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="h-6 sm:h-8 text-xs"
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-2">
-                <Label>Categoría</Label>
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs sm:text-sm">Categoría</Label>
                 <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
-                  <SelectTrigger>
-                    <SelectValue>
+                  <SelectTrigger className="h-6 sm:h-8 text-xs">
+                    <span className="text-xs truncate">
                       {form.categoryId && form.categoryId !== 'none' 
                         ? (() => {
                             const selected = filteredCategories.find(c => String(c.id) === form.categoryId)
                             return selected ? (
-                              <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: selected.color }} />
-                                {selected.name}
+                              <div className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: selected.color }} />
+                                <span className="truncate">{selected.name}</span>
                               </div>
-                            ) : 'Selecciona una categoría'
+                            ) : 'Cat.'
                           })()
-                        : 'Selecciona una categoría'
+                        : 'Cat.'
                       }
-                    </SelectValue>
+                    </span>
                   </SelectTrigger>
                   <SelectContent>
                     {filteredCategories.length === 0
@@ -486,20 +488,20 @@ export function TransactionsClient({ userId }: { userId: string }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="date">Fecha</Label>
-                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="date" className="text-xs sm:text-sm">Fecha</Label>
+                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="h-6 sm:h-8 text-xs" required />
               </div>
             </div>
-            <div className="space-y-3">
-              <Label>Método de Pago</Label>
-              <div className="flex gap-3 flex-wrap">
+            <div className="space-y-1">
+              <Label className="text-xs sm:text-sm">Método de Pago</Label>
+              <div className="flex gap-1.5 sm:gap-2 flex-wrap">
                 {[
                   { value: 'cash', label: 'Efectivo' },
                   { value: 'transfer', label: 'Transferencia' },
                   { value: 'deposit', label: 'Depósito' },
                 ].map((option) => (
-                  <label key={option.value} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border-2 transition-all" 
+                  <label key={option.value} className="flex items-center gap-1 cursor-pointer p-1.5 sm:p-2 rounded-lg border transition-all text-xs sm:text-sm" 
                     style={{
                       borderColor: form.paymentMethod === option.value ? '#22c55e' : '#e5e7eb',
                       backgroundColor: form.paymentMethod === option.value ? '#f0fdf4' : 'transparent',
@@ -510,16 +512,16 @@ export function TransactionsClient({ userId }: { userId: string }) {
                       value={option.value}
                       checked={form.paymentMethod === option.value}
                       onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
-                      className="w-4 h-4"
+                      className="w-3 h-3 sm:w-4 sm:h-4"
                     />
-                    <span className="text-sm font-medium">{option.label}</span>
+                    <span className="font-medium">{option.label}</span>
                   </label>
                 ))}
               </div>
             </div>
-            <div className="flex justify-end gap-2 mt-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="hover:bg-slate-100">Cancelar</Button>
-              <Button type="submit" disabled={isPending || !form.categoryId || form.categoryId === 'none'} className="bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-400">
+            <div className="flex justify-end gap-1.5 sm:gap-2 mt-1 sm:mt-2">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="h-7 sm:h-8 text-xs sm:text-sm hover:bg-slate-100">Cancelar</Button>
+              <Button type="submit" disabled={isPending || !form.categoryId || form.categoryId === 'none'} className="h-7 sm:h-8 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-400">
                 {isPending ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
               </Button>
             </div>
