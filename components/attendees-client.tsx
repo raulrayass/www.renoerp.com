@@ -763,18 +763,18 @@ export function AttendeesClient({ userId }: Props) {
                         </div>
                       </div>
                       {discount > 0 && (
-                        <div className="bg-green-50 border border-green-200 rounded p-2 space-y-1">
+                        <div className="bg-card border-2 border-primary rounded p-2 space-y-1">
                           <div className="flex justify-between text-xs">
                             <span className="text-muted-foreground">Costo original:</span>
                             <span className="line-through text-muted-foreground">{formatMXN(originalTotal)}</span>
                           </div>
                           <div className="flex justify-between text-xs">
                             <span className="text-muted-foreground">Descuento:</span>
-                            <span className="font-semibold text-green-700">{discount}%</span>
+                            <span className="font-semibold text-primary">{discount}%</span>
                           </div>
                           <div className="flex justify-between text-sm font-semibold">
-                            <span>Costo final:</span>
-                            <span className="text-green-700">{formatMXN(total)}</span>
+                            <span className="text-foreground">Costo final:</span>
+                            <span className="text-primary">{formatMXN(total)}</span>
                           </div>
                         </div>
                       )}
@@ -1045,8 +1045,8 @@ export function AttendeesClient({ userId }: Props) {
                   ))}
                 </div>
                 {form.discount > 0 && (
-                  <div className="text-xs text-muted-foreground bg-blue-50 p-2 rounded">
-                    Monto con descuento: {formatMXN((parseFloat(form.totalAmount) || 0) * (1 - form.discount / 100))}
+                  <div className="text-xs text-foreground bg-card border border-primary p-2 rounded">
+                    Monto con descuento: <span className="font-semibold text-primary">{formatMXN((parseFloat(form.totalAmount) || 0) * (1 - form.discount / 100))}</span>
                   </div>
                 )}
               </div>

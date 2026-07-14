@@ -15,10 +15,10 @@ interface StatCardProps {
 
 const colorMap = {
   primary: { bg: 'bg-primary/10', icon: 'text-primary', text: 'text-primary' },
-  green: { bg: 'bg-emerald-50', icon: 'text-emerald-600', text: 'text-emerald-600' },
-  red: { bg: 'bg-red-50', icon: 'text-red-600', text: 'text-red-600' },
-  orange: { bg: 'bg-orange-50', icon: 'text-orange-600', text: 'text-orange-600' },
-  blue: { bg: 'bg-blue-50', icon: 'text-blue-600', text: 'text-blue-600' },
+  green: { bg: 'bg-emerald-600/10', icon: 'text-emerald-600', text: 'text-emerald-600' },
+  red: { bg: 'bg-red-600/10', icon: 'text-red-600', text: 'text-red-600' },
+  orange: { bg: 'bg-orange-600/10', icon: 'text-orange-600', text: 'text-orange-600' },
+  blue: { bg: 'bg-blue-600/10', icon: 'text-blue-600', text: 'text-blue-600' },
 }
 
 export function StatCard({ label, value, icon: Icon, color = 'primary', trend, subtitle }: StatCardProps) {
