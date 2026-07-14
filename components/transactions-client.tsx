@@ -22,6 +22,7 @@ import {
 import { getCategories } from '@/app/actions/categories'
 import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, FileDown, Filter } from 'lucide-react'
 import type { Category } from '@/lib/db/schema'
+import { RESPONSIVE_SIZES } from '@/lib/responsive-config'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 
@@ -256,11 +257,11 @@ export function TransactionsClient({ userId }: { userId: string }) {
       </div>
 
       {/* Filters */}
-      <Card className="bg-gradient-to-r from-background to-background p-2.5 sm:p-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-            <span className="text-xs sm:text-sm font-medium text-foreground">Filtros</span>
+      <Card className={`bg-gradient-to-r from-background to-background ${RESPONSIVE_SIZES.padding.section}`}>
+        <div className={RESPONSIVE_SIZES.spacing.compact}>
+          <div className={`flex items-center ${RESPONSIVE_SIZES.gap.compact}`}>
+            <Filter className={`${RESPONSIVE_SIZES.icon.small} text-muted-foreground shrink-0`} />
+            <span className={`${RESPONSIVE_SIZES.text.label} font-medium text-foreground`}>Filtros</span>
             {(filterType !== 'all' || filterCat !== 'all' || filterMethod !== 'all' || dateFrom || dateTo || search) && (
               <Button variant="ghost" size="sm" className="ml-auto h-7 text-xs text-muted-foreground hover:text-foreground" 
                 onClick={() => { setFilterType('all'); setFilterCat('all'); setFilterMethod('all'); setSearch(''); setDateFrom(''); setDateTo('') }}>
