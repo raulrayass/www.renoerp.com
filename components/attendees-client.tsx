@@ -983,7 +983,9 @@ export function AttendeesClient({ userId }: Props) {
                   <Label htmlFor="teamId" className="text-sm font-medium">Equipo</Label>
                   <Select value={form.teamId || 'none'} onValueChange={(value) => setForm({ ...form, teamId: value === 'none' ? '' : value })}>
                     <SelectTrigger id="teamId" className="mt-1">
-                      {form.teamId ? <span>{getTeamName(form.teamId)}</span> : <SelectValue placeholder="Sin equipo" />}
+                      <span className="text-foreground">
+                        {form.teamId ? getTeamName(form.teamId) : 'Sin equipo'}
+                      </span>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Sin equipo</SelectItem>
@@ -999,7 +1001,9 @@ export function AttendeesClient({ userId }: Props) {
                   <Label htmlFor="roomId" className="text-sm font-medium">Habitación</Label>
                   <Select value={form.roomId || 'none'} onValueChange={(value) => setForm({ ...form, roomId: value === 'none' ? '' : value })}>
                     <SelectTrigger id="roomId" className="mt-1">
-                      {form.roomId ? <span>{getRoomName(form.roomId)}</span> : <SelectValue placeholder="Sin habitación" />}
+                      <span className="text-foreground">
+                        {form.roomId ? getRoomName(form.roomId) : 'Sin habitación'}
+                      </span>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Sin habitación</SelectItem>
