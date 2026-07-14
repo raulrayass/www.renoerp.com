@@ -527,16 +527,16 @@ export function AttendeesClient({ userId }: Props) {
       {!loading && attendeeList.length > 0 && (
         <StatsBar
           items={[
-            { label: 'Total Camperos', value: attendeeList.length, icon: <Users2 className="w-5 h-5" />, color: 'primary' },
-            { label: 'Pagados', value: paidCount, icon: <CreditCard className="w-5 h-5" />, color: 'success' },
-            { label: 'Check-in', value: checkedInCount, icon: <LogIn className="w-5 h-5" />, color: 'primary' },
+            { label: 'Total Camperos', value: attendeeList.length, icon: <Users2 className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'primary' },
+            { label: 'Pagados', value: paidCount, icon: <CreditCard className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'success' },
+            { label: 'Check-in', value: checkedInCount, icon: <LogIn className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'primary' },
           ]}
         />
       )}
 
       {/* Summary Cards */}
       {!loading && attendeeList.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-1.5">
           <StatCard
             label="Esperado"
             value={formatMXN(summary.expected)}

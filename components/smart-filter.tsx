@@ -48,34 +48,34 @@ export function SmartFilter({
   ].reduce((a, b) => a + b, 0)
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-1.5 sm:space-y-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg p-2 sm:p-3">
       {/* Search bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Buscar por nombre, iglesia o teléfono..."
-          className="pl-9"
+          className="pl-8 h-7 sm:h-8 text-xs"
         />
         {search && (
           <button
             onClick={() => onSearchChange('')}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
         )}
       </div>
 
       {/* Quick filters - Row 1: Status */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2">
         {/* Status quick filters */}
         <Button
           variant={statusFilter === 'paid' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onStatusChange(statusFilter === 'paid' ? 'all' : 'paid')}
-          className="text-xs"
+          className="h-7 text-xs"
         >
           Pagado
         </Button>
@@ -83,7 +83,7 @@ export function SmartFilter({
           variant={statusFilter === 'partial' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onStatusChange(statusFilter === 'partial' ? 'all' : 'partial')}
-          className="text-xs"
+          className="h-7 text-xs"
         >
           Parcial
         </Button>
@@ -91,7 +91,7 @@ export function SmartFilter({
           variant={statusFilter === 'pending' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onStatusChange(statusFilter === 'pending' ? 'all' : 'pending')}
-          className="text-xs"
+          className="h-7 text-xs"
         >
           Pendiente
         </Button>
@@ -99,10 +99,10 @@ export function SmartFilter({
       </div>
 
       {/* Quick filters - Row 2: Dropdowns */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2">
         {/* Church filter */}
         <Select value={churchFilter} onValueChange={onChurchChange}>
-          <SelectTrigger className="text-xs h-9">
+          <SelectTrigger className="text-xs h-7">
             <SelectValue placeholder="Iglesia">
               {churchFilter 
                 ? churches.find(c => c.id.toString() === churchFilter)?.name || 'Iglesia'
@@ -123,7 +123,7 @@ export function SmartFilter({
         {/* Team filter */}
         {teams.length > 0 && onTeamChange && (
           <Select value={teamFilter || ''} onValueChange={onTeamChange}>
-            <SelectTrigger className="text-xs h-9">
+            <SelectTrigger className="text-xs h-7">
               <SelectValue placeholder="Equipo">
                 {teamFilter 
                   ? teams.find(t => t.id.toString() === teamFilter)?.name || 'Equipo'
@@ -145,7 +145,7 @@ export function SmartFilter({
         {/* Room filter */}
         {rooms.length > 0 && onRoomChange && (
           <Select value={roomFilter || ''} onValueChange={onRoomChange}>
-            <SelectTrigger className="text-xs h-9">
+            <SelectTrigger className="text-xs h-7">
               <SelectValue placeholder="Habitación">
                 {roomFilter 
                   ? rooms.find(r => r.id.toString() === roomFilter)?.name || 'Habitación'

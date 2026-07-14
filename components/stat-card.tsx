@@ -26,11 +26,11 @@ export function StatCard({ label, value, icon: Icon, color = 'primary', trend, s
 
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-1.5 sm:p-3">
-        <div className="flex items-start justify-between gap-1">
+      <CardContent className="p-1 sm:p-2">
+        <div className="flex items-start justify-between gap-0.5">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight truncate">{label}</p>
-            <p className="text-sm sm:text-base font-bold mt-0.5 text-foreground break-words">{value}</p>
+            <p className="text-xs sm:text-sm font-bold mt-0.5 text-foreground break-words">{value}</p>
             {subtitle && <p className="text-xs text-muted-foreground mt-0.5 truncate">{subtitle}</p>}
             {trend && (
               <div className={`text-xs mt-0.5 font-semibold ${trend.direction === 'up' ? 'text-emerald-600' : 'text-red-600'}`}>
@@ -39,8 +39,8 @@ export function StatCard({ label, value, icon: Icon, color = 'primary', trend, s
             )}
           </div>
           {Icon && (
-            <div className={`${colors.bg} p-1 sm:p-2 rounded-lg flex-shrink-0`}>
-              <Icon className={`w-3 h-3 sm:w-4 sm:h-4 ${colors.icon}`} />
+            <div className={`${colors.bg} p-0.5 sm:p-1 rounded-lg flex-shrink-0`}>
+              <Icon className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${colors.icon}`} />
             </div>
           )}
         </div>
