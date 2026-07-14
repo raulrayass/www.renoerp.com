@@ -494,7 +494,7 @@ export function AttendeesClient({ userId }: Props) {
   const getRoomName = (id: string) => rooms.find(r => r.id === parseInt(id))?.name || ''
 
   return (
-    <div className="px-2 sm:px-4 lg:px-6 py-2 sm:py-4 flex flex-col gap-2 sm:gap-4 max-w-7xl mx-auto w-full">
+    <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}
       <PageHeader title="Camperos">
         <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs h-8">

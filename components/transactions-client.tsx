@@ -220,11 +220,11 @@ export function TransactionsClient({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+    <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Transacciones</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-1">Registra y gestiona tus ingresos y egresos</p>
+          <h1 className="text-lg sm:text-xl font-bold text-foreground">Transacciones</h1>
+          <p className="text-muted-foreground text-xs mt-0.5">Registra y gestiona ingresos y egresos</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={exportToExcel} className="gap-2 hover:bg-slate-100">
