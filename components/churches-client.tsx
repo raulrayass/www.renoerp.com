@@ -159,7 +159,7 @@ export function ChurchesClient({ userId }: Props) {
                 id="church-name"
                 value={churchName}
                 onChange={(e) => setChurchName(e.target.value)}
-                placeholder="Nombre de iglesia"
+                placeholder="Ej: Iglesia Central"
                 autoFocus
               />
             </div>

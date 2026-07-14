@@ -263,7 +263,7 @@ export function TeamsClient({ userId }: Props) {
                   id="name"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Nombre"
+                  placeholder="Ej: Nombre del equipo"
                 />
             </div>
             <div>
@@ -297,7 +297,7 @@ export function TeamsClient({ userId }: Props) {
                 <Input
                   value={form.color}
                   onChange={(e) => setForm({ ...form, color: e.target.value })}
-                  placeholder="#4a9d67"
+                  placeholder="Código hex"
                   className="text-xs"
                 />
               </div>

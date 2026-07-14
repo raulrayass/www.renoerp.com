@@ -249,7 +249,7 @@ export function RoomsClient({ userId }: Props) {
                 id="name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Litera A"
+                placeholder="Ej: Litera A"
               />
             </div>
             <div>
@@ -260,7 +260,7 @@ export function RoomsClient({ userId }: Props) {
                 min="1"
                 value={form.capacity}
                 onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-                placeholder="8"
+                placeholder="0"
               />
             </div>
             <div className="flex gap-2 justify-end pt-4">

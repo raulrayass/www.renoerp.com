@@ -252,7 +252,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Input
-            placeholder="Buscar descripción..."
+            placeholder="Buscar..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-9"
@@ -375,7 +375,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
               <div className="flex flex-col gap-2">
                 <Label htmlFor="amount">Monto</Label>
                 <Input
-                  id="amount" type="number" step="0.01" min="0.01" placeholder="0.00"
+                  id="amount" type="number" step="0.01" min="0.01" placeholder="0"
                   value={form.amount}
                   onChange={(e) => setForm({ ...form, amount: e.target.value })}
                   required
@@ -385,7 +385,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
             <div className="flex flex-col gap-2">
               <Label htmlFor="desc">Descripción</Label>
               <Input
-                id="desc" placeholder="Descripción de la transacción"
+                id="desc" placeholder="Ej: Compra de suministros"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 required

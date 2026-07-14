@@ -194,4 +194,17 @@ html {
   [role="option"] {
     font-size: 16px !important;
   }
+
+  /* Mejorar contraste de placeholders */
+  input::placeholder,
+  textarea::placeholder {
+    opacity: 0.5;
+    color: var(--muted-foreground);
+  }
+
+  /* Mejor contraste cuando el input está enfocado */
+  input:focus,
+  textarea:focus {
+    background-color: var(--card);
+  }
 }
