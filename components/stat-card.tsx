@@ -39,8 +39,8 @@ export function StatCard({ label, value, icon: Icon, color = 'primary', trend, s
             )}
           </div>
           {Icon && (
-            <div className={`${colors.bg} p-0.5 sm:p-1 rounded-lg flex-shrink-0`}>
-              <Icon className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${colors.icon}`} />
+            <div className={`${colors.bg} p-1 sm:p-1.5 rounded-lg flex-shrink-0`}>
+              <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${colors.icon}`} />
             </div>
           )}
         </div>
