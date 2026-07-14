@@ -113,6 +113,36 @@ export const gameScores = pgTable('game_scores', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
+export const staff = pgTable('staff', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(),
+  name: text('name').notNull(),
+  age: integer('age'),
+  shirtSize: text('shirtSize'),
+  sex: text('sex'),
+  phone: text('phone'),
+  churchId: integer('churchId'),
+  category: text('category').notNull(),
+  leadTeamId: integer('leadTeamId'),
+  totalAmount: decimal('totalAmount', { precision: 10, scale: 2 }).default('0'),
+  amountPaid: decimal('amountPaid', { precision: 10, scale: 2 }).default('0'),
+  checkedIn: boolean('checkedIn').default(false),
+  status: text('status').default('pending'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const staffPayments = pgTable('staffPayments', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(),
+  staffId: integer('staffId').notNull(),
+  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: text('paymentMethod').notNull(),
+  paymentDate: timestamp('paymentDate').notNull(),
+  notes: text('notes'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
 export type AppUser = typeof appUsers.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
@@ -132,3 +162,7 @@ export type Game = typeof games.$inferSelect
 export type NewGame = typeof games.$inferInsert
 export type GameScore = typeof gameScores.$inferSelect
 export type NewGameScore = typeof gameScores.$inferInsert
+export type Staff = typeof staff.$inferSelect
+export type NewStaff = typeof staff.$inferInsert
+export type StaffPayment = typeof staffPayments.$inferSelect
+export type NewStaffPayment = typeof staffPayments.$inferInsert
