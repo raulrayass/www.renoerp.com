@@ -168,7 +168,9 @@ export async function addAttendeePayment(
   if (!attendee) throw new Error('Campero no encontrado')
 
   // Validate payment doesn't exceed remaining amount
-  const totalAmount = parseFloat(attendee.totalAmount as string)
+  const originalTotal = parseFloat(attendee.totalAmount as string)
+  const discount = attendee.discount || 0
+  const totalAmount = originalTotal * (1 - discount / 100)
   const alreadyPaid = parseFloat(attendee.amountPaid as string)
   const remaining = totalAmount - alreadyPaid
 
@@ -275,7 +277,9 @@ export async function deleteAttendeePayment(userId: string, paymentId: number) {
 
   // Update attendee paid amount
   const newPaidAmount = Math.max(0, parseFloat(attendee.amountPaid as string) - parseFloat(payment.amount as string))
-  const totalAmount = parseFloat(attendee.totalAmount as string)
+  const originalTotal = parseFloat(attendee.totalAmount as string)
+  const discount = attendee.discount || 0
+  const totalAmount = originalTotal * (1 - discount / 100)
   const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
 
   await db
