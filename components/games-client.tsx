@@ -165,10 +165,21 @@ export function GamesClient({ userId }: Props) {
       .reduce((sum, gs) => sum + gs.points, 0)
   }
 
+  const getTeamPointsPerGame = (teamId: number): Record<number, number> => {
+    const pointsPerGame: Record<number, number> = {}
+    allGameScores
+      .filter((gs) => gs.teamId === teamId)
+      .forEach((gs) => {
+        pointsPerGame[gs.gameId] = (pointsPerGame[gs.gameId] || 0) + gs.points
+      })
+    return pointsPerGame
+  }
+
   const leaderboard = teams
     .map((team) => ({
       team,
       totalPoints: getTeamTotalPoints(team.id),
+      pointsPerGame: getTeamPointsPerGame(team.id),
     }))
     .sort((a, b) => b.totalPoints - a.totalPoints)
 
@@ -193,27 +204,44 @@ export function GamesClient({ userId }: Props) {
         <Card>
           <CardContent className="p-6">
             <h2 className="font-semibold text-lg mb-4">Puntaje General</h2>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {leaderboard.map((entry, idx) => (
                 <div
                   key={entry.team.id}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
+                  className="rounded-lg border bg-card p-3"
                   style={{
-                    borderLeft: `4px solid ${entry.team.color}`,
+                    borderLeftWidth: '4px',
+                    borderLeftColor: entry.team.color,
                   }}
                 >
-                  <div className="text-lg font-bold text-muted-foreground w-6 text-center">
-                    {idx === 0 && '🥇'}
-                    {idx === 1 && '🥈'}
-                    {idx === 2 && '🥉'}
-                    {idx > 2 && `${idx + 1}.`}
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="text-lg font-bold text-muted-foreground w-6 text-center">
+                      {idx === 0 && '🥇'}
+                      {idx === 1 && '🥈'}
+                      {idx === 2 && '🥉'}
+                      {idx > 2 && `${idx + 1}.`}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium">{entry.team.name}</p>
+                    </div>
+                    <div className="font-bold text-lg tabular-nums text-primary">
+                      {entry.totalPoints} pts
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{entry.team.name}</p>
-                  </div>
-                  <div className="font-bold text-lg tabular-nums">
-                    {entry.totalPoints}
-                  </div>
+                  {Object.keys(entry.pointsPerGame).length > 0 && (
+                    <div className="ml-9 text-xs text-muted-foreground space-y-1">
+                      {gameList
+                        .filter((g) => entry.pointsPerGame[g.id])
+                        .map((game) => (
+                          <div key={game.id} className="flex justify-between gap-2">
+                            <span className="truncate">{game.name}:</span>
+                            <span className="font-semibold text-foreground tabular-nums">
+                              {entry.pointsPerGame[game.id]}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
