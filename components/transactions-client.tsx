@@ -238,74 +238,74 @@ export function TransactionsClient({ userId }: { userId: string }) {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card className="border-l-4 border-l-green-600">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+        <Card className="border-l-4 border-l-green-600 p-2.5 sm:p-4">
           <p className="text-xs text-muted-foreground">Ingresos</p>
-          <p className="text-lg font-bold mt-0.5 text-green-600">{formatCurrency(totals.income)}</p>
+          <p className="text-base sm:text-lg font-bold mt-0.5 text-green-600">{formatCurrency(totals.income)}</p>
         </Card>
-        <Card className="border-l-4 border-l-orange-600">
+        <Card className="border-l-4 border-l-orange-600 p-2.5 sm:p-4">
           <p className="text-xs text-muted-foreground">Egresos</p>
-          <p className="text-lg font-bold mt-0.5 text-orange-600">{formatCurrency(totals.expense)}</p>
+          <p className="text-base sm:text-lg font-bold mt-0.5 text-orange-600">{formatCurrency(totals.expense)}</p>
         </Card>
-        <Card className="border-l-4 border-l-slate-600">
+        <Card className="border-l-4 border-l-slate-600 p-2.5 sm:p-4">
           <p className="text-xs text-muted-foreground">Balance</p>
-          <p className={`text-lg font-bold mt-0.5 ${totals.income - totals.expense >= 0 ? 'text-slate-700' : 'text-red-600'}`}>
+          <p className={`text-base sm:text-lg font-bold mt-0.5 ${totals.income - totals.expense >= 0 ? 'text-slate-700' : 'text-red-600'}`}>
             {formatCurrency(totals.income - totals.expense)}
           </p>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="bg-gradient-to-r from-background to-background">
-        <div className="space-y-3">
+      <Card className="bg-gradient-to-r from-background to-background p-2.5 sm:p-4">
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-            <span className="text-sm font-medium text-foreground">Filtros</span>
+            <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <span className="text-xs sm:text-sm font-medium text-foreground">Filtros</span>
             {(filterType !== 'all' || filterCat !== 'all' || filterMethod !== 'all' || dateFrom || dateTo || search) && (
-              <Button variant="ghost" size="sm" className="ml-auto h-8 text-xs text-muted-foreground hover:text-foreground" 
+              <Button variant="ghost" size="sm" className="ml-auto h-7 text-xs text-muted-foreground hover:text-foreground" 
                 onClick={() => { setFilterType('all'); setFilterCat('all'); setFilterMethod('all'); setSearch(''); setDateFrom(''); setDateTo('') }}>
                 Limpiar
               </Button>
             )}
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Row 1: Search */}
             <div>
-              <Label className="text-xs text-muted-foreground mb-1 block">Buscar</Label>
+              <Label className="text-xs text-muted-foreground mb-0.5 block">Buscar</Label>
               <Input
                 placeholder="Descripción o monto..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-9 text-sm w-full"
+                className="h-8 text-xs w-full"
               />
             </div>
             {/* Row 2: Dates - responsive */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label className="text-xs text-muted-foreground mb-1 block">Desde</Label>
+                <Label className="text-xs text-muted-foreground mb-0.5 block">Desde</Label>
                 <Input
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="h-9 text-xs w-full"
+                  className="h-8 text-xs w-full"
                 />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground mb-1 block">Hasta</Label>
+                <Label className="text-xs text-muted-foreground mb-0.5 block">Hasta</Label>
                 <Input
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="h-9 text-xs w-full"
+                  className="h-8 text-xs w-full"
                 />
               </div>
             </div>
             {/* Row 3: Filters - responsive */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <div>
-                <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
+                <Label className="text-xs text-muted-foreground mb-0.5 block">Tipo</Label>
                 <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="h-9 text-xs">
+                  <SelectTrigger className="h-8 text-xs">
                     <span className="text-foreground truncate">
                       {filterType === 'all' ? 'Todos' : filterType === 'income' ? 'Ingresos' : 'Egresos'}
                     </span>
@@ -318,9 +318,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 </Select>
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground mb-1 block">Categoría</Label>
+                <Label className="text-xs text-muted-foreground mb-0.5 block">Categoría</Label>
                 <Select value={filterCat} onValueChange={setFilterCat}>
-                  <SelectTrigger className="h-9 text-xs">
+                  <SelectTrigger className="h-8 text-xs">
                     <span className="text-foreground truncate">
                       {filterCat === 'all' ? 'Todas' : categories.find(c => String(c.id) === filterCat)?.name || 'Todas'}
                     </span>
@@ -334,9 +334,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 </Select>
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground mb-1 block">Método</Label>
+                <Label className="text-xs text-muted-foreground mb-0.5 block">Método</Label>
                 <Select value={filterMethod} onValueChange={setFilterMethod}>
-                  <SelectTrigger className="h-9 text-xs">
+                  <SelectTrigger className="h-8 text-xs">
                     <span className="text-foreground truncate">
                       {filterMethod === 'all' ? 'Todos' : filterMethod === 'cash' ? 'Efectivo' : filterMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
                     </span>
@@ -364,43 +364,43 @@ export function TransactionsClient({ userId }: { userId: string }) {
           </p>
         </Card>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {filtered.map((t) => (
-            <div key={t.id} className="p-3 sm:p-4 border border-border rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-muted/50 transition-colors">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+            <div key={t.id} className="p-2 sm:p-3 border border-border rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 hover:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                   {t.type === 'income' ? (
-                    <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                    <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600" />
                   ) : (
-                    <ArrowDownRight className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+                    <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground text-sm truncate">{t.description}</p>
-                  <div className="hidden sm:flex gap-2 mt-1 text-xs text-muted-foreground">
+                  <p className="font-medium text-foreground text-xs sm:text-sm truncate">{t.description}</p>
+                  <div className="hidden sm:flex gap-2 mt-0.5 text-xs text-muted-foreground">
                     <span>{t.date}</span>
                     <span>•</span>
                     <span>{t.categoryName ?? 'Sin categoría'}</span>
                     <span>•</span>
                     <span>{!t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}</span>
                   </div>
-                  <div className="sm:hidden flex gap-2 mt-1 text-xs text-muted-foreground">
+                  <div className="sm:hidden flex gap-2 mt-0.5 text-xs text-muted-foreground">
                     <span>{t.date}</span>
                     <span>•</span>
                     <span className="truncate">{t.categoryName ?? 'Sin categoría'}</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between sm:justify-end gap-3">
-                <p className={`text-sm font-bold whitespace-nowrap ${t.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
+              <div className="flex items-center justify-between sm:justify-end gap-2">
+                <p className={`text-xs sm:text-sm font-bold whitespace-nowrap ${t.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
                   {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
                 </p>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="w-8 h-8 sm:w-8 sm:h-8" onClick={() => openEdit(t)}>
-                    <Pencil className="w-3.5 h-3.5 text-blue-600" />
+                <div className="flex gap-0.5">
+                  <Button variant="ghost" size="icon" className="w-7 h-7 sm:w-8 sm:h-8" onClick={() => openEdit(t)}>
+                    <Pencil className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="w-8 h-8 sm:w-8 sm:h-8" onClick={() => openDelete(t.id)}>
-                    <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                  <Button variant="ghost" size="icon" className="w-7 h-7 sm:w-8 sm:h-8" onClick={() => openDelete(t.id)}>
+                    <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-600" />
                   </Button>
                 </div>
               </div>
