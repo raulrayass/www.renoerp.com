@@ -268,80 +268,87 @@ export function TransactionsClient({ userId }: { userId: string }) {
               </Button>
             )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-            <div className="col-span-1 sm:col-span-2">
+          <div className="space-y-3">
+            {/* Row 1: Search */}
+            <div>
               <Label className="text-xs text-muted-foreground mb-1 block">Buscar</Label>
               <Input
                 placeholder="Descripción o monto..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-9 text-sm"
+                className="h-9 text-sm w-full"
               />
             </div>
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1 block">Desde</Label>
-              <Input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="h-9 text-sm"
-              />
+            {/* Row 2: Dates - responsive */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Desde</Label>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="h-9 text-xs w-full"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Hasta</Label>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="h-9 text-xs w-full"
+                />
+              </div>
             </div>
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1 block">Hasta</Label>
-              <Input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="h-9 text-sm"
-              />
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="h-9 text-sm">
-                  <span className="text-foreground">
-                    {filterType === 'all' ? 'Todos' : filterType === 'income' ? 'Ingresos' : 'Egresos'}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="income">Ingresos</SelectItem>
-                  <SelectItem value="expense">Egresos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1 block">Categoría</Label>
-              <Select value={filterCat} onValueChange={setFilterCat}>
-                <SelectTrigger className="h-9 text-sm">
-                  <span className="text-foreground">
-                    {filterCat === 'all' ? 'Todas' : categories.find(c => String(c.id) === filterCat)?.name || 'Todas'}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1 block">Método</Label>
-              <Select value={filterMethod} onValueChange={setFilterMethod}>
-                <SelectTrigger className="h-9 text-sm">
-                  <span className="text-foreground">
-                    {filterMethod === 'all' ? 'Todos' : filterMethod === 'cash' ? 'Efectivo' : filterMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="cash">Efectivo</SelectItem>
-                  <SelectItem value="transfer">Transferencia</SelectItem>
-                  <SelectItem value="deposit">Depósito</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Row 3: Filters - responsive */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <span className="text-foreground truncate">
+                      {filterType === 'all' ? 'Todos' : filterType === 'income' ? 'Ingresos' : 'Egresos'}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="income">Ingresos</SelectItem>
+                    <SelectItem value="expense">Egresos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Categoría</Label>
+                <Select value={filterCat} onValueChange={setFilterCat}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <span className="text-foreground truncate">
+                      {filterCat === 'all' ? 'Todas' : categories.find(c => String(c.id) === filterCat)?.name || 'Todas'}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Método</Label>
+                <Select value={filterMethod} onValueChange={setFilterMethod}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <span className="text-foreground truncate">
+                      {filterMethod === 'all' ? 'Todos' : filterMethod === 'cash' ? 'Efectivo' : filterMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="cash">Efectivo</SelectItem>
+                    <SelectItem value="transfer">Transferencia</SelectItem>
+                    <SelectItem value="deposit">Depósito</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
@@ -359,35 +366,40 @@ export function TransactionsClient({ userId }: { userId: string }) {
       ) : (
         <div className="space-y-2">
           {filtered.map((t) => (
-            <div key={t.id} className="p-4 border border-border rounded-lg flex items-center justify-between gap-4 hover:bg-muted/50 transition-colors">
+            <div key={t.id} className="p-3 sm:p-4 border border-border rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                   {t.type === 'income' ? (
-                    <ArrowUpRight className="w-5 h-5 text-green-600" />
+                    <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                   ) : (
-                    <ArrowDownRight className="w-5 h-5 text-orange-600" />
+                    <ArrowDownRight className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground text-sm">{t.description}</p>
-                  <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
+                  <p className="font-medium text-foreground text-sm truncate">{t.description}</p>
+                  <div className="hidden sm:flex gap-2 mt-1 text-xs text-muted-foreground">
                     <span>{t.date}</span>
                     <span>•</span>
                     <span>{t.categoryName ?? 'Sin categoría'}</span>
                     <span>•</span>
                     <span>{!t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}</span>
                   </div>
+                  <div className="sm:hidden flex gap-2 mt-1 text-xs text-muted-foreground">
+                    <span>{t.date}</span>
+                    <span>•</span>
+                    <span className="truncate">{t.categoryName ?? 'Sin categoría'}</span>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="flex items-center justify-between sm:justify-end gap-3">
                 <p className={`text-sm font-bold whitespace-nowrap ${t.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
                   {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
                 </p>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => openEdit(t)}>
+                  <Button variant="ghost" size="icon" className="w-8 h-8 sm:w-8 sm:h-8" onClick={() => openEdit(t)}>
                     <Pencil className="w-3.5 h-3.5 text-blue-600" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="w-8 h-8" onClick={() => openDelete(t.id)}>
+                  <Button variant="ghost" size="icon" className="w-8 h-8 sm:w-8 sm:h-8" onClick={() => openDelete(t.id)}>
                     <Trash2 className="w-3.5 h-3.5 text-red-600" />
                   </Button>
                 </div>
