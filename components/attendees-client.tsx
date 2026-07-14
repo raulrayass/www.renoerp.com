@@ -767,7 +767,7 @@ export function AttendeesClient({ userId }: Props) {
                             className="h-6 w-6 p-0 hover:bg-red-100"
                             title="Eliminar campero"
                           >
-                            <Trash2 className="w-3 h-3 text-red-600" />
+                            <Trash2 className="w-5 h-5 text-red-600" />
                           </Button>
                         </div>
                       </div>
