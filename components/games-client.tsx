@@ -323,7 +323,7 @@ export function GamesClient({ userId }: Props) {
                 id="name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Rally, Bolley"
+                placeholder="Ej: Rally, Volley"
               />
             </div>
             <div>
@@ -332,7 +332,7 @@ export function GamesClient({ userId }: Props) {
                 id="description"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Detalles del juego"
+                placeholder="Ej: Juego amistoso"
               />
             </div>
             <div>
