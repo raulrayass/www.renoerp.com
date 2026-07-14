@@ -300,7 +300,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
               <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder={filterType === 'all' ? 'Todos' : filterType === 'income' ? 'Ingresos' : 'Egresos'} />
+                  <span className="text-foreground">
+                    {filterType === 'all' ? 'Todos' : filterType === 'income' ? 'Ingresos' : 'Egresos'}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
@@ -313,7 +315,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
               <Label className="text-xs text-muted-foreground mb-1 block">Categoría</Label>
               <Select value={filterCat} onValueChange={setFilterCat}>
                 <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder={filterCat === 'all' ? 'Todas' : categories.find(c => String(c.id) === filterCat)?.name || 'Todas'} />
+                  <span className="text-foreground">
+                    {filterCat === 'all' ? 'Todas' : categories.find(c => String(c.id) === filterCat)?.name || 'Todas'}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas</SelectItem>
@@ -327,7 +331,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
               <Label className="text-xs text-muted-foreground mb-1 block">Método</Label>
               <Select value={filterMethod} onValueChange={setFilterMethod}>
                 <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder={filterMethod === 'all' ? 'Todos' : filterMethod === 'cash' ? 'Efectivo' : filterMethod === 'transfer' ? 'Transferencia' : 'Depósito'} />
+                  <span className="text-foreground">
+                    {filterMethod === 'all' ? 'Todos' : filterMethod === 'cash' ? 'Efectivo' : filterMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
