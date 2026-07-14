@@ -640,34 +640,34 @@ export function AttendeesClient({ userId }: Props) {
 
               return (
                 <Card key={attendee.id} className="overflow-hidden">
-                  <CardContent className="p-2 sm:p-4">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-start justify-between gap-1.5">
+                  <CardContent className="p-1.5 sm:p-3">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-start justify-between gap-1">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                            <h3 className="font-semibold text-xs sm:text-sm truncate">{attendee.name}</h3>
+                          <div className="flex items-center gap-1 mb-0.5 flex-wrap">
+                            <h3 className="font-semibold text-xs truncate">{attendee.name}</h3>
                             <Badge
                               variant={attendee.status === 'paid' ? 'default' : attendee.status === 'partial' ? 'secondary' : 'outline'}
-                              className="shrink-0 text-xs"
+                              className="shrink-0 text-xs py-0"
                             >
                               {attendee.status === 'paid' ? 'Pagado' : attendee.status === 'partial' ? 'Parcial' : 'Pendiente'}
                             </Badge>
                             {attendee.checkedIn && (
-                              <Badge className="shrink-0 text-xs bg-green-600 hover:bg-green-600 text-white gap-1">
-                                <CheckCircle2 className="w-3 h-3" />
+                              <Badge className="shrink-0 text-xs py-0 bg-green-600 hover:bg-green-600 text-white gap-0.5">
+                                <CheckCircle2 className="w-2.5 h-2.5" />
                                 Check-in
                               </Badge>
                             )}
                             {attendee.teamId && teamMap.get(attendee.teamId) && (
                               <span
-                                className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full text-white shrink-0"
+                                className="inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded-full text-white shrink-0"
                                 style={{ backgroundColor: teamMap.get(attendee.teamId)!.color }}
                               >
                                 {teamMap.get(attendee.teamId)!.name}
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-muted-foreground space-y-0.5">
+                          <div className="text-xs text-muted-foreground space-y-0">
                             {(attendee.age != null || attendee.shirtSize || attendee.sex) && (
                               <p>
                                 {[
@@ -693,18 +693,18 @@ export function AttendeesClient({ userId }: Props) {
                             {attendee.allergies && <p className="text-amber-700">Alergias: {attendee.allergies}</p>}
                           </div>
                         </div>
-                        <div className="flex gap-1 shrink-0">
+                        <div className="flex gap-0.5 shrink-0">
                           <Button
                             onClick={() => handleToggleCheckIn(attendee)}
                             size="sm"
                             variant="ghost"
                             className={cn(
-                              'h-8 w-8 p-0',
+                              'h-6 w-6 p-0',
                               attendee.checkedIn ? 'text-green-600 hover:bg-green-100' : 'hover:bg-muted'
                             )}
                             title={attendee.checkedIn ? 'Cancelar check-in' : 'Registrar check-in'}
                           >
-                            {attendee.checkedIn ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                            {attendee.checkedIn ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
                           </Button>
                           <Button
                             onClick={() => {
@@ -713,19 +713,19 @@ export function AttendeesClient({ userId }: Props) {
                             }}
                             size="sm"
                             variant="outline"
-                            className="h-8 w-8 p-0"
+                            className="h-6 w-6 p-0"
                             title="Registrar pago"
                           >
-                            <DollarSign className="w-4 h-4" />
+                            <DollarSign className="w-3 h-3" />
                           </Button>
                           <Button
                             onClick={() => openHistory(attendee.id)}
                             size="sm"
                             variant="ghost"
-                            className="h-8 w-8 p-0 hover:bg-accent/15"
+                            className="h-6 w-6 p-0 hover:bg-accent/15"
                             title="Ver historial de pagos"
                           >
-                            <History className="w-4 h-4 text-accent" />
+                            <History className="w-3 h-3 text-accent" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -752,10 +752,10 @@ export function AttendeesClient({ userId }: Props) {
                             }}
                             size="sm"
                             variant="ghost"
-                            className="h-8 w-8 p-0 hover:bg-blue-100"
+                            className="h-6 w-6 p-0 hover:bg-blue-100"
                             title="Editar campero"
                           >
-                            <Edit2 className="w-4 h-4 text-blue-600" />
+                            <Edit2 className="w-3 h-3 text-blue-600" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -764,10 +764,10 @@ export function AttendeesClient({ userId }: Props) {
                             }}
                             size="sm"
                             variant="ghost"
-                            className="h-8 w-8 p-0 hover:bg-red-100"
+                            className="h-6 w-6 p-0 hover:bg-red-100"
                             title="Eliminar campero"
                           >
-                            <Trash2 className="w-4 h-4 text-red-600" />
+                            <Trash2 className="w-3 h-3 text-red-600" />
                           </Button>
                         </div>
                       </div>
