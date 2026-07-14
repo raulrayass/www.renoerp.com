@@ -1085,7 +1085,7 @@ export function AttendeesClient({ userId }: Props) {
                 {[
                   { value: 'cash', label: 'Efectivo' },
                   { value: 'transfer', label: 'Transferencia' },
-                  { value: 'deposit', label: 'Depósito/Banca Móvil' },
+                  { value: 'deposit', label: 'Depósito' },
                 ].map((option) => (
                   <label key={option.value} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border-2 transition-all" 
                     style={{

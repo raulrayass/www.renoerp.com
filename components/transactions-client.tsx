@@ -431,16 +431,31 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
               </div>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="space-y-3">
               <Label>Método de Pago</Label>
-              <Select value={form.paymentMethod} onValueChange={(v) => setForm({ ...form, paymentMethod: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cash">Efectivo</SelectItem>
-                  <SelectItem value="transfer">Transferencia</SelectItem>
-                  <SelectItem value="deposit">Depósito</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex gap-3 flex-wrap">
+                {[
+                  { value: 'cash', label: 'Efectivo' },
+                  { value: 'transfer', label: 'Transferencia' },
+                  { value: 'deposit', label: 'Depósito' },
+                ].map((option) => (
+                  <label key={option.value} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border-2 transition-all" 
+                    style={{
+                      borderColor: form.paymentMethod === option.value ? '#22c55e' : '#e5e7eb',
+                      backgroundColor: form.paymentMethod === option.value ? '#f0fdf4' : 'transparent',
+                    }}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={option.value}
+                      checked={form.paymentMethod === option.value}
+                      onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm font-medium">{option.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
             <div className="flex justify-end gap-2 mt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="hover:bg-slate-100">Cancelar</Button>
