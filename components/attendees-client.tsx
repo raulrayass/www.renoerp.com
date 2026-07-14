@@ -497,14 +497,14 @@ export function AttendeesClient({ userId }: Props) {
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}
       <PageHeader title="Camperos">
-        <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs h-8">
-          <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="hidden sm:inline">Plantilla</span>
+        <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+          <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Plantilla</span>
         </Button>
         <label className="relative inline-block">
-          <Button variant="outline" size="sm" className="gap-1 text-xs h-8 pointer-events-none">
-            <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Importar</span>
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 pointer-events-none">
+            <Upload className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            <span>Importar</span>
           </Button>
           <input
             type="file"
@@ -513,13 +513,13 @@ export function AttendeesClient({ userId }: Props) {
             className="absolute inset-0 opacity-0 cursor-pointer"
           />
         </label>
-        <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1 text-xs h-8">
-          <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="hidden sm:inline">Exportar</span>
+        <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+          <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Exportar</span>
         </Button>
-        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white">
-          <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="hidden sm:inline">Agregar</span>
+        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Agregar</span>
         </Button>
       </PageHeader>
 
