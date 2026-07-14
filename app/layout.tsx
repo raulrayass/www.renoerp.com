@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Poppins } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { UserProvider } from '@/components/user-provider'
 import './globals.css'
@@ -9,6 +9,11 @@ const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+})
+const poppins = Poppins({
+  variable: '--font-heading',
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -52,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} bg-background`}>
+    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} bg-background`}>
       <body className="font-sans antialiased">
         <UserProvider>
           {children}

@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading, 'Poppins'), 'Geist', sans-serif;
   --font-sans: var(--font-geist-sans), 'Geist Fallback';
   --font-mono: var(--font-geist-mono), 'Geist Mono Fallback';
   --color-sidebar-ring: var(--sidebar-ring);
@@ -167,6 +167,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  h1 { @apply text-3xl sm:text-4xl; }
+  h2 { @apply text-2xl sm:text-3xl; }
+  h3 { @apply text-xl sm:text-2xl; }
+  h4 { @apply text-lg sm:text-xl; }
+
 html {
   scroll-behavior: smooth;
 }
@@ -174,11 +184,35 @@ html {
 /* Consistent Card Styling */
 [data-slot="card"] {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 [data-slot="card"]:hover {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Card transitions */
+.bg-card {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Button transitions */
+button, [role="button"], a[role="button"] {
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled), [role="button"]:hover, a[role="button"]:hover {
+  transform: translateY(-0.5px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0px);
+}
+
+/* Input focus animation */
+input:focus, textarea:focus, select:focus {
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 /* Remove inconsistent padding overrides */
