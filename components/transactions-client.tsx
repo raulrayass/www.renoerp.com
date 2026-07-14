@@ -239,18 +239,18 @@ export function TransactionsClient({ userId }: { userId: string }) {
       </div>
 
       {/* Summary */}
-      <div className={`grid grid-cols-3 gap-1.5 sm:gap-3`}>
-        <Card className="border-l-4 border-l-green-600 p-2 sm:p-4">
+      <div className={`grid grid-cols-3 gap-1 sm:gap-2`}>
+        <Card className="border-l-4 border-l-green-600 p-1.5 sm:p-3">
           <p className="text-xs text-muted-foreground">Ingresos</p>
-          <p className="text-sm sm:text-lg font-bold mt-1 text-green-600">{formatCurrency(totals.income)}</p>
+          <p className="text-xs sm:text-sm font-bold mt-0.5 text-green-600">{formatCurrency(totals.income)}</p>
         </Card>
-        <Card className="border-l-4 border-l-orange-600 p-2 sm:p-4">
+        <Card className="border-l-4 border-l-orange-600 p-1.5 sm:p-3">
           <p className="text-xs text-muted-foreground">Egresos</p>
-          <p className="text-sm sm:text-lg font-bold mt-1 text-orange-600">{formatCurrency(totals.expense)}</p>
+          <p className="text-xs sm:text-sm font-bold mt-0.5 text-orange-600">{formatCurrency(totals.expense)}</p>
         </Card>
-        <Card className="border-l-4 border-l-slate-600 p-2 sm:p-4">
+        <Card className="border-l-4 border-l-slate-600 p-1.5 sm:p-3">
           <p className="text-xs text-muted-foreground">Balance</p>
-          <p className={`text-sm sm:text-lg font-bold mt-1 ${totals.income - totals.expense >= 0 ? 'text-slate-700' : 'text-red-600'}`}>
+          <p className={`text-xs sm:text-sm font-bold mt-0.5 ${totals.income - totals.expense >= 0 ? 'text-slate-700' : 'text-red-600'}`}>
             {formatCurrency(totals.income - totals.expense)}
           </p>
         </Card>
