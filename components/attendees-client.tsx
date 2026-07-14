@@ -762,6 +762,22 @@ export function AttendeesClient({ userId }: Props) {
                           </Button>
                         </div>
                       </div>
+                      {discount > 0 && (
+                        <div className="bg-green-50 border border-green-200 rounded p-2 space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Costo original:</span>
+                            <span className="line-through text-muted-foreground">{formatMXN(originalTotal)}</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Descuento:</span>
+                            <span className="font-semibold text-green-700">{discount}%</span>
+                          </div>
+                          <div className="flex justify-between text-sm font-semibold">
+                            <span>Costo final:</span>
+                            <span className="text-green-700">{formatMXN(total)}</span>
+                          </div>
+                        </div>
+                      )}
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs sm:text-sm">
                           <span className="text-muted-foreground">Progreso de pago</span>
