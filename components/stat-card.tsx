@@ -26,21 +26,21 @@ export function StatCard({ label, value, icon: Icon, color = 'primary', trend, s
 
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex items-start justify-between gap-2">
+      <CardContent className="p-1.5 sm:p-3">
+        <div className="flex items-start justify-between gap-1">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide truncate">{label}</p>
-            <p className="text-base sm:text-lg font-bold mt-1 text-foreground break-words">{value}</p>
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight truncate">{label}</p>
+            <p className="text-sm sm:text-base font-bold mt-0.5 text-foreground break-words">{value}</p>
             {subtitle && <p className="text-xs text-muted-foreground mt-0.5 truncate">{subtitle}</p>}
             {trend && (
-              <div className={`text-xs mt-1 font-semibold ${trend.direction === 'up' ? 'text-emerald-600' : 'text-red-600'}`}>
+              <div className={`text-xs mt-0.5 font-semibold ${trend.direction === 'up' ? 'text-emerald-600' : 'text-red-600'}`}>
                 {trend.direction === 'up' ? '↑' : '↓'} {Math.abs(trend.value)}%
               </div>
             )}
           </div>
           {Icon && (
-            <div className={`${colors.bg} p-2 sm:p-2.5 rounded-lg flex-shrink-0`}>
-              <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${colors.icon}`} />
+            <div className={`${colors.bg} p-1 sm:p-2 rounded-lg flex-shrink-0`}>
+              <Icon className={`w-3 h-3 sm:w-4 sm:h-4 ${colors.icon}`} />
             </div>
           )}
         </div>
