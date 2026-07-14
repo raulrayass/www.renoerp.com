@@ -501,11 +501,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
                   { value: 'transfer', label: 'Transferencia' },
                   { value: 'deposit', label: 'Depósito' },
                 ].map((option) => (
-                  <label key={option.value} className="flex items-center gap-1 cursor-pointer p-1.5 sm:p-2 rounded-lg border transition-all text-xs sm:text-sm" 
-                    style={{
-                      borderColor: form.paymentMethod === option.value ? '#22c55e' : '#e5e7eb',
-                      backgroundColor: form.paymentMethod === option.value ? '#f0fdf4' : 'transparent',
-                    }}>
+                  <label key={option.value} className={`flex items-center gap-1 cursor-pointer p-1.5 sm:p-2 rounded-lg border transition-all text-xs sm:text-sm ${form.paymentMethod === option.value ? 'bg-primary/10 border-primary' : 'border-border'}`}>
                     <input
                       type="radio"
                       name="paymentMethod"
