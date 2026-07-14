@@ -48,34 +48,34 @@ export function SmartFilter({
   ].reduce((a, b) => a + b, 0)
 
   return (
-    <div className="space-y-1 bg-background border border-border rounded-lg p-2 sm:p-2.5">
+    <div className="space-y-1.5 bg-white dark:bg-white border-2 border-border rounded-lg p-3 sm:p-3.5">
       {/* Search bar */}
       <div className="relative">
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Buscar..."
-          className="pl-7 h-6 text-xs"
+          className="pl-10 h-8 text-xs border-2 border-border rounded-md"
         />
         {search && (
           <button
             onClick={() => onSearchChange('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           >
-            <X className="w-3 h-3" />
+            <X className="w-4 h-4" />
           </button>
         )}
       </div>
 
       {/* Quick filters - Row 1: Status */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-0.5">
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-1">
         {/* Status quick filters */}
         <Button
           variant={statusFilter === 'paid' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onStatusChange(statusFilter === 'paid' ? 'all' : 'paid')}
-          className="h-6 text-xs py-0 px-1"
+          className="h-8 text-xs py-1 px-2 border-2"
         >
           Pagado
         </Button>
@@ -83,7 +83,7 @@ export function SmartFilter({
           variant={statusFilter === 'partial' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onStatusChange(statusFilter === 'partial' ? 'all' : 'partial')}
-          className="h-6 text-xs py-0 px-1"
+          className="h-8 text-xs py-1 px-2 border-2"
         >
           Parcial
         </Button>
@@ -91,17 +91,17 @@ export function SmartFilter({
           variant={statusFilter === 'pending' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onStatusChange(statusFilter === 'pending' ? 'all' : 'pending')}
-          className="h-6 text-xs py-0 px-1"
+          className="h-8 text-xs py-1 px-2 border-2"
         >
           Pendiente
         </Button>
       </div>
 
       {/* Quick filters - Row 2: Dropdowns */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-0.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
         {/* Church filter */}
         <Select value={churchFilter} onValueChange={onChurchChange}>
-          <SelectTrigger className="text-xs h-6 py-0 px-1">
+          <SelectTrigger className="text-xs h-8 py-1 px-2 border-2 border-border rounded-md">
             <SelectValue placeholder="Iglesia">
               {churchFilter 
                 ? churches.find(c => c.id.toString() === churchFilter)?.name || 'Iglesia'
@@ -122,7 +122,7 @@ export function SmartFilter({
         {/* Team filter */}
         {teams.length > 0 && onTeamChange && (
           <Select value={teamFilter || ''} onValueChange={onTeamChange}>
-            <SelectTrigger className="text-xs h-6 py-0 px-1">
+            <SelectTrigger className="text-xs h-8 py-1 px-2 border-2 border-border rounded-md">
               <SelectValue placeholder="Equipo">
                 {teamFilter 
                   ? teams.find(t => t.id.toString() === teamFilter)?.name || 'Equipo'
@@ -144,7 +144,7 @@ export function SmartFilter({
         {/* Room filter */}
         {rooms.length > 0 && onRoomChange && (
           <Select value={roomFilter || ''} onValueChange={onRoomChange}>
-            <SelectTrigger className="text-xs h-6 py-0 px-1">
+            <SelectTrigger className="text-xs h-8 py-1 px-2 border-2 border-border rounded-md">
               <SelectValue placeholder="Habitación">
                 {roomFilter 
                   ? rooms.find(r => r.id.toString() === roomFilter)?.name || 'Habitación'

@@ -21,7 +21,7 @@ export function StatsBar({ items }: StatsBarProps) {
   return (
     <div className="flex items-stretch justify-between gap-2 sm:gap-4 py-0">
       {items.map((item, idx) => (
-        <div key={idx} className="flex-1 flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/50">
+        <div key={idx} className="flex-1 flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-white dark:bg-white">
           <div className="flex items-center gap-1 justify-center">
             {item.icon && <div className={`w-5 h-5 sm:w-6 sm:h-6 ${colorClasses[item.color || 'default']}`}>{item.icon}</div>}
             <p className={`text-base sm:text-lg font-bold ${colorClasses[item.color || 'default']}`}>
