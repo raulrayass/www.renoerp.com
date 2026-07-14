@@ -48,7 +48,7 @@ export function SmartFilter({
   ].reduce((a, b) => a + b, 0)
 
   return (
-    <div className="space-y-1.5 bg-white dark:bg-white border-2 border-border rounded-lg p-3 sm:p-3.5">
+    <div className="space-y-1.5 bg-card border-2 border-border rounded-lg p-3 sm:p-3.5">
       {/* Search bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

@@ -1038,11 +1038,7 @@ export function AttendeesClient({ userId }: Props) {
                 <Label className="text-sm font-medium">Descuento</Label>
                 <div className="flex gap-2 flex-wrap">
                   {[0, 10, 20, 30].map((discountPercent) => (
-                    <label key={discountPercent} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border-2 transition-all" 
-                      style={{
-                        borderColor: form.discount === discountPercent ? '#22c55e' : '#e5e7eb',
-                        backgroundColor: form.discount === discountPercent ? '#f0fdf4' : 'transparent',
-                      }}>
+                    <label key={discountPercent} className={`flex items-center gap-2 cursor-pointer p-2 rounded-lg border-2 transition-all ${form.discount === discountPercent ? 'bg-primary/10 border-primary' : 'border-border'}`}>
                       <input
                         type="radio"
                         name="discount"
@@ -1200,11 +1196,7 @@ export function AttendeesClient({ userId }: Props) {
                   { value: 'transfer', label: 'Transferencia' },
                   { value: 'deposit', label: 'Depósito' },
                 ].map((option) => (
-                  <label key={option.value} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border-2 transition-all" 
-                    style={{
-                      borderColor: paymentForm.paymentMethod === option.value ? '#22c55e' : '#e5e7eb',
-                      backgroundColor: paymentForm.paymentMethod === option.value ? '#f0fdf4' : 'transparent',
-                    }}>
+                  <label key={option.value} className={`flex items-center gap-2 cursor-pointer p-2 rounded-lg border-2 transition-all ${paymentForm.paymentMethod === option.value ? 'bg-primary/10 border-primary' : 'border-border'}`}>
                     <input
                       type="radio"
                       name="paymentMethod"
