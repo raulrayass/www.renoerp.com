@@ -13,7 +13,6 @@ import {
   bulkCreateStaff,
   bulkDeleteStaff,
 } from '@/app/actions/staff'
-import { getChurches } from '@/app/actions/churches'
 import { Staff, StaffPayment, Church } from '@/lib/db/schema'
 import { formatMXN } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
@@ -36,6 +35,7 @@ import { PageHeader } from '@/components/page-header'
 
 interface Props {
   userId: string
+  churches: Church[]
 }
 
 const emptyForm = {
@@ -50,9 +50,9 @@ const emptyForm = {
   notes: '',
 }
 
-export function StaffClient({ userId }: Props) {
+export function StaffClient({ userId, churches: initialChurches }: Props) {
   const [staffList, setStaffList] = useState<Staff[]>([])
-  const [churches, setChurches] = useState<Church[]>([])
+  const [churches] = useState<Church[]>(initialChurches)
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
@@ -84,7 +84,6 @@ export function StaffClient({ userId }: Props) {
     setLoading(true)
     try {
       await loadStaff()
-      await loadChurches()
     } catch (error) {
       console.error('Error loading data:', error)
     }
@@ -95,11 +94,6 @@ export function StaffClient({ userId }: Props) {
     // Load all staff for calculations and metrics (not paginated)
     const allData = await getAllStaff(userId)
     setStaffList(allData)
-  }
-
-  async function loadChurches() {
-    const data = await getChurches(userId)
-    setChurches(data)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -289,16 +283,36 @@ export function StaffClient({ userId }: Props) {
           return
         }
 
-        const staffToImport = rows.slice(1).map((row) => ({
-          name: String(row[0] || '').trim(),
-          phone: String(row[1] || '').trim() || undefined,
-          church: String(row[2] || '').trim() || undefined,
-          ministry: String(row[3] || '').trim() || undefined,
-          role: String(row[4] || '').trim() || undefined,
-          totalAmount: parseFloat(String(row[5] || '0')),
-          initialPayment: parseFloat(String(row[5] || '0')) || 0,
-          notes: String(row[6] || '').trim() || undefined,
-        }))
+        // Crear mapa de iglesias (case-insensitive)
+        const churchMap = new Map(
+          churches.map((c) => [c.name.toLowerCase().trim(), c.name])
+        )
+
+        const errors: string[] = []
+        const staffToImport = rows.slice(1).map((row, idx) => {
+          const churchName = String(row[2] || '').trim()
+          const normalizedChurchName = churchMap.get(churchName.toLowerCase())
+
+          if (churchName && !normalizedChurchName) {
+            errors.push(`Fila ${idx + 2}: Iglesia "${churchName}" no encontrada`)
+          }
+
+          return {
+            name: String(row[0] || '').trim(),
+            phone: String(row[1] || '').trim() || undefined,
+            church: normalizedChurchName || churchName,
+            ministry: String(row[3] || '').trim() || undefined,
+            role: String(row[4] || '').trim() || undefined,
+            totalAmount: parseFloat(String(row[5] || '0')),
+            initialPayment: parseFloat(String(row[5] || '0')) || 0,
+            notes: String(row[6] || '').trim() || undefined,
+          }
+        })
+
+        if (errors.length > 0) {
+          toast.error(errors.join('\n'))
+          return
+        }
 
         // Validar solo campos requeridos: nombre y monto total
         if (

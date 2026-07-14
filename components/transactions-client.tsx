@@ -53,6 +53,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
   const [form, setForm] = useState(defaultForm)
   const [filterType, setFilterType] = useState('all')
   const [filterCat, setFilterCat] = useState('all')
+  const [filterOrigin, setFilterOrigin] = useState('all') // 'all' | 'campero' | 'staff' | 'general'
   const [search, setSearch] = useState('')
 
   async function reload() {
@@ -77,6 +78,15 @@ export function TransactionsClient({ userId }: { userId: string }) {
     if (filterType !== 'all' && t.type !== filterType) return false
     if (filterCat !== 'all' && t.categoryId !== parseInt(filterCat)) return false
     if (search && !t.description.toLowerCase().includes(search.toLowerCase())) return false
+    
+    // Filter by origin based on category name
+    if (filterOrigin !== 'all') {
+      const catName = t.categoryName?.toLowerCase() || ''
+      if (filterOrigin === 'campero' && !catName.includes('campero')) return false
+      if (filterOrigin === 'staff' && !catName.includes('staff')) return false
+      if (filterOrigin === 'general' && (catName.includes('campero') || catName.includes('staff'))) return false
+    }
+    
     return true
   })
 
@@ -250,7 +260,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
           <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
           <span className="text-xs font-medium text-muted-foreground">Filtros</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <Input
             placeholder="Buscar descripción..."
             value={search}
@@ -278,8 +288,19 @@ export function TransactionsClient({ userId }: { userId: string }) {
               ))}
             </SelectContent>
           </Select>
-          {(filterType !== 'all' || filterCat !== 'all' || search) && (
-            <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={() => { setFilterType('all'); setFilterCat('all'); setSearch('') }}>
+          <Select value={filterOrigin} onValueChange={setFilterOrigin}>
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="Origen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los orígenes</SelectItem>
+              <SelectItem value="campero">Camperos</SelectItem>
+              <SelectItem value="staff">Staff</SelectItem>
+              <SelectItem value="general">General</SelectItem>
+            </SelectContent>
+          </Select>
+          {(filterType !== 'all' || filterCat !== 'all' || filterOrigin !== 'all' || search) && (
+            <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={() => { setFilterType('all'); setFilterCat('all'); setFilterOrigin('all'); setSearch('') }}>
               Limpiar filtros
             </Button>
           )}
