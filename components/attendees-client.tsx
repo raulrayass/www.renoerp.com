@@ -786,8 +786,8 @@ export function AttendeesClient({ userId }: Props) {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Información Personal */}
-            <div className="bg-card border rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Información Personal</h3>
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-bold text-slate-900">Información Personal</h3>
               <div>
                 <Label htmlFor="name" className="text-sm font-medium">Nombre *</Label>
                 <Input
@@ -842,8 +842,8 @@ export function AttendeesClient({ userId }: Props) {
             </div>
 
             {/* Contacto e Iglesia */}
-            <div className="bg-card border rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Contacto e Iglesia</h3>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-bold text-blue-900">Contacto e Iglesia</h3>
               <div>
                 <Label htmlFor="phone" className="text-sm font-medium">Teléfono Personal *</Label>
                 <Input
@@ -878,8 +878,8 @@ export function AttendeesClient({ userId }: Props) {
             </div>
 
             {/* Contactos de Emergencia */}
-            <div className="bg-card border rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Contactos de Emergencia</h3>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-bold text-amber-900">Contactos de Emergencia</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="emergencyContactName" className="text-sm font-medium">Nombre 1 *</Label>
@@ -937,8 +937,8 @@ export function AttendeesClient({ userId }: Props) {
             </div>
 
             {/* Asignación */}
-            <div className="bg-card border rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Asignación</h3>
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-bold text-purple-900">Asignación</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="teamId" className="text-sm font-medium">Equipo</Label>
@@ -975,9 +975,9 @@ export function AttendeesClient({ userId }: Props) {
               </div>
             </div>
 
-            {/* Monto y Notas */}
-            <div className="bg-card border rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Finanzas</h3>
+            {/* Costo y Notas */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-bold text-green-900">Costo</h3>
               <div>
                 <Label htmlFor="totalAmount" className="text-sm font-medium">Monto Total ($) *</Label>
                 <Input
@@ -1027,7 +1027,7 @@ export function AttendeesClient({ userId }: Props) {
             )}
           </DialogHeader>
           {selectedAttendeeId && attendeeList.find((a) => a.id === selectedAttendeeId) && (
-            <div className="bg-muted p-3 rounded-lg space-y-1 text-sm mb-4">
+            <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg space-y-1 text-sm mb-4">
               {(() => {
                 const att = attendeeList.find((a) => a.id === selectedAttendeeId)!
                 const total = parseFloat(att.totalAmount as string)
