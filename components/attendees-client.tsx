@@ -780,199 +780,234 @@ export function AttendeesClient({ userId }: Props) {
           }
         }}
       >
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-              <DialogTitle>{editingId ? 'Editar campero' : 'Agregar campero'}</DialogTitle>
+              <DialogTitle className="text-xl">{editingId ? 'Editar campero' : 'Agregar campero'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Nombre *</Label>
-              <Input
-                id="name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Ej: Nombre completo"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-2">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Información Personal */}
+            <div className="bg-card border rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Información Personal</h3>
               <div>
-                <Label htmlFor="age">Edad</Label>
+                <Label htmlFor="name" className="text-sm font-medium">Nombre *</Label>
                 <Input
-                  id="age"
-                  type="number"
-                  min="0"
-                  value={form.age}
-                  onChange={(e) => setForm({ ...form, age: e.target.value })}
-                  placeholder="21"
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Ej: Nombre completo"
+                  className="mt-1"
                 />
               </div>
-              <div>
-                <Label htmlFor="shirtSize">Talla</Label>
-                <Select value={form.shirtSize} onValueChange={(value) => setForm({ ...form, shirtSize: value })}>
-                  <SelectTrigger id="shirtSize">
-                    <SelectValue placeholder="—" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SHIRT_SIZES.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <Label htmlFor="age" className="text-sm font-medium">Edad</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    min="0"
+                    value={form.age}
+                    onChange={(e) => setForm({ ...form, age: e.target.value })}
+                    placeholder="21"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="shirtSize" className="text-sm font-medium">Talla</Label>
+                  <Select value={form.shirtSize} onValueChange={(value) => setForm({ ...form, shirtSize: value })}>
+                    <SelectTrigger id="shirtSize" className="mt-1">
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SHIRT_SIZES.map((size) => (
+                        <SelectItem key={size} value={size}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="sex" className="text-sm font-medium">Sexo</Label>
+                  <Select value={form.sex} onValueChange={(value) => setForm({ ...form, sex: value })}>
+                    <SelectTrigger id="sex" className="mt-1">
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Hombre">Hombre</SelectItem>
+                      <SelectItem value="Mujer">Mujer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+            </div>
+
+            {/* Contacto e Iglesia */}
+            <div className="bg-card border rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Contacto e Iglesia</h3>
               <div>
-                <Label htmlFor="sex">Sexo</Label>
-                <Select value={form.sex} onValueChange={(value) => setForm({ ...form, sex: value })}>
-                  <SelectTrigger id="sex">
-                    <SelectValue placeholder="—" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Hombre">Hombre</SelectItem>
-                    <SelectItem value="Mujer">Mujer</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="phone">Contacto Personal (Teléfono) *</Label>
-              <Input
-                id="phone"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                placeholder="Ej: 3326094596"
-              />
-            </div>
-            <div>
-              <Label htmlFor="church">Iglesia *</Label>
-              <Select value={form.church} onValueChange={(value) => setForm({ ...form, church: value })}>
-                <SelectTrigger id="church">
-                  <SelectValue placeholder="Selecciona una iglesia" />
-                </SelectTrigger>
-                <SelectContent>
-                  {churches.length > 0 ? (
-                    churches.map((church) => (
-                      <SelectItem key={church.id} value={church.name}>
-                        {church.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <div className="p-2 text-sm text-muted-foreground text-center">
-                      Agrega iglesias en la sección de Iglesias
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label htmlFor="emergencyContactName">Contacto emergencia 1 *</Label>
+                <Label htmlFor="phone" className="text-sm font-medium">Teléfono Personal *</Label>
                 <Input
-                  id="emergencyContactName"
-                  value={form.emergencyContactName}
-                  onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })}
-                  placeholder="Ej: Nombre"
-                />
-              </div>
-              <div>
-                <Label htmlFor="emergencyContactPhone">Teléfono 1 *</Label>
-                <Input
-                  id="emergencyContactPhone"
-                  value={form.emergencyContactPhone}
-                  onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
+                  id="phone"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   placeholder="Ej: 3326094596"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label htmlFor="emergencyContactName2">Contacto emergencia 2</Label>
-                <Input
-                  id="emergencyContactName2"
-                  value={form.emergencyContactName2}
-                  onChange={(e) => setForm({ ...form, emergencyContactName2: e.target.value })}
-                  placeholder="Papá"
+                  className="mt-1"
                 />
               </div>
               <div>
-                <Label htmlFor="emergencyContactPhone2">Teléfono 2</Label>
-                <Input
-                  id="emergencyContactPhone2"
-                  value={form.emergencyContactPhone2}
-                  onChange={(e) => setForm({ ...form, emergencyContactPhone2: e.target.value })}
-                  placeholder="3324255466"
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="allergies">Alergias</Label>
-              <Input
-                id="allergies"
-                value={form.allergies}
-                onChange={(e) => setForm({ ...form, allergies: e.target.value })}
-                placeholder="Ej: Ninguna"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-            <Label htmlFor="teamId">Equipo</Label>
-            <Select value={form.teamId || 'none'} onValueChange={(value) => setForm({ ...form, teamId: value === 'none' ? '' : value })}>
-              <SelectTrigger id="teamId">
-                {form.teamId ? <span>{getTeamName(form.teamId)}</span> : <SelectValue placeholder="Selecciona un equipo" />}
-              </SelectTrigger>
+                <Label htmlFor="church" className="text-sm font-medium">Iglesia *</Label>
+                <Select value={form.church} onValueChange={(value) => setForm({ ...form, church: value })}>
+                  <SelectTrigger id="church" className="mt-1">
+                    <SelectValue placeholder="Selecciona una iglesia" />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Sin equipo</SelectItem>
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={String(team.id)}>
-                        {team.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-            <Label htmlFor="roomId">Habitación</Label>
-            <Select value={form.roomId || 'none'} onValueChange={(value) => setForm({ ...form, roomId: value === 'none' ? '' : value })}>
-              <SelectTrigger id="roomId">
-                {form.roomId ? <span>{getRoomName(form.roomId)}</span> : <SelectValue placeholder="Selecciona una habitación" />}
-              </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Sin habitación</SelectItem>
-                    {rooms.map((room) => (
-                      <SelectItem key={room.id} value={String(room.id)}>
-                        {room.name}
-                      </SelectItem>
-                    ))}
+                    {churches.length > 0 ? (
+                      churches.map((church) => (
+                        <SelectItem key={church.id} value={church.name}>
+                          {church.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="p-2 text-sm text-muted-foreground text-center">
+                        Agrega iglesias en la sección de Iglesias
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            <div>
-              <Label htmlFor="totalAmount">Monto Total ($) *</Label>
-              <Input
-                id="totalAmount"
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.totalAmount}
-                onChange={(e) => setForm({ ...form, totalAmount: e.target.value })}
-                placeholder="1200"
-              />
+
+            {/* Contactos de Emergencia */}
+            <div className="bg-card border rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Contactos de Emergencia</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="emergencyContactName" className="text-sm font-medium">Nombre 1 *</Label>
+                  <Input
+                    id="emergencyContactName"
+                    value={form.emergencyContactName}
+                    onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })}
+                    placeholder="Ej: Nombre"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="emergencyContactPhone" className="text-sm font-medium">Teléfono 1 *</Label>
+                  <Input
+                    id="emergencyContactPhone"
+                    value={form.emergencyContactPhone}
+                    onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
+                    placeholder="Ej: 3326094596"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="emergencyContactName2" className="text-sm font-medium">Nombre 2</Label>
+                  <Input
+                    id="emergencyContactName2"
+                    value={form.emergencyContactName2}
+                    onChange={(e) => setForm({ ...form, emergencyContactName2: e.target.value })}
+                    placeholder="Ej: Nombre"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="emergencyContactPhone2" className="text-sm font-medium">Teléfono 2</Label>
+                  <Input
+                    id="emergencyContactPhone2"
+                    value={form.emergencyContactPhone2}
+                    onChange={(e) => setForm({ ...form, emergencyContactPhone2: e.target.value })}
+                    placeholder="Ej: 3326094596"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="allergies" className="text-sm font-medium">Alergias</Label>
+                <Input
+                  id="allergies"
+                  value={form.allergies}
+                  onChange={(e) => setForm({ ...form, allergies: e.target.value })}
+                  placeholder="Ej: Ninguna"
+                  className="mt-1"
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="notes">Notas</Label>
-              <Input
-                id="notes"
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Notas adicionales"
-              />
+
+            {/* Asignación */}
+            <div className="bg-card border rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Asignación</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="teamId" className="text-sm font-medium">Equipo</Label>
+                  <Select value={form.teamId || 'none'} onValueChange={(value) => setForm({ ...form, teamId: value === 'none' ? '' : value })}>
+                    <SelectTrigger id="teamId" className="mt-1">
+                      {form.teamId ? <span>{getTeamName(form.teamId)}</span> : <SelectValue placeholder="Sin equipo" />}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sin equipo</SelectItem>
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={String(team.id)}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="roomId" className="text-sm font-medium">Habitación</Label>
+                  <Select value={form.roomId || 'none'} onValueChange={(value) => setForm({ ...form, roomId: value === 'none' ? '' : value })}>
+                    <SelectTrigger id="roomId" className="mt-1">
+                      {form.roomId ? <span>{getRoomName(form.roomId)}</span> : <SelectValue placeholder="Sin habitación" />}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sin habitación</SelectItem>
+                      {rooms.map((room) => (
+                        <SelectItem key={room.id} value={String(room.id)}>
+                          {room.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2 justify-end pt-4">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="hover:bg-slate-100">
+
+            {/* Monto y Notas */}
+            <div className="bg-card border rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Finanzas</h3>
+              <div>
+                <Label htmlFor="totalAmount" className="text-sm font-medium">Monto Total ($) *</Label>
+                <Input
+                  id="totalAmount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.totalAmount}
+                  onChange={(e) => setForm({ ...form, totalAmount: e.target.value })}
+                  placeholder="0"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="notes" className="text-sm font-medium">Notas</Label>
+                <Input
+                  id="notes"
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  placeholder="Notas adicionales"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end pt-2 border-t">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-400">
+              <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white">
                 {editingId ? 'Guardar Cambios' : 'Agregar Campero'}
               </Button>
             </div>
