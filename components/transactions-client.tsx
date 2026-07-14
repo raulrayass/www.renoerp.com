@@ -53,7 +53,10 @@ export function TransactionsClient({ userId }: { userId: string }) {
   const [form, setForm] = useState(defaultForm)
   const [filterType, setFilterType] = useState('all')
   const [filterCat, setFilterCat] = useState('all')
+  const [filterMethod, setFilterMethod] = useState('all')
   const [search, setSearch] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   async function reload() {
     const [txs, cats] = await Promise.all([
@@ -76,7 +79,15 @@ export function TransactionsClient({ userId }: { userId: string }) {
   const filtered = transactions.filter((t) => {
     if (filterType !== 'all' && t.type !== filterType) return false
     if (filterCat !== 'all' && t.categoryId !== parseInt(filterCat)) return false
-    if (search && !t.description.toLowerCase().includes(search.toLowerCase())) return false
+    if (filterMethod !== 'all' && t.paymentMethod !== filterMethod) return false
+    if (dateFrom && t.date < dateFrom) return false
+    if (dateTo && t.date > dateTo) return false
+    if (search) {
+      const searchLower = search.toLowerCase()
+      const amount = parseFloat(t.amount as string)
+      if (!t.description.toLowerCase().includes(searchLower) && 
+          !formatCurrency(amount).includes(search)) return false
+    }
     return true
   })
 
@@ -245,114 +256,130 @@ export function TransactionsClient({ userId }: { userId: string }) {
       </div>
 
       {/* Filters */}
-      <Card>
-        <div className="flex items-center gap-2 mb-3">
-          <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-          <span className="text-xs font-medium text-muted-foreground">Filtros</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Input
-            placeholder="Buscar..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-9"
-          />
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los tipos</SelectItem>
-              <SelectItem value="income">Ingresos</SelectItem>
-              <SelectItem value="expense">Egresos</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterCat} onValueChange={setFilterCat}>
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="Categoría" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas las categorías</SelectItem>
-              {categories.map((c) => (
-                <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {(filterType !== 'all' || filterCat !== 'all' || search) && (
-            <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={() => { setFilterType('all'); setFilterCat('all'); setSearch('') }}>
-              Limpiar filtros
-            </Button>
-          )}
+      <Card className="bg-gradient-to-r from-background to-background">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="text-sm font-medium text-foreground">Filtros</span>
+            {(filterType !== 'all' || filterCat !== 'all' || filterMethod !== 'all' || dateFrom || dateTo || search) && (
+              <Button variant="ghost" size="sm" className="ml-auto h-8 text-xs text-muted-foreground hover:text-foreground" 
+                onClick={() => { setFilterType('all'); setFilterCat('all'); setFilterMethod('all'); setSearch(''); setDateFrom(''); setDateTo('') }}>
+                Limpiar
+              </Button>
+            )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+            <Input
+              placeholder="Buscar por descripción o monto..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-9 text-sm col-span-1 sm:col-span-2 lg:col-span-1"
+            />
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="h-9 text-sm"
+              title="Desde"
+            />
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="h-9 text-sm"
+              title="Hasta"
+            />
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="income">Ingresos</SelectItem>
+                <SelectItem value="expense">Egresos</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterCat} onValueChange={setFilterCat}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterMethod} onValueChange={setFilterMethod}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="Método" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="cash">Efectivo</SelectItem>
+                <SelectItem value="transfer">Transferencia</SelectItem>
+                <SelectItem value="deposit">Depósito</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </Card>
 
-      {/* Table */}
-      <Card className="overflow-hidden">
-        {filtered.length === 0 ? (
-          <div className="p-12 text-center text-muted-foreground text-sm">
+      {/* Transactions List */}
+      {filtered.length === 0 ? (
+        <Card className="p-12 text-center">
+          <p className="text-muted-foreground text-sm">
             {transactions.length === 0
               ? 'No hay transacciones aun. Haz clic en "Nueva" para comenzar.'
               : 'No se encontraron transacciones con los filtros actuales.'}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Fecha</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Descripcion</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3 hidden sm:table-cell">Categoria</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3 hidden sm:table-cell">Tipo</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3 hidden md:table-cell">Método</th>
-                  <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">Monto</th>
-                  <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((t) => (
-                  <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{t.date}</td>
-                    <td className="px-4 py-3 text-sm text-foreground max-w-[200px] truncate">{t.description}</td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: t.categoryColor ?? '#888' }} />
-                        <span className="text-sm text-foreground">{t.categoryName ?? 'Sin categoria'}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <Badge className={`text-xs gap-1 ${t.type === 'income' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                        {t.type === 'income'
-                          ? <><ArrowUpRight className="w-3 h-3" /> Ingreso</>
-                          : <><ArrowDownRight className="w-3 h-3" /> Egreso</>}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-sm text-foreground">
-                        {!t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <span className={`text-sm font-semibold ${t.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
-                        {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="w-8 h-8 hover:bg-blue-100" onClick={() => openEdit(t)}>
-                          <Pencil className="w-3.5 h-3.5 text-blue-600" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="w-8 h-8 hover:bg-red-100" onClick={() => openDelete(t.id)}>
-                          <Trash2 className="w-3.5 h-3.5 text-red-600" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+          </p>
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {filtered.map((t) => (
+            <Card key={t.id} className="p-4 flex items-center justify-between gap-4 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="hidden sm:flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                    {t.type === 'income' ? (
+                      <ArrowUpRight className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <ArrowDownRight className="w-5 h-5 text-orange-600" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground truncate">{t.description}</p>
+                  <div className="flex gap-2 flex-wrap mt-1">
+                    <span className="text-xs text-muted-foreground">{t.date}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                      {t.categoryName ?? 'Sin categoría'}
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                      {!t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className={`text-lg font-bold ${t.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
+                    {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
+                  </p>
+                </div>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="w-8 h-8 hover:bg-blue-100" onClick={() => openEdit(t)}>
+                    <Pencil className="w-3.5 h-3.5 text-blue-600" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="w-8 h-8 hover:bg-red-100" onClick={() => openDelete(t.id)}>
+                    <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
