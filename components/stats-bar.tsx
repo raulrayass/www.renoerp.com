@@ -19,16 +19,16 @@ export function StatsBar({ items }: StatsBarProps) {
   }
 
   return (
-    <div className="flex flex-wrap gap-1.5 sm:gap-3 py-1 px-0">
+    <div className="flex items-center justify-start gap-3 sm:gap-6 py-0">
       {items.map((item, idx) => (
-        <div key={idx} className="flex items-center gap-0.5">
-          {item.icon && <div className={`w-3 h-3 sm:w-4 sm:h-4 ${colorClasses[item.color || 'default']}`}>{item.icon}</div>}
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">{item.label}</p>
-            <p className={`text-xs sm:text-sm font-semibold ${colorClasses[item.color || 'default']}`}>
+        <div key={idx} className="flex flex-col items-center gap-0">
+          <div className="flex items-center gap-1">
+            {item.icon && <div className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClasses[item.color || 'default']}`}>{item.icon}</div>}
+            <p className={`text-sm sm:text-base font-semibold ${colorClasses[item.color || 'default']}`}>
               {item.value}
             </p>
           </div>
+          <p className="text-xs text-muted-foreground font-medium mt-0.5">{item.label}</p>
         </div>
       ))}
     </div>
