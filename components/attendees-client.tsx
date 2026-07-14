@@ -1079,24 +1079,31 @@ export function AttendeesClient({ userId }: Props) {
                 onChange={(e) => setPaymentForm({ ...paymentForm, date: e.target.value })}
               />
             </div>
-            <div>
+            <div className="space-y-3">
               <Label>Método de Pago *</Label>
-              <Select value={paymentForm.paymentMethod} onValueChange={(v) => setPaymentForm({ ...paymentForm, paymentMethod: v })}>
-                <SelectTrigger className="flex items-center">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cash" className="flex items-center">
-                    💵 Efectivo
-                  </SelectItem>
-                  <SelectItem value="transfer" className="flex items-center">
-                    🏦 Transferencia
-                  </SelectItem>
-                  <SelectItem value="deposit" className="flex items-center">
-                    📱 Depósito/Banca Móvil
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex gap-3 flex-wrap">
+                {[
+                  { value: 'cash', label: 'Efectivo' },
+                  { value: 'transfer', label: 'Transferencia' },
+                  { value: 'deposit', label: 'Depósito/Banca Móvil' },
+                ].map((option) => (
+                  <label key={option.value} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border-2 transition-all" 
+                    style={{
+                      borderColor: paymentForm.paymentMethod === option.value ? '#22c55e' : '#e5e7eb',
+                      backgroundColor: paymentForm.paymentMethod === option.value ? '#f0fdf4' : 'transparent',
+                    }}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={option.value}
+                      checked={paymentForm.paymentMethod === option.value}
+                      onChange={(e) => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm font-medium">{option.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
             <div>
               <Label htmlFor="payment-notes">Notas (opcional)</Label>
