@@ -420,7 +420,11 @@ export function TransactionsClient({ userId }: { userId: string }) {
               <div className="flex flex-col gap-2">
                 <Label>Tipo</Label>
                 <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v, categoryId: '' })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <span className="text-foreground">
+                      {form.type === 'income' ? 'Ingreso' : form.type === 'expense' ? 'Egreso' : 'Selecciona un tipo'}
+                    </span>
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="income">Ingreso</SelectItem>
                     <SelectItem value="expense">Egreso</SelectItem>
