@@ -25,6 +25,7 @@ import type { Category } from '@/lib/db/schema'
 import { RESPONSIVE_SIZES } from '@/lib/responsive-config'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
+import { TransactionSmartFilter } from '@/components/transaction-smart-filter'
 
 type TransactionRow = Awaited<ReturnType<typeof getTransactions>>[number]
 
@@ -257,103 +258,29 @@ export function TransactionsClient({ userId }: { userId: string }) {
       </div>
 
       {/* Filters */}
-      <Card className="bg-gradient-to-r from-background to-background p-1.5 sm:p-3">
-        <div className="space-y-1 sm:space-y-1.5">
-          <div className="flex items-center gap-1.5">
-            <Filter className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground shrink-0" />
-            <span className="text-xs font-medium text-foreground">Filtros</span>
-            {(filterType !== 'all' || filterCat !== 'all' || filterMethod !== 'all' || dateFrom || dateTo || search) && (
-              <Button variant="ghost" size="sm" className="ml-auto h-5 px-1.5 text-xs text-muted-foreground hover:text-foreground" 
-                onClick={() => { setFilterType('all'); setFilterCat('all'); setFilterMethod('all'); setSearch(''); setDateFrom(''); setDateTo('') }}>
-                Limpiar
-              </Button>
-            )}
-          </div>
-          <div className="space-y-1 sm:space-y-1.5">
-            {/* Row 1: Search */}
-            <div>
-              <Label className="text-xs text-muted-foreground mb-0.5 block">Buscar</Label>
-              <Input
-                placeholder="Descripción o monto..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-6 sm:h-7 text-xs w-full"
-              />
-            </div>
-            {/* Row 2: Dates - responsive */}
-            <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
-              <div>
-                <Label className="text-xs text-muted-foreground mb-0.5 block">Desde</Label>
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="h-6 sm:h-7 text-xs w-full"
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground mb-0.5 block">Hasta</Label>
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="h-6 sm:h-7 text-xs w-full"
-                />
-              </div>
-            </div>
-            {/* Row 3: Filters - responsive */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-1.5">
-              <div>
-                <Label className="text-xs text-muted-foreground mb-0.5 block">Tipo</Label>
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="h-6 sm:h-7 text-xs">
-                    <span className="text-foreground truncate text-xs">
-                      {filterType === 'all' ? 'Todos' : filterType === 'income' ? 'Ingresos' : 'Egresos'}
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="income">Ingresos</SelectItem>
-                    <SelectItem value="expense">Egresos</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground mb-0.5 block">Categoría</Label>
-                <Select value={filterCat} onValueChange={setFilterCat}>
-                  <SelectTrigger className="h-6 sm:h-7 text-xs">
-                    <span className="text-foreground truncate text-xs">
-                      {filterCat === 'all' ? 'Todas' : categories.find(c => String(c.id) === filterCat)?.name || 'Todas'}
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    {categories.map((c) => (
-                      <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground mb-0.5 block">Método</Label>
-                <Select value={filterMethod} onValueChange={setFilterMethod}>
-                  <SelectTrigger className="h-6 sm:h-7 text-xs">
-                    <span className="text-foreground truncate text-xs">
-                      {filterMethod === 'all' ? 'Todos' : filterMethod === 'cash' ? 'Efectivo' : filterMethod === 'transfer' ? 'Transferencia' : 'Depósito'}
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="cash">Efectivo</SelectItem>
-                    <SelectItem value="transfer">Transferencia</SelectItem>
-                    <SelectItem value="deposit">Depósito</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <TransactionSmartFilter
+        search={search}
+        onSearchChange={setSearch}
+        typeFilter={filterType}
+        onTypeChange={setFilterType}
+        categoryFilter={filterCat}
+        onCategoryChange={setFilterCat}
+        categories={categories}
+        methodFilter={filterMethod}
+        onMethodChange={setFilterMethod}
+        dateFrom={dateFrom}
+        onDateFromChange={setDateFrom}
+        dateTo={dateTo}
+        onDateToChange={setDateTo}
+        onClearFilters={() => {
+          setFilterType('all')
+          setFilterCat('all')
+          setFilterMethod('all')
+          setSearch('')
+          setDateFrom('')
+          setDateTo('')
+        }}
+      />
 
       {/* Transactions List */}
       {filtered.length === 0 ? (
