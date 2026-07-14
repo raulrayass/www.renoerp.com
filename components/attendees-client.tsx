@@ -201,7 +201,9 @@ export function AttendeesClient({ userId }: Props) {
       return
     }
 
-    const totalAmount = parseFloat(attendee.totalAmount as string)
+    const originalTotal = parseFloat(attendee.totalAmount as string)
+    const discount = attendee.discount || 0
+    const totalAmount = originalTotal * (1 - discount / 100)
     const alreadyPaid = parseFloat(attendee.amountPaid as string)
     const remaining = totalAmount - alreadyPaid
 
@@ -1068,7 +1070,9 @@ export function AttendeesClient({ userId }: Props) {
             <div className="bg-muted p-3 rounded-lg space-y-1 text-sm mb-4">
               {(() => {
                 const att = attendeeList.find((a) => a.id === selectedAttendeeId)!
-                const total = parseFloat(att.totalAmount as string)
+                const originalTotal = parseFloat(att.totalAmount as string)
+                const discount = att.discount || 0
+                const total = originalTotal * (1 - discount / 100)
                 const paid = parseFloat(att.amountPaid as string)
                 const remaining = total - paid
                 return (
@@ -1107,8 +1111,10 @@ export function AttendeesClient({ userId }: Props) {
                 {(() => {
                   const attendee = selectedAttendeeId ? attendeeList.find((a) => a.id === selectedAttendeeId) : null
                   if (!attendee) return null
-                  const total = parseFloat(attendee.totalAmount as string) || 0
-                  const paid = attendee.paidAmount || 0
+                  const originalTotal = parseFloat(attendee.totalAmount as string) || 0
+                  const discount = attendee.discount || 0
+                  const total = originalTotal * (1 - discount / 100)
+                  const paid = parseFloat(attendee.amountPaid as string) || 0
                   const remaining = total - paid
                   if (remaining > 0) {
                     return (
@@ -1129,8 +1135,10 @@ export function AttendeesClient({ userId }: Props) {
               {(() => {
                 const attendee = selectedAttendeeId ? attendeeList.find((a) => a.id === selectedAttendeeId) : null
                 if (!attendee) return null
-                const total = parseFloat(attendee.totalAmount as string) || 0
-                const paid = attendee.paidAmount || 0
+                const originalTotal = parseFloat(attendee.totalAmount as string) || 0
+                const discount = attendee.discount || 0
+                const total = originalTotal * (1 - discount / 100)
+                const paid = parseFloat(attendee.amountPaid as string) || 0
                 const remaining = total - paid
                 if (remaining > 0) {
                   const suggested = parseFloat(paymentForm.amount) || 0
