@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Plus, Edit2, Trash2, Users, ChevronDown } from 'lucide-react'
+import { Plus, Edit2, Trash2, Users, ChevronDown, Home } from 'lucide-react'
 import { toast } from 'sonner'
 import { createRoom, updateRoom, deleteRoom, getRooms, getRoomOccupancy, getRoomOccupants } from '@/app/actions/rooms'
 import { Room, Attendee } from '@/lib/db/schema'
+import { StatsBar } from '@/components/stats-bar'
 
 interface Props {
   userId: string
