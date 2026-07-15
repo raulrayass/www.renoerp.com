@@ -55,7 +55,7 @@ export function TransactionSmartFilter({
   ].reduce((a, b) => a + b, 0)
 
   return (
-    <div className="space-y-1 bg-card border-2 border-border rounded-lg p-2 sm:p-3">
+    <div className="space-y-1 bg-card border-2 border-border rounded-lg p-1.5 sm:p-2 overflow-hidden">
       {/* Search bar */}
       <div className="relative">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -144,29 +144,29 @@ export function TransactionSmartFilter({
       </div>
 
       {/* Date range - Row 3 */}
-      <div className="grid grid-cols-2 gap-0.5">
-        <div className="relative">
+      <div className="grid grid-cols-2 gap-0.5 overflow-hidden">
+        <div className="relative min-w-0">
           <Input
             type="date"
             value={dateFrom}
             onChange={(e) => onDateFromChange(e.target.value)}
-            className="h-7 text-xs border-2 border-border rounded-md px-1.5 py-0"
+            className="h-7 text-xs border-2 border-border rounded-md px-1 py-0 w-full"
           />
           {!dateFrom && (
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+            <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
               Desde
             </span>
           )}
         </div>
-        <div className="relative">
+        <div className="relative min-w-0">
           <Input
             type="date"
             value={dateTo}
             onChange={(e) => onDateToChange(e.target.value)}
-            className="h-7 text-xs border-2 border-border rounded-md px-1.5 py-0"
+            className="h-7 text-xs border-2 border-border rounded-md px-1 py-0 w-full"
           />
           {!dateTo && (
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+            <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
               Hasta
             </span>
           )}
