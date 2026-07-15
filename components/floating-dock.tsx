@@ -7,7 +7,7 @@ import { Square, ArrowLeftRight, Tag, Users, Church, Zap, Home, Trophy, Briefcas
 const navItems = [
   { href: '/', label: 'Dashboard', icon: Square },
   { href: '/attendees', label: 'Camperos', icon: Users },
-  { href: '/staff', label: 'Staff', icon: Briefcase },
+  { href: '/staff', label: 'Personal', icon: Briefcase },
   { href: '/teams', label: 'Equipos', icon: Zap },
   { href: '/rooms', label: 'Habitaciones', icon: Home },
   { href: '/games', label: 'Juegos', icon: Trophy },

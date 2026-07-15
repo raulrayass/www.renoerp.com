@@ -7,6 +7,7 @@ import { desc } from 'drizzle-orm'
 
 const STAFF_PER_PAGE = 20
 
+// Get ALL staff for reports and metrics (no pagination)
 export async function getAllStaff(userId: string) {
   return db
     .select()
@@ -15,6 +16,7 @@ export async function getAllStaff(userId: string) {
     .orderBy(desc(staff.createdAt))
 }
 
+// Get paginated staff for UI display
 export async function getStaff(userId: string, page: number = 1) {
   const offset = (page - 1) * STAFF_PER_PAGE
   return db
@@ -51,9 +53,8 @@ export async function createStaff(
     sex?: string
     phone?: string
     church?: string
-    category?: string
+    category?: string // Ministerio
     totalAmount: number
-    discount?: number
     notes?: string
   }
 ) {
@@ -67,10 +68,8 @@ export async function createStaff(
     church: data.church || '',
     category: data.category || '',
     totalAmount: parseFloat(data.totalAmount.toString()),
-    discount: data.discount ?? 0,
     status: 'pending',
     notes: data.notes || '',
-    checkedIn: false,
   })
 }
 
@@ -86,7 +85,6 @@ export async function updateStaff(
     church: string
     category: string
     totalAmount: number
-    discount: number
     notes: string
   }>
 ) {
@@ -111,6 +109,7 @@ export async function toggleCheckIn(userId: string, staffId: number, checkedIn: 
 }
 
 export async function deleteStaff(userId: string, staffId: number) {
+  // Delete all payments and transactions for this staff
   const payments = await db
     .select()
     .from(staffPayments)
@@ -147,9 +146,8 @@ export async function addStaffPayment(
 
   if (!staffMember) throw new Error('Personal no encontrado')
 
-  const originalTotal = parseFloat(staffMember.totalAmount as string)
-  const discount = staffMember.discount || 0
-  const totalAmount = originalTotal * (1 - discount / 100)
+  // Validate payment doesn't exceed remaining amount
+  const totalAmount = parseFloat(staffMember.totalAmount as string)
   const alreadyPaid = parseFloat(staffMember.amountPaid as string)
   const remaining = totalAmount - alreadyPaid
 
@@ -159,6 +157,7 @@ export async function addStaffPayment(
     )
   }
 
+  // Create payment record
   await db.insert(staffPayments).values({
     staffId,
     userId,
@@ -168,6 +167,7 @@ export async function addStaffPayment(
     notes: notes || '',
   })
 
+  // Update staff paid amount and status
   const newPaidAmount = alreadyPaid + amount
   const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
 
@@ -180,14 +180,16 @@ export async function addStaffPayment(
     })
     .where(and(eq(staff.userId, userId), eq(staff.id, staffId)))
 
+  // Determine category name based on payment method
   const categoryNameMap: Record<string, string> = {
-    'cash': 'Pago de Staff - Efectivo',
-    'transfer': 'Pago de Staff - Transferencia/Depósito',
-    'deposit': 'Pago de Staff - Transferencia/Depósito',
-    'mobile': 'Pago de Staff - Transferencia/Depósito',
+    'cash': 'Pago de Personal - Efectivo',
+    'transfer': 'Pago de Personal - Transferencia/Depósito',
+    'deposit': 'Pago de Personal - Transferencia/Depósito',
+    'mobile': 'Pago de Personal - Transferencia/Depósito',
   }
-  const categoryName = categoryNameMap[paymentMethod] || 'Pago de Staff - Efectivo'
+  const categoryName = categoryNameMap[paymentMethod] || 'Pago de Personal - Efectivo'
 
+  // Find or create category based on payment method
   let [staffPaymentCat] = await db
     .select()
     .from(categories)
@@ -195,8 +197,8 @@ export async function addStaffPayment(
 
   if (!staffPaymentCat) {
     const colorMap: Record<string, string> = {
-      'Pago de Staff - Efectivo': '#22c55e',
-      'Pago de Staff - Transferencia/Depósito': '#3b82f6',
+      'Pago de Personal - Efectivo': '#22c55e', // green
+      'Pago de Personal - Transferencia/Depósito': '#3b82f6', // blue
     }
     const [newCat] = await db
       .insert(categories)
@@ -211,6 +213,7 @@ export async function addStaffPayment(
     staffPaymentCat = newCat
   }
 
+  // Create transaction for this payment with payment method
   await db.insert(transactions).values({
     userId,
     categoryId: staffPaymentCat!.id,
@@ -237,6 +240,7 @@ export async function deleteStaffPayment(userId: string, paymentId: number) {
 
   if (!staffMember) throw new Error('Personal no encontrado')
 
+  // Delete corresponding transaction
   await db
     .delete(transactions)
     .where(
@@ -248,10 +252,9 @@ export async function deleteStaffPayment(userId: string, paymentId: number) {
       )
     )
 
+  // Update staff paid amount
   const newPaidAmount = Math.max(0, parseFloat(staffMember.amountPaid as string) - parseFloat(payment.amount as string))
-  const originalTotal = parseFloat(staffMember.totalAmount as string)
-  const discount = staffMember.discount || 0
-  const totalAmount = originalTotal * (1 - discount / 100)
+  const totalAmount = parseFloat(staffMember.totalAmount as string)
   const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
 
   await db
@@ -263,6 +266,7 @@ export async function deleteStaffPayment(userId: string, paymentId: number) {
     })
     .where(eq(staff.id, payment.staffId))
 
+  // Delete payment
   await db.delete(staffPayments).where(eq(staffPayments.id, paymentId))
 }
 
@@ -283,6 +287,7 @@ export async function bulkCreateStaff(
 ) {
   if (staffList.length === 0) return
 
+  // Insert staff
   const createdStaff = await db
     .insert(staff)
     .values(
@@ -304,17 +309,18 @@ export async function bulkCreateStaff(
               : 'partial'
             : 'pending',
         notes: (s.notes || '').trim(),
-        checkedIn: false,
       }))
     )
     .returning()
 
+  // Get category for payments
   const staffPaymentCat = await db.query.categories.findFirst({
-    where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Staff')),
+    where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Personal')),
   })
 
   if (!staffPaymentCat) return
 
+  // Create transactions for initial payments
   const transactionsToInsert: any[] = []
   for (let i = 0; i < createdStaff.length; i++) {
     const initialPayment = parseFloat((staffList[i].initialPayment || 0).toString())
@@ -335,12 +341,47 @@ export async function bulkCreateStaff(
   }
 }
 
-export const MINISTRIES = [
-  'Deportes',
-  'Cocina',
-  'Pastor@',
-  'Lider de equipo',
-  'Logistica',
-  'Administración',
-  'Multimendia',
-]
+export async function getCategoryDistribution(userId: string) {
+  try {
+    // Get all staff with categories
+    const allStaff = await db.query.staff.findMany({
+      where: eq(staff.userId, userId),
+      columns: {
+        category: true,
+      },
+    })
+
+    // Group and count by category
+    const categoryMap = new Map<string | null, number>()
+    for (const member of allStaff) {
+      const category = member.category || 'Sin ministerio asignado'
+      categoryMap.set(category, (categoryMap.get(category) || 0) + 1)
+    }
+
+    const colors = [
+      '#3b82f6',
+      '#ef4444',
+      '#10b981',
+      '#f59e0b',
+      '#8b5cf6',
+      '#ec4899',
+      '#14b8a6',
+      '#f97316',
+      '#06b6d4',
+      '#84cc16',
+    ]
+
+    const result = Array.from(categoryMap.entries())
+      .map(([name, count], index) => ({
+        name: name || 'Sin ministerio asignado',
+        value: count,
+        color: colors[index % colors.length],
+      }))
+      .sort((a, b) => b.value - a.value)
+
+    return result
+  } catch (error) {
+    console.error('[v0] Error fetching category distribution:', error)
+    return []
+  }
+}

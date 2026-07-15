@@ -125,7 +125,6 @@ export const staff = pgTable('staff', {
   category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimendia'
   checkedIn: boolean('checkedIn').notNull().default(false),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
-  discount: integer('discount').notNull().default(0), // porcentaje: 0, 10, 20, 30
   amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
   status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
   notes: text('notes'),
@@ -133,7 +132,7 @@ export const staff = pgTable('staff', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
-export const staffPayments = pgTable('staff_payments', {
+export const staffPayments = pgTable('staffPayments', {
   id: serial('id').primaryKey(),
   staffId: integer('staffId').notNull(),
   userId: text('userId').notNull(),
