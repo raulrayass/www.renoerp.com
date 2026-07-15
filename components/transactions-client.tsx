@@ -87,8 +87,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
     if (search) {
       const searchLower = search.toLowerCase()
       const amount = parseFloat(t.amount as string)
-      if (!t.description.toLowerCase().includes(searchLower) && 
-          !formatCurrency(amount).includes(search)) return false
+      if (!t.description.toLowerCase().includes(searchLower) &&
+        !formatCurrency(amount).includes(search)) return false
     }
     return true
   })
@@ -225,7 +225,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
       <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap">
         <div>
           <h1 className="text-lg sm:text-xl font-bold text-foreground">Transacciones</h1>
-          <p className="text-muted-foreground text-xs mt-0.5">Registra y gestiona ingresos y egresos</p>
+          <p className="text-muted-foreground text-xs mt-0.5"></p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={exportToExcel} className="gap-2 hover:bg-slate-100">
@@ -319,47 +319,47 @@ export function TransactionsClient({ userId }: { userId: string }) {
             if (t.paymentMethod === 'cash') borderColor = 'border-l-green-600'
             else if (t.paymentMethod === 'transfer') borderColor = 'border-l-blue-600'
             else if (t.paymentMethod === 'deposit') borderColor = 'border-l-purple-600'
-            
+
             return (
-            <div key={t.id} className={`p-1.5 sm:p-2.5 border border-l-4 border-border ${borderColor} rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 hover:bg-muted/50 transition-colors`}>
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                  {t.type === 'income' ? (
-                    <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600" />
-                  ) : (
-                    <ArrowDownRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-600" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground text-xs truncate">{t.description}</p>
-                  <div className="hidden sm:flex gap-2 mt-0.5 text-xs text-muted-foreground">
-                    <span>{t.date}</span>
-                    <span>•</span>
-                    <span>{t.categoryName ?? 'Sin categoría'}</span>
-                    <span>•</span>
-                    <span>{!t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}</span>
+              <div key={t.id} className={`p-1.5 sm:p-2.5 border border-l-4 border-border ${borderColor} rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 hover:bg-muted/50 transition-colors`}>
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                    {t.type === 'income' ? (
+                      <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-600" />
+                    ) : (
+                      <ArrowDownRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-600" />
+                    )}
                   </div>
-                  <div className="sm:hidden flex gap-1.5 mt-0.5 text-xs text-muted-foreground">
-                    <span className="text-xs">{t.date}</span>
-                    <span>•</span>
-                    <span className="truncate text-xs">{t.categoryName ?? 'Sin categoría'}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground text-xs truncate">{t.description}</p>
+                    <div className="hidden sm:flex gap-2 mt-0.5 text-xs text-muted-foreground">
+                      <span>{t.date}</span>
+                      <span>•</span>
+                      <span>{t.categoryName ?? 'Sin categoría'}</span>
+                      <span>•</span>
+                      <span>{!t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}</span>
+                    </div>
+                    <div className="sm:hidden flex gap-1.5 mt-0.5 text-xs text-muted-foreground">
+                      <span className="text-xs">{t.date}</span>
+                      <span>•</span>
+                      <span className="truncate text-xs">{t.categoryName ?? 'Sin categoría'}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between sm:justify-end gap-1.5">
+                  <p className={`text-xs sm:text-sm font-bold whitespace-nowrap ${t.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
+                    {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
+                  </p>
+                  <div className="flex gap-0.5">
+                    <Button variant="ghost" size="icon" className="w-6 h-6 sm:w-7 sm:h-7" onClick={() => openEdit(t)}>
+                      <Pencil className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="w-6 h-6 sm:w-7 sm:h-7" onClick={() => openDelete(t.id)}>
+                      <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-red-600" />
+                    </Button>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between sm:justify-end gap-1.5">
-                <p className={`text-xs sm:text-sm font-bold whitespace-nowrap ${t.type === 'income' ? 'text-green-600' : 'text-orange-600'}`}>
-                  {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
-                </p>
-                <div className="flex gap-0.5">
-                  <Button variant="ghost" size="icon" className="w-6 h-6 sm:w-7 sm:h-7" onClick={() => openEdit(t)}>
-                    <Pencil className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="w-6 h-6 sm:w-7 sm:h-7" onClick={() => openDelete(t.id)}>
-                    <Trash2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-red-600" />
-                  </Button>
-                </div>
-              </div>
-            </div>
             )
           })}
         </div>
@@ -414,16 +414,16 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
                   <SelectTrigger className="h-6 sm:h-8 text-xs">
                     <span className="text-xs truncate">
-                      {form.categoryId && form.categoryId !== 'none' 
+                      {form.categoryId && form.categoryId !== 'none'
                         ? (() => {
-                            const selected = filteredCategories.find(c => String(c.id) === form.categoryId)
-                            return selected ? (
-                              <div className="flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: selected.color }} />
-                                <span className="truncate">{selected.name}</span>
-                              </div>
-                            ) : 'Cat.'
-                          })()
+                          const selected = filteredCategories.find(c => String(c.id) === form.categoryId)
+                          return selected ? (
+                            <div className="flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: selected.color }} />
+                              <span className="truncate">{selected.name}</span>
+                            </div>
+                          ) : 'Cat.'
+                        })()
                         : 'Cat.'
                       }
                     </span>
