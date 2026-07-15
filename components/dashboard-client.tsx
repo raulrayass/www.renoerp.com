@@ -219,7 +219,7 @@ export function DashboardClient({ userId }: { userId: string }) {
           <h2 className="font-semibold text-foreground mb-1">Camperos por Iglesia</h2>
           <p className="text-xs text-muted-foreground mb-4"></p>
           {churchData && churchData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={380}>
               <PieChart>
                 <Pie
                   data={churchData}
