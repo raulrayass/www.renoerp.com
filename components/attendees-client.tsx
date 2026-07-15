@@ -448,7 +448,7 @@ export function AttendeesClient({ userId }: Props) {
   const filteredAttendees = attendeeList.filter((a) => {
     // Smart search - searches name, phone, church simultaneously
     const searchLower = search.toLowerCase()
-    const matchesSearch = !search || 
+    const matchesSearch = !search ||
       a.name.toLowerCase().includes(searchLower) ||
       (a.phone && a.phone.includes(search)) ||
       (a.church && a.church.toLowerCase().includes(searchLower))
@@ -821,7 +821,7 @@ export function AttendeesClient({ userId }: Props) {
       >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-              <DialogTitle className="text-xl">{editingId ? 'Editar campero' : 'Agregar campero'}</DialogTitle>
+            <DialogTitle className="text-xl">{editingId ? 'Editar campero' : 'Agregar campero'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Información Personal */}
@@ -1020,7 +1020,7 @@ export function AttendeesClient({ userId }: Props) {
 
             {/* Monto y Notas */}
             <div className="bg-card border rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Finanzas</h3>
+              <h3 className="text-sm font-semibold text-foreground">Costo</h3>
               <div>
                 <Label htmlFor="totalAmount" className="text-sm font-medium">Monto Total ($) *</Label>
                 <Input
