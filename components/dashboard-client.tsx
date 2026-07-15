@@ -77,14 +77,14 @@ export function DashboardClient({ userId }: { userId: string }) {
           value={formatCurrency(totalIncome)}
           icon={TrendingUp}
           color="green"
-          subtitle="Acumulado total"
+          subtitle=""
         />
         <StatCard
           label="Total Egresos"
           value={formatCurrency(totalExpense)}
           icon={TrendingDown}
           color="orange"
-          subtitle="Acumulado total"
+          subtitle=""
         />
       </div>
 
