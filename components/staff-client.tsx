@@ -882,7 +882,7 @@ export function StaffClient({ userId }: Props) {
 
             {/* Monto y Notas */}
             <div className="bg-card border rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Finanzas</h3>
+              <h3 className="text-sm font-semibold text-foreground">Costo</h3>
               <div>
                 <Label htmlFor="totalAmount" className="text-sm font-medium">Monto Total ($) *</Label>
                 <Input
