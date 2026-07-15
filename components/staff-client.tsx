@@ -183,10 +183,10 @@ export function StaffClient({ userId }: Props) {
       try {
         if (editingId) {
           await updateStaff(userId, editingId, payload)
-          toast.success('Personal de ministerio actualizado correctamente')
+          toast.success('Staff actualizado correctamente')
         } else {
           await createStaff(userId, payload)
-          toast.success('Personal de ministerio agregado correctamente')
+          toast.success('Staff agregado correctamente')
         }
         setDialogOpen(false)
         setForm({ ...emptyForm })
