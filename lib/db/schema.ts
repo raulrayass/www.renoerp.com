@@ -117,27 +117,28 @@ export const staff = pgTable('staff', {
   id: serial('id').primaryKey(),
   userId: text('userId').notNull(),
   name: text('name').notNull(),
-  category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimendia'
-  sex: text('sex'), // 'H' | 'M'
-  shirtSize: text('shirtSize'), // 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
-  phone: text('phone'),
-  churchId: integer('churchId'),
   age: integer('age'),
-  checkedIn: boolean('checkedIn').default(false),
-  leadTeamId: integer('leadTeamId'),
+  shirtSize: text('shirtSize'), // 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
+  sex: text('sex'), // 'H' | 'M'
+  phone: text('phone'),
+  church: text('church'),
+  category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimendia'
+  checkedIn: boolean('checkedIn').notNull().default(false),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
+  discount: integer('discount').notNull().default(0), // porcentaje: 0, 10, 20, 30
   amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
   status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
+  notes: text('notes'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
-export const staffPayments = pgTable('staffPayments', {
+export const staffPayments = pgTable('staff_payments', {
   id: serial('id').primaryKey(),
   staffId: integer('staffId').notNull(),
   userId: text('userId').notNull(),
   amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
-  paymentDate: timestamp('paymentDate').notNull(),
+  paymentDate: date('paymentDate').notNull(),
   paymentMethod: text('paymentMethod').default('cash'), // 'cash' | 'transfer' | 'deposit'
   notes: text('notes'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
