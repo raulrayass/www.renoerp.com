@@ -41,6 +41,16 @@ interface Props {
   userId: string
 }
 
+const MINISTRIES = [
+  'Deportes',
+  'Cocina',
+  'Pastor@',
+  'Lider de equipo',
+  'Logistica',
+  'Administración',
+  'Multimendia',
+]
+
 const emptyForm = {
   name: '',
   age: '',
@@ -183,7 +193,7 @@ export function StaffClient({ userId }: Props) {
         setEditingId(null)
         await loadAttendees()
       } catch (error) {
-        toast.error('Error al guardar el personal de ministerio')
+        toast.error('Error al guardar el staff')
         console.error(error)
       }
     })
@@ -240,7 +250,7 @@ export function StaffClient({ userId }: Props) {
         toast.success('Personal de ministerio eliminado')
         await loadAttendees()
       } catch (error) {
-        toast.error('Error al eliminar el personal de ministerio')
+        toast.error('Error al eliminar el staff')
         console.error(error)
       }
     })
@@ -341,8 +351,8 @@ export function StaffClient({ userId }: Props) {
 
     const ws = XLSX.utils.aoa_to_sheet(rows)
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Personal de ministerios')
-    XLSX.writeFile(wb, 'Plantilla_Personal de ministerios.xlsx')
+    XLSX.utils.book_append_sheet(wb, ws, 'Staff')
+    XLSX.writeFile(wb, 'Plantilla_Staff.xlsx')
     toast.success('Plantilla descargada')
   }
 
@@ -388,7 +398,7 @@ export function StaffClient({ userId }: Props) {
           )
         ) {
           await bulkCreateStaff(userId, attendeesToImport)
-          toast.success(`${attendeesToImport.length} personal de ministerios importados correctamente`)
+          toast.success(`${attendeesToImport.length} staff importados correctamente`)
           await loadAttendees()
         } else {
           toast.error('Verifica que todos los registros tengan Nombre y Monto Total válidos.')
@@ -404,7 +414,7 @@ export function StaffClient({ userId }: Props) {
 
   function exportCurrentData() {
     if (staffList.length === 0) {
-      toast.error('No hay personal de ministerios para exportar')
+      toast.error('No hay staff para exportar')
       return
     }
     const data = staffList.map((a) => {
@@ -439,8 +449,8 @@ export function StaffClient({ userId }: Props) {
     })
     const ws = XLSX.utils.json_to_sheet(data)
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Personal de ministerios')
-    XLSX.writeFile(wb, `Personal de ministerios_${new Date().toISOString().split('T')[0]}.xlsx`)
+    XLSX.utils.book_append_sheet(wb, ws, 'Staff')
+    XLSX.writeFile(wb, `Staff_${new Date().toISOString().split('T')[0]}.xlsx`)
     toast.success('Reporte exportado correctamente')
   }
 
@@ -496,7 +506,7 @@ export function StaffClient({ userId }: Props) {
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}
-      <PageHeader title="Personal de ministerios">
+      <PageHeader title="Staff">
         <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
           <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
           <span>Plantilla</span>
@@ -527,7 +537,7 @@ export function StaffClient({ userId }: Props) {
       {!loading && staffList.length > 0 && (
         <StatsBar
           items={[
-            { label: 'Total Personal de ministerios', value: staffList.length, icon: <Users2 className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'primary' },
+            { label: 'Total Staff', value: staffList.length, icon: <Users2 className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'primary' },
             { label: 'Pagados', value: paidCount, icon: <CreditCard className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'success' },
             { label: 'Check-in', value: checkedInCount, icon: <LogIn className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'primary' },
           ]}
@@ -612,12 +622,12 @@ export function StaffClient({ userId }: Props) {
           <div className="flex flex-col items-center gap-3">
             <Users className="w-12 h-12 text-muted-foreground/40" />
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-1">Sin personal de ministerios registrados</h3>
-              <p className="text-sm text-muted-foreground">Comienza agregando personal de ministerios usando el botón "Agregar" o importando un archivo Excel</p>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Sin staff registrados</h3>
+              <p className="text-sm text-muted-foreground">Comienza agregando staff usando el botón "Agregar" o importando un archivo Excel</p>
             </div>
             <Button onClick={() => setDialogOpen(true)} className="mt-2 gap-2">
               <Plus className="w-4 h-4" />
-              Agregar primer personal de ministerio
+              Agregar primer staff
             </Button>
           </div>
         </Card>
@@ -625,7 +635,7 @@ export function StaffClient({ userId }: Props) {
         <Card className="p-12 text-center">
           <div className="flex flex-col items-center gap-3">
             <Search className="w-10 h-10 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">No se encontraron personal de ministerios con esos filtros</p>
+            <p className="text-sm text-muted-foreground">No se encontraron staff con esos filtros</p>
           </div>
         </Card>
       ) : (
@@ -753,7 +763,7 @@ export function StaffClient({ userId }: Props) {
                             size="sm"
                             variant="ghost"
                             className="h-6 w-6 p-0 hover:bg-blue-100"
-                            title="Editar personal de ministerio"
+                            title="Editar staff"
                           >
                             <Edit2 className="w-3 h-3 text-blue-600" />
                           </Button>
@@ -765,7 +775,7 @@ export function StaffClient({ userId }: Props) {
                             size="sm"
                             variant="ghost"
                             className="h-6 w-6 p-0 hover:bg-red-100"
-                            title="Eliminar personal de ministerio"
+                            title="Eliminar staff"
                           >
                             <Trash2 className="w-3 h-3 text-red-600" />
                           </Button>
@@ -821,7 +831,7 @@ export function StaffClient({ userId }: Props) {
       >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-              <DialogTitle className="text-xl">{editingId ? 'Editar personal de ministerio' : 'Agregar personal de ministerio'}</DialogTitle>
+              <DialogTitle className="text-xl">{editingId ? 'Editar Staff' : 'Agregar Staff'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Información Personal */}
@@ -916,105 +926,23 @@ export function StaffClient({ userId }: Props) {
               </div>
             </div>
 
-            {/* Contactos de Emergencia */}
+            {/* Ministerio y Categoría */}
             <div className="bg-card border rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Contactos de Emergencia</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="emergencyContactName" className="text-sm font-medium">Nombre 1 *</Label>
-                  <Input
-                    id="emergencyContactName"
-                    value={form.emergencyContactName}
-                    onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })}
-                    placeholder="Ej: Nombre"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="emergencyContactPhone" className="text-sm font-medium">Teléfono 1 *</Label>
-                  <Input
-                    id="emergencyContactPhone"
-                    value={form.emergencyContactPhone}
-                    onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
-                    placeholder="Ej: 3326094596"
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="emergencyContactName2" className="text-sm font-medium">Nombre 2</Label>
-                  <Input
-                    id="emergencyContactName2"
-                    value={form.emergencyContactName2}
-                    onChange={(e) => setForm({ ...form, emergencyContactName2: e.target.value })}
-                    placeholder="Ej: Nombre"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="emergencyContactPhone2" className="text-sm font-medium">Teléfono 2</Label>
-                  <Input
-                    id="emergencyContactPhone2"
-                    value={form.emergencyContactPhone2}
-                    onChange={(e) => setForm({ ...form, emergencyContactPhone2: e.target.value })}
-                    placeholder="Ej: 3326094596"
-                    className="mt-1"
-                  />
-                </div>
-              </div>
+              <h3 className="text-sm font-semibold text-foreground">Ministerio</h3>
               <div>
-                <Label htmlFor="allergies" className="text-sm font-medium">Alergias</Label>
-                <Input
-                  id="allergies"
-                  value={form.allergies}
-                  onChange={(e) => setForm({ ...form, allergies: e.target.value })}
-                  placeholder="Ej: Ninguna"
-                  className="mt-1"
-                />
-              </div>
-            </div>
-
-            {/* Asignación */}
-            <div className="bg-card border rounded-lg p-4 space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Asignación</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="teamId" className="text-sm font-medium">Equipo</Label>
-                  <Select value={form.teamId || 'none'} onValueChange={(value) => setForm({ ...form, teamId: value === 'none' ? '' : value })}>
-                    <SelectTrigger id="teamId" className="mt-1">
-                      <span className="text-foreground">
-                        {form.teamId ? getTeamName(form.teamId) : 'Sin equipo'}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin equipo</SelectItem>
-                      {teams.map((team) => (
-                        <SelectItem key={team.id} value={String(team.id)}>
-                          {team.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="roomId" className="text-sm font-medium">Habitación</Label>
-                  <Select value={form.roomId || 'none'} onValueChange={(value) => setForm({ ...form, roomId: value === 'none' ? '' : value })}>
-                    <SelectTrigger id="roomId" className="mt-1">
-                      <span className="text-foreground">
-                        {form.roomId ? getRoomName(form.roomId) : 'Sin habitación'}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin habitación</SelectItem>
-                      {rooms.map((room) => (
-                        <SelectItem key={room.id} value={String(room.id)}>
-                          {room.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Label htmlFor="category" className="text-sm font-medium">Ministerio *</Label>
+                <Select value={form.category} onValueChange={(value) => setForm({ ...form, category: value })}>
+                  <SelectTrigger id="category" className="mt-1">
+                    <SelectValue placeholder="Selecciona un ministerio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MINISTRIES.map((ministry) => (
+                      <SelectItem key={ministry} value={ministry}>
+                        {ministry}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -1237,7 +1165,7 @@ export function StaffClient({ userId }: Props) {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro que deseas eliminar este personal de ministerio y todos sus registros de pago? Esta acción no se puede deshacer.
+              ¿Estás seguro que deseas eliminar este staff y todos sus registros de pago? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-2 justify-end pt-4">
