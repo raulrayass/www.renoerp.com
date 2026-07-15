@@ -113,37 +113,30 @@ export const gameScores = pgTable('game_scores', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
-export const ministries = pgTable('ministries', {
-  id: serial('id').primaryKey(),
-  userId: text('userId').notNull(),
-  name: text('name').notNull(), // 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimendia'
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-})
-
 export const staff = pgTable('staff', {
   id: serial('id').primaryKey(),
   userId: text('userId').notNull(),
   name: text('name').notNull(),
-  ministryId: integer('ministryId').notNull(),
+  category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimendia'
   sex: text('sex'), // 'Hombre' | 'Mujer'
   shirtSize: text('shirtSize'), // 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
   phone: text('phone'),
   church: text('church'),
+  age: integer('age'),
+  checkedIn: boolean('checkedIn').default(false),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
-  discount: integer('discount').notNull().default(0), // porcentaje: 0, 10, 20, 30
   amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
   status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
-  notes: text('notes'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
-export const staffPayments = pgTable('staff_payments', {
+export const staffPayments = pgTable('staffPayments', {
   id: serial('id').primaryKey(),
   staffId: integer('staffId').notNull(),
   userId: text('userId').notNull(),
   amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
-  paymentDate: date('paymentDate').notNull(),
+  paymentDate: timestamp('paymentDate').notNull(),
   paymentMethod: text('paymentMethod').default('cash'), // 'cash' | 'transfer' | 'deposit'
   notes: text('notes'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -168,8 +161,6 @@ export type Game = typeof games.$inferSelect
 export type NewGame = typeof games.$inferInsert
 export type GameScore = typeof gameScores.$inferSelect
 export type NewGameScore = typeof gameScores.$inferInsert
-export type Ministry = typeof ministries.$inferSelect
-export type NewMinistry = typeof ministries.$inferInsert
 export type Staff = typeof staff.$inferSelect
 export type NewStaff = typeof staff.$inferInsert
 export type StaffPayment = typeof staffPayments.$inferSelect

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import {
+  MINISTRIES,
   getStaff,
   createStaff,
   updateStaff,
@@ -9,12 +10,10 @@ import {
   addStaffPayment,
   deleteStaffPayment,
   getStaffPayments,
-  getMinistries,
-  createDefaultMinistries,
 } from '@/app/actions/staff'
 import { getTransactions, createTransaction } from '@/app/actions/transactions'
-import { Staff, StaffPayment, Ministry, Transaction } from '@/lib/db/schema'
-import { formatMXN as formatCurrency, cn } from '@/lib/utils'
+import { Staff, StaffPayment, Transaction } from '@/lib/db/schema'
+import { formatMXN as formatCurrency } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,30 +24,28 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2, DollarSign, Edit2, History } from 'lucide-react'
 import { toast } from 'sonner'
-import { PageHeader } from '@/components/page-header'
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react'
 
 interface Props {
   userId: string
 }
 
+const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+
 const emptyForm = {
   name: '',
-  ministryId: '',
+  category: '',
   sex: '',
   shirtSize: '',
   phone: '',
   church: '',
+  age: '',
   totalAmount: '',
-  discount: 0,
   notes: '',
 }
 
-const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
-
 export function StaffClient({ userId }: Props) {
   const [staffList, setStaffList] = useState<Staff[]>([])
-  const [ministries, setMinistries] = useState<Ministry[]>([])
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
@@ -69,19 +66,17 @@ export function StaffClient({ userId }: Props) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    initializeDefaults()
+    loadStaffData()
   }, [userId])
 
-  async function initializeDefaults() {
+  async function loadStaffData() {
     setLoading(true)
     try {
-      const ministryList = await createDefaultMinistries(userId)
-      setMinistries(ministryList)
       const staffData = await getStaff(userId)
       setStaffList(staffData)
     } catch (err) {
-      console.error('Error loading data:', err)
-      toast.error('Error al cargar datos')
+      console.error('Error loading staff:', err)
+      toast.error('Error al cargar personal')
     } finally {
       setLoading(false)
     }
@@ -103,24 +98,24 @@ export function StaffClient({ userId }: Props) {
     setDialogOpen(true)
   }
 
-  function openEditDialog(staff: Staff) {
+  function openEditDialog(s: Staff) {
     setForm({
-      name: staff.name,
-      ministryId: staff.ministryId.toString(),
-      sex: staff.sex || '',
-      shirtSize: staff.shirtSize || '',
-      phone: staff.phone || '',
-      church: staff.church || '',
-      totalAmount: staff.totalAmount.toString(),
-      discount: staff.discount,
-      notes: staff.notes || '',
+      name: s.name,
+      category: s.category || '',
+      sex: s.sex || '',
+      shirtSize: s.shirtSize || '',
+      phone: s.phone || '',
+      church: s.church || '',
+      age: s.age?.toString() || '',
+      totalAmount: s.totalAmount.toString(),
+      notes: '',
     })
-    setEditingId(staff.id)
+    setEditingId(s.id)
     setDialogOpen(true)
   }
 
   function handleSaveStaff() {
-    if (!form.name || !form.ministryId || !form.totalAmount) {
+    if (!form.name || !form.category || !form.totalAmount) {
       toast.error('Completa los campos requeridos')
       return
     }
@@ -128,137 +123,158 @@ export function StaffClient({ userId }: Props) {
     startTransition(async () => {
       try {
         const amount = parseFloat(form.totalAmount)
-        const discount = form.discount || 0
-        const discountAmount = (amount * discount) / 100
-        const finalAmount = amount - discountAmount
 
         if (editingId) {
           await updateStaff(editingId, {
             name: form.name,
-            ministryId: parseInt(form.ministryId),
+            category: form.category || null,
             sex: form.sex || null,
             shirtSize: form.shirtSize || null,
             phone: form.phone || null,
             church: form.church || null,
-            totalAmount: finalAmount.toString(),
-            discount: form.discount,
-            notes: form.notes || null,
+            age: form.age ? parseInt(form.age) : null,
+            totalAmount: amount.toString(),
           })
           toast.success('Personal actualizado')
         } else {
           await createStaff(userId, {
             name: form.name,
-            ministryId: parseInt(form.ministryId),
+            category: form.category || null,
             sex: form.sex || null,
             shirtSize: form.shirtSize || null,
             phone: form.phone || null,
             church: form.church || null,
-            totalAmount: finalAmount.toString(),
-            discount: form.discount,
-            notes: form.notes || null,
-            status: 'pending',
+            age: form.age ? parseInt(form.age) : null,
+            totalAmount: amount.toString(),
             amountPaid: '0',
-          })
+            status: 'pending',
+          } as any)
           toast.success('Personal agregado')
         }
+
+        await loadStaffData()
+        resetForm()
         setDialogOpen(false)
-        const updated = await getStaff(userId)
-        setStaffList(updated)
       } catch (err) {
+        console.error('Error saving staff:', err)
         toast.error('Error al guardar')
       }
     })
   }
 
-  async function handleOpenPaymentDialog(staffId: number) {
+  function handleDeleteClick(staffId: number) {
+    setDeletingId(staffId)
+    setDeleteDialogOpen(true)
+  }
+
+  function handleConfirmDelete() {
+    if (!deletingId) return
+
+    startTransition(async () => {
+      try {
+        await deleteStaff(deletingId)
+        await loadStaffData()
+        toast.success('Personal eliminado')
+        setDeleteDialogOpen(false)
+        setDeletingId(null)
+      } catch (err) {
+        console.error('Error deleting staff:', err)
+        toast.error('Error al eliminar')
+      }
+    })
+  }
+
+  function handleOpenPaymentDialog(staffId: number) {
     setSelectedStaffId(staffId)
     setPaymentForm({ amount: '', date: new Date().toISOString().split('T')[0], paymentMethod: 'cash', notes: '' })
     setPaymentDialogOpen(true)
   }
 
   function handleAddPayment() {
-    if (!paymentForm.amount || !selectedStaffId) {
-      toast.error('Ingresa el monto de pago')
+    if (!selectedStaffId || !paymentForm.amount) {
+      toast.error('Ingresa el monto del pago')
       return
     }
 
     startTransition(async () => {
       try {
-        const staffRecord = staffList.find(s => s.id === selectedStaffId)
-        if (!staffRecord) return
+        const amount = parseFloat(paymentForm.amount)
+        const paymentDate = new Date(paymentForm.date)
 
-        const paymentAmount = parseFloat(paymentForm.amount)
         await addStaffPayment(userId, selectedStaffId, {
-          amount: paymentAmount.toString(),
-          paymentDate: paymentForm.date,
-          paymentMethod: paymentForm.paymentMethod,
+          staffId: selectedStaffId,
+          userId,
+          amount: amount.toString(),
+          paymentDate: paymentDate.toISOString() as any,
+          paymentMethod: paymentForm.paymentMethod as any,
           notes: paymentForm.notes || null,
-        })
+        } as any)
 
-        // Create transaction entry
-        const categoryId = 1 // Ingresos
-        await createTransaction(userId, {
-          categoryId,
-          type: 'income',
-          amount: paymentAmount.toString(),
-          description: `Pago de ${staffRecord.name} (${ministries.find(m => m.id === staffRecord.ministryId)?.name || 'Personal'})`,
-          date: paymentForm.date,
-          paymentMethod: paymentForm.paymentMethod,
-        })
+        // Registrar en transacciones
+        const staff = staffList.find(s => s.id === selectedStaffId)
+        if (staff) {
+          await createTransaction(userId, {
+            categoryId: 1,
+            type: 'income',
+            amount: amount.toString(),
+            description: `Pago de ${staff.name}`,
+            date: paymentForm.date,
+            paymentMethod: paymentForm.paymentMethod,
+          } as any)
+        }
 
-        const updated = await getStaff(userId)
-        setStaffList(updated)
-        setPaymentDialogOpen(false)
+        await loadStaffData()
         toast.success('Pago registrado')
+        setPaymentDialogOpen(false)
+        setSelectedStaffId(null)
       } catch (err) {
+        console.error('Error adding payment:', err)
         toast.error('Error al registrar pago')
       }
     })
   }
 
-  async function openPaymentHistory(staffId: number) {
+  async function handleOpenHistory(staffId: number) {
     setHistoryStaffId(staffId)
     try {
       const history = await getStaffPayments(staffId)
       setPaymentHistory(history)
       setHistoryDialogOpen(true)
     } catch (err) {
+      console.error('Error loading history:', err)
       toast.error('Error al cargar historial')
     }
   }
 
-  function openDeleteDialog(staff: Staff) {
-    setDeletingId(staff.id)
-    setDeleteDialogOpen(true)
-  }
-
-  function handleDelete() {
-    if (deletingId === null) return
+  function handleDeletePayment(paymentId: number) {
     startTransition(async () => {
       try {
-        await deleteStaff(deletingId)
-        const updated = await getStaff(userId)
-        setStaffList(updated)
-        setDeleteDialogOpen(false)
-        toast.success('Personal eliminado')
+        await deleteStaffPayment(paymentId)
+        if (historyStaffId) {
+          const history = await getStaffPayments(historyStaffId)
+          setPaymentHistory(history)
+        }
+        await loadStaffData()
+        toast.success('Pago eliminado')
       } catch (err) {
+        console.error('Error deleting payment:', err)
         toast.error('Error al eliminar')
       }
     })
   }
 
-  if (loading) return <div className="text-center py-12 text-muted-foreground">Cargando...</div>
+  const getStatusColor = (status: string) => {
+    if (status === 'paid') return 'bg-green-100 text-green-800'
+    if (status === 'partial') return 'bg-yellow-100 text-yellow-800'
+    return 'bg-red-100 text-red-800'
+  }
+
+  if (loading) {
+    return <div className="text-center py-12 text-muted-foreground">Cargando...</div>
+  }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <PageHeader
-        title="Personal de Ministerios"
-        description="Gestiona al personal de los diferentes ministerios"
-        buttons={[
-          { label: 'Agregar', onClick: openAddDialog, icon: Plus },
-        ]}
-      />
-
+    <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <Card className="p-3 sm:p-4">
@@ -268,7 +284,7 @@ export function StaffClient({ userId }: Props) {
               <p className="text-lg sm:text-2xl font-bold text-foreground mt-1">{formatCurrency(totals.total)}</p>
             </div>
             <div className="bg-primary/10 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
-              <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             </div>
           </div>
         </Card>
@@ -287,159 +303,211 @@ export function StaffClient({ userId }: Props) {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-xs text-muted-foreground font-medium">Pendiente</p>
-              <p className="text-lg sm:text-2xl font-bold text-orange-600 mt-1">{formatCurrency(totals.pending)}</p>
+              <p className="text-lg sm:text-2xl font-bold text-red-600 mt-1">{formatCurrency(totals.pending)}</p>
             </div>
-            <div className="bg-orange-600/10 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
-              <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+            <div className="bg-red-600/10 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+              <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Staff List */}
-      <div className="space-y-1">
-        {staffList.length === 0 ? (
-          <Card className="p-6 text-center text-muted-foreground">Sin personal registrado</Card>
-        ) : (
-          staffList.map((s) => {
-            const ministry = ministries.find(m => m.id === s.ministryId)
-            const remaining = parseFloat(s.totalAmount as string) - parseFloat(s.amountPaid as string)
-            let borderColor = 'border-l-slate-400'
-            if (s.status === 'paid') borderColor = 'border-l-green-600'
-            else if (s.status === 'partial') borderColor = 'border-l-yellow-600'
-            else borderColor = 'border-l-red-600'
+      {/* Add Button */}
+      <div className="flex justify-end">
+        <Button onClick={openAddDialog} className="bg-green-600 hover:bg-green-700">
+          <Plus className="w-4 h-4 mr-2" />
+          Agregar Personal
+        </Button>
+      </div>
 
-            return (
-              <div key={s.id} className={`p-2 sm:p-3 border border-l-4 border-border ${borderColor} rounded-lg hover:bg-muted/50 transition-colors`}>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm sm:text-base">{s.name}</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      <Badge variant="secondary" className="text-xs">{ministry?.name}</Badge>
-                      {s.sex && <Badge variant="outline" className="text-xs">{s.sex}</Badge>}
-                      {s.shirtSize && <Badge variant="outline" className="text-xs">Talla: {s.shirtSize}</Badge>}
-                      <Badge className={cn('text-xs', {
-                        'bg-green-600': s.status === 'paid',
-                        'bg-yellow-600': s.status === 'partial',
-                        'bg-red-600': s.status === 'pending',
-                      })}>{s.status === 'paid' ? 'Pagado' : s.status === 'partial' ? 'Parcial' : 'Pendiente'}</Badge>
-                    </div>
+      {/* Staff List */}
+      {staffList.length === 0 ? (
+        <Card className="p-8 text-center text-muted-foreground">
+          Sin personal registrado
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {staffList.map((s) => (
+            <Card key={s.id} className="p-3 hover:bg-muted/50 transition-colors">
+              <div className="flex justify-between items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-sm truncate">{s.name}</h3>
+                    <Badge className={getStatusColor(s.status || 'pending')} variant="secondary">
+                      {s.status === 'paid' ? 'Pagado' : s.status === 'partial' ? 'Parcial' : 'Pendiente'}
+                    </Badge>
                   </div>
-                  <div className="flex flex-col sm:text-right gap-1">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Total: </span>
-                      <span className="font-semibold">{formatCurrency(s.totalAmount)}</span>
+                  {s.category && <p className="text-xs text-muted-foreground">{s.category}</p>}
+                  {s.phone && <p className="text-xs text-muted-foreground">Tel: {s.phone}</p>}
+                  {s.church && <p className="text-xs text-muted-foreground">Iglesia: {s.church}</p>}
+                  <div className="mt-1">
+                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                      <div
+                        className="bg-green-600 h-1.5 rounded-full"
+                        style={{ width: `${(parseFloat(s.amountPaid as string || '0') / parseFloat(s.totalAmount as string || '1')) * 100}%` }}
+                      ></div>
                     </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Pagado: </span>
-                      <span className="font-semibold text-green-600">{formatCurrency(s.amountPaid)}</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Falta: </span>
-                      <span className="font-semibold text-orange-600">{formatCurrency(remaining)}</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-1 sm:flex-col">
-                    <Button size="sm" variant="outline" onClick={() => handleOpenPaymentDialog(s.id)} className="h-8">
-                      <DollarSign className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => openPaymentHistory(s.id)} className="h-8">
-                      <History className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => openEditDialog(s)} className="h-8">
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => openDeleteDialog(s)} className="h-8 text-red-600 hover:text-red-700">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {formatCurrency(parseFloat(s.amountPaid as string || '0'))} / {formatCurrency(parseFloat(s.totalAmount as string || '0'))}
+                    </p>
                   </div>
                 </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOpenPaymentDialog(s.id)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <DollarSign className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOpenHistory(s.id)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <History className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openEditDialog(s)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteClick(s.id)}
+                    className="h-8 w-8 p-0 text-red-600"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            )
-          })
-        )}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? 'Editar Personal' : 'Agregar Personal'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <Label>Nombre *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre completo" />
+              <Label className="text-xs">Nombre *</Label>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Nombre completo"
+                className="text-xs h-8"
+              />
             </div>
+
             <div>
-              <Label>Ministerio *</Label>
-              <Select value={form.ministryId} onValueChange={(value) => setForm({ ...form, ministryId: value })}>
-                <SelectTrigger>
+              <Label className="text-xs">Ministerio *</Label>
+              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                <SelectTrigger className="text-xs h-8">
                   <SelectValue placeholder="Selecciona ministerio" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ministries.map((m) => (
-                    <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
+                  {MINISTRIES.map((m) => (
+                    <SelectItem key={m} value={m}>
+                      {m}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label>Sexo</Label>
-                <Select value={form.sex} onValueChange={(value) => setForm({ ...form, sex: value })}>
-                  <SelectTrigger>
+                <Label className="text-xs">Sexo</Label>
+                <Select value={form.sex} onValueChange={(v) => setForm({ ...form, sex: v })}>
+                  <SelectTrigger className="text-xs h-8">
                     <SelectValue placeholder="Sexo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">-</SelectItem>
                     <SelectItem value="Hombre">Hombre</SelectItem>
                     <SelectItem value="Mujer">Mujer</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
               <div>
-                <Label>Talla</Label>
-                <Select value={form.shirtSize} onValueChange={(value) => setForm({ ...form, shirtSize: value })}>
-                  <SelectTrigger>
+                <Label className="text-xs">Talla</Label>
+                <Select value={form.shirtSize} onValueChange={(v) => setForm({ ...form, shirtSize: v })}>
+                  <SelectTrigger className="text-xs h-8">
                     <SelectValue placeholder="Talla" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">-</SelectItem>
-                    {SHIRT_SIZES.map((size) => (
-                      <SelectItem key={size} value={size}>{size}</SelectItem>
+                    {SHIRT_SIZES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
+
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label>Teléfono</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Teléfono" />
+                <Label className="text-xs">Teléfono</Label>
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  placeholder="Teléfono"
+                  className="text-xs h-8"
+                />
               </div>
+
               <div>
-                <Label>Iglesia</Label>
-                <Input value={form.church} onChange={(e) => setForm({ ...form, church: e.target.value })} placeholder="Iglesia" />
+                <Label className="text-xs">Edad</Label>
+                <Input
+                  type="number"
+                  value={form.age}
+                  onChange={(e) => setForm({ ...form, age: e.target.value })}
+                  placeholder="Edad"
+                  className="text-xs h-8"
+                />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label>Monto Total *</Label>
-                <Input type="number" value={form.totalAmount} onChange={(e) => setForm({ ...form, totalAmount: e.target.value })} placeholder="0.00" />
-              </div>
-              <div>
-                <Label>Descuento (%)</Label>
-                <Input type="number" value={form.discount} onChange={(e) => setForm({ ...form, discount: parseInt(e.target.value) || 0 })} placeholder="0" />
-              </div>
-            </div>
+
             <div>
-              <Label>Notas</Label>
-              <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Notas" />
+              <Label className="text-xs">Iglesia</Label>
+              <Input
+                value={form.church}
+                onChange={(e) => setForm({ ...form, church: e.target.value })}
+                placeholder="Iglesia"
+                className="text-xs h-8"
+              />
             </div>
-            <div className="flex gap-2">
-              <Button onClick={handleSaveStaff} disabled={isPending}>Guardar</Button>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+
+            <div>
+              <Label className="text-xs">Monto Total *</Label>
+              <Input
+                type="number"
+                value={form.totalAmount}
+                onChange={(e) => setForm({ ...form, totalAmount: e.target.value })}
+                placeholder="Monto"
+                step="0.01"
+                className="text-xs h-8"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setDialogOpen(false)} className="text-xs h-8">
+                Cancelar
+              </Button>
+              <Button onClick={handleSaveStaff} disabled={isPending} className="text-xs h-8">
+                {isPending ? 'Guardando...' : 'Guardar'}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -451,19 +519,33 @@ export function StaffClient({ userId }: Props) {
           <DialogHeader>
             <DialogTitle>Registrar Pago</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <Label>Monto *</Label>
-              <Input type="number" value={paymentForm.amount} onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })} placeholder="0.00" />
+              <Label className="text-xs">Monto *</Label>
+              <Input
+                type="number"
+                value={paymentForm.amount}
+                onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                placeholder="Monto"
+                step="0.01"
+                className="text-xs h-8"
+              />
             </div>
+
             <div>
-              <Label>Fecha</Label>
-              <Input type="date" value={paymentForm.date} onChange={(e) => setPaymentForm({ ...paymentForm, date: e.target.value })} />
+              <Label className="text-xs">Fecha</Label>
+              <Input
+                type="date"
+                value={paymentForm.date}
+                onChange={(e) => setPaymentForm({ ...paymentForm, date: e.target.value })}
+                className="text-xs h-8"
+              />
             </div>
+
             <div>
-              <Label>Método de Pago</Label>
-              <Select value={paymentForm.paymentMethod} onValueChange={(value) => setPaymentForm({ ...paymentForm, paymentMethod: value })}>
-                <SelectTrigger>
+              <Label className="text-xs">Método</Label>
+              <Select value={paymentForm.paymentMethod} onValueChange={(v) => setPaymentForm({ ...paymentForm, paymentMethod: v })}>
+                <SelectTrigger className="text-xs h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -473,45 +555,57 @@ export function StaffClient({ userId }: Props) {
                 </SelectContent>
               </Select>
             </div>
+
             <div>
-              <Label>Notas</Label>
-              <Input value={paymentForm.notes} onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })} placeholder="Notas (opcional)" />
+              <Label className="text-xs">Notas</Label>
+              <Input
+                value={paymentForm.notes}
+                onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
+                placeholder="Notas (opcional)"
+                className="text-xs h-8"
+              />
             </div>
-            <div className="flex gap-2">
-              <Button onClick={handleAddPayment} disabled={isPending}>Guardar Pago</Button>
-              <Button variant="outline" onClick={() => setPaymentDialogOpen(false)}>Cancelar</Button>
+
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setPaymentDialogOpen(false)} className="text-xs h-8">
+                Cancelar
+              </Button>
+              <Button onClick={handleAddPayment} disabled={isPending} className="text-xs h-8">
+                {isPending ? 'Registrando...' : 'Registrar'}
+              </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Payment History Dialog */}
+      {/* History Dialog */}
       <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Historial de Pagos</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2">
             {paymentHistory.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Sin pagos registrados</p>
+              <p className="text-xs text-muted-foreground text-center py-4">Sin pagos registrados</p>
             ) : (
-              paymentHistory.map((payment) => (
-                <div key={payment.id} className="flex justify-between items-center p-2 border rounded">
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold">{formatCurrency(payment.amount)}</p>
-                    <p className="text-xs text-muted-foreground">{payment.paymentDate} - {payment.paymentMethod === 'cash' ? 'Efectivo' : payment.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}</p>
+              paymentHistory.map((p) => (
+                <Card key={p.id} className="p-2">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <p className="text-xs font-medium">{formatCurrency(parseFloat(p.amount as string))}</p>
+                      <p className="text-xs text-muted-foreground">{p.paymentDate}</p>
+                      <p className="text-xs text-muted-foreground">{p.paymentMethod}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeletePayment(p.id)}
+                      className="h-6 w-6 p-0 text-red-600"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
-                  <Button size="sm" variant="ghost" onClick={() => startTransition(async () => {
-                    await deleteStaffPayment(payment.id)
-                    const history = await getStaffPayments(historyStaffId!)
-                    setPaymentHistory(history)
-                    const updated = await getStaff(userId)
-                    setStaffList(updated)
-                    toast.success('Pago eliminado')
-                  })}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                </Card>
               ))
             )}
           </div>
@@ -522,12 +616,16 @@ export function StaffClient({ userId }: Props) {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar Personal</AlertDialogTitle>
-            <AlertDialogDescription>¿Estás seguro? Esta acción no se puede deshacer.</AlertDialogDescription>
+            <AlertDialogTitle>¿Eliminar personal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminarán todos los pagos asociados.
+            </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex gap-2">
-            <AlertDialogAction onClick={handleDelete}>Eliminar</AlertDialogAction>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel className="text-xs h-8">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={isPending} className="text-xs h-8 bg-red-600 hover:bg-red-700">
+              {isPending ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
           </div>
         </AlertDialogContent>
       </AlertDialog>

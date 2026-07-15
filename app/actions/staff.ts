@@ -1,43 +1,19 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { staff, staffPayments, ministries } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
-import type { NewStaff, NewStaffPayment, NewMinistry } from '@/lib/db/schema'
+import { staff, staffPayments } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
+import type { NewStaff, NewStaffPayment } from '@/lib/db/schema'
 
-export async function getMinistries(userId: string) {
-  return await db
-    .select()
-    .from(ministries)
-    .where(eq(ministries.userId, userId))
-}
-
-export async function createDefaultMinistries(userId: string) {
-  const defaultMinistries = [
-    'Deportes',
-    'Cocina',
-    'Pastor@',
-    'Lider de equipo',
-    'Logistica',
-    'Administración',
-    'Multimendia',
-  ]
-
-  const existing = await getMinistries(userId)
-  const existingNames = existing.map(m => m.name)
-  const toCreate = defaultMinistries.filter(name => !existingNames.includes(name))
-
-  if (toCreate.length > 0) {
-    await db.insert(ministries).values(
-      toCreate.map(name => ({
-        userId,
-        name,
-      }))
-    )
-  }
-
-  return getMinistries(userId)
-}
+export const MINISTRIES = [
+  'Deportes',
+  'Cocina',
+  'Pastor@',
+  'Lider de equipo',
+  'Logistica',
+  'Administración',
+  'Multimendia',
+]
 
 export async function getStaff(userId: string) {
   return await db
