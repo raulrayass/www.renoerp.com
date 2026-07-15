@@ -396,11 +396,11 @@ export async function getCategoryDistribution(userId: string) {
 export async function generateExcelTemplate() {
   // Returns data for creating an Excel template file
   return {
-    columns: ['Nombre', 'Sexo', 'Talla', 'Teléfono', 'Iglesia', 'Ministerio', 'Monto Total ($)', 'Notas'],
+    columns: ['Nombre', 'Sexo', 'Talla Camisa', 'Teléfono', 'Iglesia', 'Ministerio', 'Monto Total ($)', 'Pagado ($)', 'Estado', 'Check-in', 'Notas'],
     data: [
-      ['Enrique Medina', 'H', 'M', '3334001726', 'NC Zapopan', 'Pastor', 1200, 'Ejemplo'],
-      ['Juan García', 'H', 'L', '5551234567', 'Iglesia Central', 'Deportes', 1500, ''],
-      ['María López', 'M', 'S', '5559876543', 'Iglesia del Barrio', 'Cocina', 800, ''],
+      ['Enrique Medina', 'H', 'M', '3334001726', 'NC Zapopan', 'Pastor', 1200, 100, 'Pendiente', 'No', ''],
+      ['Juan García', 'H', 'L', '5551234567', 'Iglesia Central', 'Deportes', 1500, 1500, 'Pagado', 'Sí', ''],
+      ['María López', 'M', 'S', '5559876543', 'Iglesia del Barrio', 'Cocina', 800, 400, 'Parcial', 'No', ''],
     ],
   }
 }
