@@ -118,12 +118,13 @@ export const staff = pgTable('staff', {
   userId: text('userId').notNull(),
   name: text('name').notNull(),
   category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimendia'
-  sex: text('sex'), // 'Hombre' | 'Mujer'
+  sex: text('sex'), // 'H' | 'M'
   shirtSize: text('shirtSize'), // 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
   phone: text('phone'),
-  church: text('church'),
+  churchId: integer('churchId'),
   age: integer('age'),
   checkedIn: boolean('checkedIn').default(false),
+  leadTeamId: integer('leadTeamId'),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
   amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
   status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'

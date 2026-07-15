@@ -114,3 +114,39 @@ export async function getStaffPayments(staffId: number) {
     .from(staffPayments)
     .where(eq(staffPayments.staffId, staffId))
 }
+
+export async function seedStaffData(userId: string) {
+  try {
+    const existing = await getStaff(userId)
+    if (existing.length > 0) return existing
+
+    const newStaffMember = await createStaff(userId, {
+      name: 'Enrique Medina',
+      category: 'Pastor',
+      sex: 'H',
+      shirtSize: 'M',
+      phone: '3334001726',
+      churchId: null,
+      age: null,
+      checkedIn: false,
+      leadTeamId: null,
+      totalAmount: '1200.00',
+      amountPaid: '100.00',
+      status: 'pending',
+    })
+
+    if (newStaffMember) {
+      await addStaffPayment(userId, newStaffMember.id, {
+        amount: '100.00',
+        paymentDate: new Date(),
+        paymentMethod: 'cash',
+        notes: 'Pago inicial',
+      })
+    }
+
+    return await getStaff(userId)
+  } catch (e) {
+    console.error('Error seeding staff data:', e)
+    return []
+  }
+}

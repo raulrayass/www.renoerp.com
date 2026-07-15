@@ -10,6 +10,7 @@ import {
   addStaffPayment,
   deleteStaffPayment,
   getStaffPayments,
+  seedStaffData,
 } from '@/app/actions/staff'
 import { getTransactions, createTransaction } from '@/app/actions/transactions'
 import { Staff, StaffPayment, Transaction } from '@/lib/db/schema'
@@ -38,10 +39,9 @@ const emptyForm = {
   sex: '',
   shirtSize: '',
   phone: '',
-  church: '',
+  churchId: '',
   age: '',
   totalAmount: '',
-  notes: '',
 }
 
 export function StaffClient({ userId }: Props) {
@@ -72,7 +72,10 @@ export function StaffClient({ userId }: Props) {
   async function loadStaffData() {
     setLoading(true)
     try {
-      const staffData = await getStaff(userId)
+      let staffData = await getStaff(userId)
+      if (staffData.length === 0) {
+        staffData = await seedStaffData(userId)
+      }
       setStaffList(staffData)
     } catch (err) {
       console.error('Error loading staff:', err)
