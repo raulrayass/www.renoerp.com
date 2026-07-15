@@ -14,7 +14,7 @@ import {
 } from '@/app/actions/staff'
 import { getTransactions, createTransaction } from '@/app/actions/transactions'
 import { Staff, StaffPayment, Ministry, Transaction } from '@/lib/db/schema'
-import { formatCurrency } from '@/lib/utils'
+import { formatMXN as formatCurrency, cn } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
