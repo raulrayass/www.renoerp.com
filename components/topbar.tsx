@@ -3,23 +3,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Square, ArrowLeftRight, Tag, Users, LogOut, User, Church, Zap, Home, Trophy } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useUser } from '@/components/user-provider'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Square, ArrowLeftRight, Tag, Users, LogOut, User, Church, Zap, Home, Trophy, Briefcase } from 'lucide-react'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: Square },
   { href: '/attendees', label: 'Camperos', icon: Users },
+  { href: '/staff', label: 'Personal', icon: Briefcase },
   { href: '/teams', label: 'Equipos', icon: Zap },
   { href: '/rooms', label: 'Habitaciones', icon: Home },
   { href: '/games', label: 'Juegos', icon: Trophy },
