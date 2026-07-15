@@ -314,8 +314,14 @@ export function TransactionsClient({ userId }: { userId: string }) {
         </Card>
       ) : (
         <div className="space-y-1">
-          {filtered.map((t) => (
-            <div key={t.id} className="p-1.5 sm:p-2.5 border border-border rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 hover:bg-muted/50 transition-colors">
+          {filtered.map((t) => {
+            let borderColor = 'border-l-slate-400'
+            if (t.paymentMethod === 'cash') borderColor = 'border-l-green-600'
+            else if (t.paymentMethod === 'transfer') borderColor = 'border-l-blue-600'
+            else if (t.paymentMethod === 'deposit') borderColor = 'border-l-purple-600'
+            
+            return (
+            <div key={t.id} className={`p-1.5 sm:p-2.5 border border-l-4 border-border ${borderColor} rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 hover:bg-muted/50 transition-colors`}>
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                   {t.type === 'income' ? (
@@ -354,7 +360,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -438,7 +445,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
               </div>
               <div className="flex flex-col gap-1">
                 <Label htmlFor="date" className="text-xs sm:text-sm">Fecha</Label>
-                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="h-7 sm:h-8 text-xs" required />
+                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="h-6 sm:h-7 text-xs" required />
               </div>
             </div>
             <div className="space-y-1">
