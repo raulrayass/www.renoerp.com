@@ -183,10 +183,10 @@ export function StaffClient({ userId }: Props) {
       try {
         if (editingId) {
           await updateStaff(userId, editingId, payload)
-          toast.success('Personal de ministerio actualizado correctamente')
+          toast.success('Staff actualizado correctamente')
         } else {
           await createStaff(userId, payload)
-          toast.success('Personal de ministerio agregado correctamente')
+          toast.success('Staff agregado correctamente')
         }
         setDialogOpen(false)
         setForm({ ...emptyForm })
@@ -247,7 +247,7 @@ export function StaffClient({ userId }: Props) {
     startTransition(async () => {
       try {
         await deleteStaff(userId, id)
-        toast.success('Personal de ministerio eliminado')
+        toast.success('Staff eliminado')
         await loadAttendees()
       } catch (error) {
         toast.error('Error al eliminar el staff')
@@ -374,19 +374,14 @@ export function StaffClient({ userId }: Props) {
 
         const attendeesToImport = rows.slice(1).map((row) => ({
           name: String(row[0] || '').trim(),
-          age: row[1] ? parseInt(String(row[1])) : undefined,
-          sex: String(row[2] || '').trim() || undefined,
-          shirtSize: String(row[3] || '').trim() || undefined,
-          phone: String(row[4] || '').trim() || undefined,
-          church: String(row[5] || '').trim() || undefined,
-          emergencyContactName: String(row[6] || '').trim() || undefined,
-          emergencyContactPhone: String(row[7] || '').trim() || undefined,
-          emergencyContactName2: String(row[8] || '').trim() || undefined,
-          emergencyContactPhone2: String(row[9] || '').trim() || undefined,
-          allergies: String(row[10] || '').trim() || undefined,
-          totalAmount: parseFloat(String(row[13] || '0')),
-          initialPayment: parseFloat(String(row[14] || '0')) || 0,
-          notes: String(row[17] || '').trim() || undefined,
+          sex: String(row[1] || '').trim() || undefined,
+          shirtSize: String(row[2] || '').trim() || undefined,
+          phone: String(row[3] || '').trim() || undefined,
+          church: String(row[4] || '').trim() || undefined,
+          category: String(row[5] || '').trim() || undefined,
+          totalAmount: parseFloat(String(row[6] || '0')),
+          initialPayment: parseFloat(String(row[7] || '0')) || 0,
+          notes: String(row[10] || '').trim() || undefined,
         }))
 
         // Validar solo campos requeridos: nombre y monto total
@@ -1004,7 +999,7 @@ export function StaffClient({ userId }: Props) {
                 Cancelar
               </Button>
               <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white">
-                {editingId ? 'Guardar Cambios' : 'Agregar Personal de ministerio'}
+                {editingId ? 'Guardar Cambios' : 'Agregar staff'}
               </Button>
             </div>
           </form>
