@@ -150,7 +150,7 @@ export function TransactionSmartFilter({
             type="date"
             value={dateFrom}
             onChange={(e) => onDateFromChange(e.target.value)}
-            className="h-8 text-xs border-2 border-border rounded-md px-2"
+            className="h-7 text-xs border-2 border-border rounded-md px-2"
           />
           {!dateFrom && (
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
@@ -163,7 +163,7 @@ export function TransactionSmartFilter({
             type="date"
             value={dateTo}
             onChange={(e) => onDateToChange(e.target.value)}
-            className="h-8 text-xs border-2 border-border rounded-md px-2"
+            className="h-7 text-xs border-2 border-border rounded-md px-2"
           />
           {!dateTo && (
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
