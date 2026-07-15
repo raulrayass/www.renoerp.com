@@ -113,37 +113,6 @@ export const gameScores = pgTable('game_scores', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
-export const staff = pgTable('staff', {
-  id: serial('id').primaryKey(),
-  userId: text('userId').notNull(),
-  name: text('name').notNull(),
-  age: integer('age'),
-  shirtSize: text('shirtSize'), // 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
-  sex: text('sex'), // 'H' | 'M'
-  phone: text('phone'),
-  church: text('church'),
-  category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimendia'
-  checkedIn: boolean('checkedIn').notNull().default(false),
-  totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
-  discount: integer('discount').notNull().default(0), // porcentaje: 0, 10, 20, 30
-  amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
-  status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
-  notes: text('notes'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
-})
-
-export const staffPayments = pgTable('staff_payments', {
-  id: serial('id').primaryKey(),
-  staffId: integer('staffId').notNull(),
-  userId: text('userId').notNull(),
-  amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
-  paymentDate: date('paymentDate').notNull(),
-  paymentMethod: text('paymentMethod').default('cash'), // 'cash' | 'transfer' | 'deposit'
-  notes: text('notes'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-})
-
 export type AppUser = typeof appUsers.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
@@ -163,7 +132,3 @@ export type Game = typeof games.$inferSelect
 export type NewGame = typeof games.$inferInsert
 export type GameScore = typeof gameScores.$inferSelect
 export type NewGameScore = typeof gameScores.$inferInsert
-export type Staff = typeof staff.$inferSelect
-export type NewStaff = typeof staff.$inferInsert
-export type StaffPayment = typeof staffPayments.$inferSelect
-export type NewStaffPayment = typeof staffPayments.$inferInsert
