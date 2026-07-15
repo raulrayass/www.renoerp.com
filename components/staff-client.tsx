@@ -58,13 +58,7 @@ const emptyForm = {
   sex: '',
   phone: '',
   church: '',
-  emergencyContactName: '',
-  emergencyContactPhone: '',
-  emergencyContactName2: '',
-  emergencyContactPhone2: '',
-  allergies: '',
-  roomId: '',
-  teamId: '',
+  category: '',
   totalAmount: '',
   discount: 0,
   notes: '',
@@ -73,7 +67,7 @@ const emptyForm = {
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export function StaffClient({ userId }: Props) {
-  const [staffList, setAttendeeList] = useState<Attendee[]>([])
+  const [staffList, setStaffList] = useState<Staff[]>([])
   const [churches, setChurches] = useState<Church[]>([])
   const [teams, setTeams] = useState<Team[]>([])
   const [rooms, setRooms] = useState<Room[]>([])
@@ -81,7 +75,7 @@ export function StaffClient({ userId }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [selectedStaffId, setSelectedAttendeeId] = useState<number | null>(null)
+  const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [form, setForm] = useState({ ...emptyForm })
@@ -92,7 +86,7 @@ export function StaffClient({ userId }: Props) {
     notes: '',
   })
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
-  const [historyStaffId, setHistoryAttendeeId] = useState<number | null>(null)
+  const [historyStaffId, setHistoryStaffId] = useState<number | null>(null)
   const [paymentHistory, setPaymentHistory] = useState<StaffPayment[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -109,7 +103,7 @@ export function StaffClient({ userId }: Props) {
   async function initializeDefaults() {
     setLoading(true)
     try {
-      await loadAttendees()
+      await loadStaff()
       await loadChurches()
       await loadTeams()
       await loadRooms()
@@ -119,10 +113,9 @@ export function StaffClient({ userId }: Props) {
     setLoading(false)
   }
 
-  async function loadAttendees() {
-    // Load all attendees for calculations and metrics (not paginated)
+  async function loadStaff() {
     const allData = await getAllStaff(userId)
-    setAttendeeList(allData)
+    setStaffList(allData)
   }
 
   async function loadChurches() {
@@ -155,6 +148,10 @@ export function StaffClient({ userId }: Props) {
       toast.error('Selecciona una iglesia')
       return
     }
+    if (!form.category.trim()) {
+      toast.error('Selecciona un ministerio')
+      return
+    }
     if (isNaN(amount) || amount <= 0) {
       toast.error('El monto total debe ser mayor a 0')
       return
@@ -167,13 +164,7 @@ export function StaffClient({ userId }: Props) {
       sex: form.sex,
       phone: form.phone,
       church: form.church,
-      emergencyContactName: form.emergencyContactName,
-      emergencyContactPhone: form.emergencyContactPhone,
-      emergencyContactName2: form.emergencyContactName2,
-      emergencyContactPhone2: form.emergencyContactPhone2,
-      allergies: form.allergies,
-      roomId: form.roomId ? parseInt(form.roomId, 10) : null,
-      teamId: form.teamId ? parseInt(form.teamId, 10) : null,
+      category: form.category,
       totalAmount: amount,
       discount: form.discount,
       notes: form.notes,
@@ -191,7 +182,7 @@ export function StaffClient({ userId }: Props) {
         setDialogOpen(false)
         setForm({ ...emptyForm })
         setEditingId(null)
-        await loadAttendees()
+        await loadStaff()
       } catch (error) {
         toast.error('Error al guardar el staff')
         console.error(error)
@@ -204,18 +195,18 @@ export function StaffClient({ userId }: Props) {
     if (!selectedStaffId) return
 
     const amount = parseFloat(paymentForm.amount)
-    const attendee = staffList.find((a) => a.id === selectedStaffId)
-    if (!attendee) return
+    const member = staffList.find((a) => a.id === selectedStaffId)
+    if (!member) return
 
     if (isNaN(amount) || amount <= 0) {
       toast.error('El monto debe ser mayor a 0')
       return
     }
 
-    const originalTotal = parseFloat(attendee.totalAmount as string)
-    const discount = attendee.discount || 0
+    const originalTotal = parseFloat(member.totalAmount as string)
+    const discount = member.discount || 0
     const totalAmount = originalTotal * (1 - discount / 100)
-    const alreadyPaid = parseFloat(attendee.amountPaid as string)
+    const alreadyPaid = parseFloat(member.amountPaid as string)
     const remaining = totalAmount - alreadyPaid
 
     if (amount > remaining) {
@@ -226,7 +217,7 @@ export function StaffClient({ userId }: Props) {
     startTransition(async () => {
       try {
         await addStaffPayment(userId, selectedStaffId, amount, paymentForm.date, paymentForm.paymentMethod, paymentForm.notes)
-        toast.success(`Pago de $${amount.toFixed(2)} registrado para ${attendee.name}`)
+        toast.success(`Pago de $${amount.toFixed(2)} registrado para ${member.name}`)
         setPaymentDialogOpen(false)
         setPaymentForm({
           amount: '',
@@ -234,8 +225,8 @@ export function StaffClient({ userId }: Props) {
           paymentMethod: 'cash',
           notes: '',
         })
-        setSelectedAttendeeId(null)
-        await loadAttendees()
+        setSelectedStaffId(null)
+        await loadStaff()
       } catch (error) {
         toast.error('Error al registrar el pago')
         console.error(error)
@@ -248,7 +239,7 @@ export function StaffClient({ userId }: Props) {
       try {
         await deleteStaff(userId, id)
         toast.success('Staff eliminado')
-        await loadAttendees()
+        await loadStaff()
       } catch (error) {
         toast.error('Error al eliminar el staff')
         console.error(error)
@@ -256,13 +247,13 @@ export function StaffClient({ userId }: Props) {
     })
   }
 
-  async function handleToggleCheckIn(attendee: Attendee) {
-    const next = !attendee.checkedIn
+  async function handleToggleCheckIn(member: Staff) {
+    const next = !member.checkedIn
     startTransition(async () => {
       try {
-        await toggleCheckIn(userId, attendee.id, next)
-        toast.success(next ? `${attendee.name} registró Check-in` : `Check-in cancelado para ${attendee.name}`)
-        await loadAttendees()
+        await toggleCheckIn(userId, member.id, next)
+        toast.success(next ? `${member.name} registró Check-in` : `Check-in cancelado para ${member.name}`)
+        await loadStaff()
       } catch (error) {
         toast.error('Error al actualizar el check-in')
         console.error(error)
@@ -271,7 +262,7 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function openHistory(staffId: number) {
-    setHistoryAttendeeId(staffId)
+    setHistoryStaffId(staffId)
     setHistoryDialogOpen(true)
     setLoadingHistory(true)
     try {
@@ -294,7 +285,7 @@ export function StaffClient({ userId }: Props) {
           const data = await getStaffPayments(userId, historyStaffId)
           setPaymentHistory(data)
         }
-        await loadAttendees()
+        await loadStaff()
       } catch (error) {
         toast.error('Error al eliminar el pago')
         console.error(error)
@@ -317,7 +308,6 @@ export function StaffClient({ userId }: Props) {
       'Notas',
     ]
 
-    // Descargar template vacío con una fila de ejemplo
     const rows = [
       headers,
       [
@@ -358,7 +348,7 @@ export function StaffClient({ userId }: Props) {
           return
         }
 
-        const attendeesToImport = rows.slice(1).map((row) => ({
+        const staffToImport = rows.slice(1).map((row) => ({
           name: String(row[0] || '').trim(),
           sex: String(row[1] || '').trim() || undefined,
           shirtSize: String(row[2] || '').trim() || undefined,
@@ -370,17 +360,16 @@ export function StaffClient({ userId }: Props) {
           notes: String(row[10] || '').trim() || undefined,
         }))
 
-        // Validar solo campos requeridos: nombre y monto total
         if (
-          attendeesToImport.every(
+          staffToImport.every(
             (a) =>
-              a.name && // Nombre es requerido
-              a.totalAmount > 0 // Monto total es requerido y debe ser > 0
+              a.name &&
+              a.totalAmount > 0
           )
         ) {
-          await bulkCreateStaff(userId, attendeesToImport)
-          toast.success(`${attendeesToImport.length} staff importados correctamente`)
-          await loadAttendees()
+          await bulkCreateStaff(userId, staffToImport)
+          toast.success(`${staffToImport.length} staff importados correctamente`)
+          await loadStaff()
         } else {
           toast.error('Verifica que todos los registros tengan Nombre y Monto Total válidos.')
         }
@@ -411,13 +400,7 @@ export function StaffClient({ userId }: Props) {
         'Talla Camisa': a.shirtSize || '',
         Teléfono: a.phone || '',
         Iglesia: a.church || '',
-        'Contacto Emergencia 1': a.emergencyContactName || '',
-        'Teléfono Emergencia 1': a.emergencyContactPhone || '',
-        'Contacto Emergencia 2': a.emergencyContactName2 || '',
-        'Teléfono Emergencia 2': a.emergencyContactPhone2 || '',
-        Alergias: a.allergies || '',
-        Equipo: teamMap.get(a.teamId)?.name || '',
-        Habitación: roomMap.get(a.roomId)?.name || '',
+        Ministerio: a.category || '',
         'Monto Original ($)': originalTotal.toFixed(2),
         'Descuento (%)': discount,
         'Monto Total ($)': total.toFixed(2),
@@ -435,31 +418,21 @@ export function StaffClient({ userId }: Props) {
     toast.success('Reporte exportado correctamente')
   }
 
-  // Apply smart filters
-  const filteredAttendees = staffList.filter((a) => {
-    // Smart search - searches name, phone, church simultaneously
+  const filteredStaff = staffList.filter((a) => {
     const searchLower = search.toLowerCase()
-    const matchesSearch = !search || 
+    const matchesSearch = !search ||
       a.name.toLowerCase().includes(searchLower) ||
       (a.phone && a.phone.includes(search)) ||
       (a.church && a.church.toLowerCase().includes(searchLower))
 
-    // Status quick filter
     const matchesStatus = statusFilter === 'all' || a.status === statusFilter
-
-    // Church quick filter
     const matchesChurch = !churchFilter || a.church === churches.find(c => c.id === parseInt(churchFilter))?.name
-
-    // Team filter
     const matchesTeam = !teamFilter || a.teamId === parseInt(teamFilter)
-
-    // Room filter
     const matchesRoom = !roomFilter || a.roomId === parseInt(roomFilter)
 
     return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom
   })
 
-  // Calculate totals based on ALL attendees (not filtered)
   const summary = staffList.reduce(
     (acc, a) => {
       const originalTotal = parseFloat(a.totalAmount as string)
@@ -479,7 +452,6 @@ export function StaffClient({ userId }: Props) {
   const partialCount = staffList.filter((a) => a.status === 'partial').length
   const pendingCount = staffList.filter((a) => a.status === 'pending').length
 
-  // Helper functions to get display names from IDs
   const getChurchName = (id: string) => churches.find(c => c.id === parseInt(id))?.name || ''
   const getTeamName = (id: string) => teams.find(t => t.id === parseInt(id))?.name || ''
   const getRoomName = (id: string) => rooms.find(r => r.id === parseInt(id))?.name || ''
@@ -583,7 +555,7 @@ export function StaffClient({ userId }: Props) {
       )}
 
 
-      {/* Attendees List */}
+      {/* Staff List */}
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
@@ -612,7 +584,7 @@ export function StaffClient({ userId }: Props) {
             </Button>
           </div>
         </Card>
-      ) : filteredAttendees.length === 0 ? (
+      ) : filteredStaff.length === 0 ? (
         <Card className="p-12 text-center">
           <div className="flex flex-col items-center gap-3">
             <Search className="w-10 h-10 text-muted-foreground/40" />
@@ -621,85 +593,72 @@ export function StaffClient({ userId }: Props) {
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredAttendees
-            .map((attendee) => {
-              const originalTotal = parseFloat(attendee.totalAmount as string)
-              const discount = attendee.discount || 0
+          {filteredStaff
+            .map((member) => {
+              const originalTotal = parseFloat(member.totalAmount as string)
+              const discount = member.discount || 0
               const total = originalTotal * (1 - discount / 100)
-              const paid = parseFloat(attendee.amountPaid as string)
+              const paid = parseFloat(member.amountPaid as string)
               const percentage = (paid / total) * 100
 
               return (
-                <Card key={attendee.id} className="overflow-hidden">
+                <Card key={member.id} className="overflow-hidden">
                   <CardContent className="p-1.5 sm:p-3">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-start justify-between gap-1">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1 mb-0.5 flex-wrap">
-                            <h3 className="font-semibold text-xs truncate">{attendee.name}</h3>
+                            <h3 className="font-semibold text-xs truncate">{member.name}</h3>
                             <Badge
-                              variant={attendee.status === 'paid' ? 'default' : attendee.status === 'partial' ? 'secondary' : 'outline'}
+                              variant={member.status === 'paid' ? 'default' : member.status === 'partial' ? 'secondary' : 'outline'}
                               className="shrink-0 text-xs py-0"
                             >
-                              {attendee.status === 'paid' ? 'Pagado' : attendee.status === 'partial' ? 'Parcial' : 'Pendiente'}
+                              {member.status === 'paid' ? 'Pagado' : member.status === 'partial' ? 'Parcial' : 'Pendiente'}
                             </Badge>
-                            {attendee.checkedIn && (
+                            {member.checkedIn && (
                               <Badge className="shrink-0 text-xs py-0 bg-green-600 hover:bg-green-600 text-white gap-0.5">
                                 <CheckCircle2 className="w-2.5 h-2.5" />
                                 Check-in
                               </Badge>
                             )}
-                            {attendee.teamId && teamMap.get(attendee.teamId) && (
-                              <span
-                                className="inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded-full text-white shrink-0"
-                                style={{ backgroundColor: teamMap.get(attendee.teamId)!.color }}
-                              >
-                                {teamMap.get(attendee.teamId)!.name}
+                            {member.category && (
+                              <span className="inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
+                                {member.category}
                               </span>
                             )}
                           </div>
                           <div className="text-xs text-muted-foreground space-y-0">
-                            {(attendee.age != null || attendee.shirtSize || attendee.sex) && (
+                            {(member.age != null || member.shirtSize || member.sex) && (
                               <p>
                                 {[
-                                  attendee.age != null ? `${attendee.age} años` : null,
-                                  attendee.sex,
-                                  attendee.shirtSize ? `Talla ${attendee.shirtSize}` : null,
+                                  member.age != null ? `${member.age} años` : null,
+                                  member.sex,
+                                  member.shirtSize ? `Talla ${member.shirtSize}` : null,
                                 ]
                                   .filter(Boolean)
                                   .join(' · ')}
                               </p>
                             )}
-                            {attendee.church && <p>Iglesia: {attendee.church}</p>}
-                            {attendee.phone && <p>Tel: {attendee.phone}</p>}
-                            {attendee.roomId && roomMap.get(attendee.roomId) && (
-                              <p>Habitación: {roomMap.get(attendee.roomId)!.name}</p>
-                            )}
-                            {attendee.emergencyContactName && (
-                              <p>Emergencia: {attendee.emergencyContactName} ({attendee.emergencyContactPhone})</p>
-                            )}
-                            {attendee.emergencyContactName2 && (
-                              <p>Emergencia 2: {attendee.emergencyContactName2} ({attendee.emergencyContactPhone2})</p>
-                            )}
-                            {attendee.allergies && <p className="text-amber-700">Alergias: {attendee.allergies}</p>}
+                            {member.church && <p>Iglesia: {member.church}</p>}
+                            {member.phone && <p>Tel: {member.phone}</p>}
                           </div>
                         </div>
                         <div className="flex gap-0.5 shrink-0">
                           <Button
-                            onClick={() => handleToggleCheckIn(attendee)}
+                            onClick={() => handleToggleCheckIn(member)}
                             size="sm"
                             variant="ghost"
                             className={cn(
                               'h-6 w-6 p-0',
-                              attendee.checkedIn ? 'text-green-600 hover:bg-green-100' : 'hover:bg-muted'
+                              member.checkedIn ? 'text-green-600 hover:bg-green-100' : 'hover:bg-muted'
                             )}
-                            title={attendee.checkedIn ? 'Cancelar check-in' : 'Registrar check-in'}
+                            title={member.checkedIn ? 'Cancelar check-in' : 'Registrar check-in'}
                           >
-                            {attendee.checkedIn ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                            {member.checkedIn ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
                           </Button>
                           <Button
                             onClick={() => {
-                              setSelectedAttendeeId(attendee.id)
+                              setSelectedStaffId(member.id)
                               setPaymentDialogOpen(true)
                             }}
                             size="sm"
@@ -710,7 +669,7 @@ export function StaffClient({ userId }: Props) {
                             <DollarSign className="w-3 h-3" />
                           </Button>
                           <Button
-                            onClick={() => openHistory(attendee.id)}
+                            onClick={() => openHistory(member.id)}
                             size="sm"
                             variant="ghost"
                             className="h-6 w-6 p-0 hover:bg-accent/15"
@@ -720,24 +679,18 @@ export function StaffClient({ userId }: Props) {
                           </Button>
                           <Button
                             onClick={() => {
-                              setEditingId(attendee.id)
+                              setEditingId(member.id)
                               setForm({
-                                name: attendee.name,
-                                age: attendee.age != null ? String(attendee.age) : '',
-                                shirtSize: attendee.shirtSize || '',
-                                sex: attendee.sex || '',
-                                phone: attendee.phone || '',
-                                church: attendee.church || '',
-                                emergencyContactName: attendee.emergencyContactName || '',
-                                emergencyContactPhone: attendee.emergencyContactPhone || '',
-                                emergencyContactName2: attendee.emergencyContactName2 || '',
-                                emergencyContactPhone2: attendee.emergencyContactPhone2 || '',
-                                allergies: attendee.allergies || '',
-                                roomId: attendee.roomId != null ? String(attendee.roomId) : '',
-                                teamId: attendee.teamId != null ? String(attendee.teamId) : '',
+                                name: member.name,
+                                age: member.age != null ? String(member.age) : '',
+                                shirtSize: member.shirtSize || '',
+                                sex: member.sex || '',
+                                phone: member.phone || '',
+                                church: member.church || '',
+                                category: member.category || '',
                                 totalAmount: total.toString(),
-                                discount: attendee.discount || 0,
-                                notes: attendee.notes || '',
+                                discount: member.discount || 0,
+                                notes: member.notes || '',
                               })
                               setDialogOpen(true)
                             }}
@@ -750,7 +703,7 @@ export function StaffClient({ userId }: Props) {
                           </Button>
                           <Button
                             onClick={() => {
-                              setDeletingId(attendee.id)
+                              setDeletingId(member.id)
                               setDeleteDialogOpen(true)
                             }}
                             size="sm"
@@ -907,7 +860,7 @@ export function StaffClient({ userId }: Props) {
               </div>
             </div>
 
-            {/* Ministerio y Categoría */}
+            {/* Ministerio */}
             <div className="bg-card border rounded-lg p-4 space-y-4">
               <h3 className="text-sm font-semibold text-foreground">Ministerio</h3>
               <div>
@@ -1046,12 +999,12 @@ export function StaffClient({ userId }: Props) {
                   className="flex-1"
                 />
                 {(() => {
-                  const attendee = selectedStaffId ? staffList.find((a) => a.id === selectedStaffId) : null
-                  if (!attendee) return null
-                  const originalTotal = parseFloat(attendee.totalAmount as string) || 0
-                  const discount = attendee.discount || 0
+                  const member = selectedStaffId ? staffList.find((a) => a.id === selectedStaffId) : null
+                  if (!member) return null
+                  const originalTotal = parseFloat(member.totalAmount as string) || 0
+                  const discount = member.discount || 0
                   const total = originalTotal * (1 - discount / 100)
-                  const paid = parseFloat(attendee.amountPaid as string) || 0
+                  const paid = parseFloat(member.amountPaid as string) || 0
                   const remaining = total - paid
                   if (remaining > 0) {
                     return (
@@ -1070,15 +1023,14 @@ export function StaffClient({ userId }: Props) {
                 })()}
               </div>
               {(() => {
-                const attendee = selectedStaffId ? staffList.find((a) => a.id === selectedStaffId) : null
-                if (!attendee) return null
-                const originalTotal = parseFloat(attendee.totalAmount as string) || 0
-                const discount = attendee.discount || 0
+                const member = selectedStaffId ? staffList.find((a) => a.id === selectedStaffId) : null
+                if (!member) return null
+                const originalTotal = parseFloat(member.totalAmount as string) || 0
+                const discount = member.discount || 0
                 const total = originalTotal * (1 - discount / 100)
-                const paid = parseFloat(attendee.amountPaid as string) || 0
+                const paid = parseFloat(member.amountPaid as string) || 0
                 const remaining = total - paid
                 if (remaining > 0) {
-                  const suggested = parseFloat(paymentForm.amount) || 0
                   return (
                     <p className="text-xs text-muted-foreground">
                       Falta por pagar: <span className="font-semibold">{formatMXN(remaining)}</span>
