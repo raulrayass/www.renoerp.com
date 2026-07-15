@@ -20,7 +20,7 @@ import {
   getTransactions, createTransaction, updateTransaction, deleteTransaction,
 } from '@/app/actions/transactions'
 import { getCategories } from '@/app/actions/categories'
-import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, FileDown, Filter } from 'lucide-react'
+import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, FileDown, Filter, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
 import type { Category } from '@/lib/db/schema'
 import { RESPONSIVE_SIZES } from '@/lib/responsive-config'
 import * as XLSX from 'xlsx'
@@ -239,33 +239,35 @@ export function TransactionsClient({ userId }: { userId: string }) {
         </div>
       </div>
 
-      {/* Summary - Stacked vertically */}
-      <div className="space-y-1.5 sm:space-y-2">
-        <Card className="border-l-4 border-l-blue-600 p-2 sm:p-2.5">
-          <div className="flex items-start justify-between gap-2">
+      {/* Summary - Like Dashboard */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <Card className="p-3 sm:p-4">
+          <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs text-muted-foreground uppercase font-medium">Esperado</p>
-              <p className="text-xs sm:text-sm font-bold mt-0.5 text-blue-600">{formatCurrency(totals.income)}</p>
+              <p className="text-xs text-muted-foreground font-medium">Total Ingresos</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground mt-1">{formatCurrency(totals.income)}</p>
             </div>
-            <div className="text-blue-600 opacity-60">💰</div>
+            <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
         </Card>
-        <Card className="border-l-4 border-l-green-600 p-2 sm:p-2.5">
-          <div className="flex items-start justify-between gap-2">
+        <Card className="p-3 sm:p-4">
+          <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs text-muted-foreground uppercase font-medium">Recaudado</p>
-              <p className="text-xs sm:text-sm font-bold mt-0.5 text-green-600">{formatCurrency(totals.income)}</p>
+              <p className="text-xs text-muted-foreground font-medium">Total Egresos</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground mt-1">{formatCurrency(totals.expense)}</p>
             </div>
-            <div className="text-green-600 opacity-60">✓</div>
+            <TrendingDown className="w-5 h-5 text-orange-600" />
           </div>
         </Card>
-        <Card className="border-l-4 border-l-red-600 p-2 sm:p-2.5">
-          <div className="flex items-start justify-between gap-2">
+        <Card className="p-3 sm:p-4">
+          <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs text-muted-foreground uppercase font-medium">Pendiente</p>
-              <p className="text-xs sm:text-sm font-bold mt-0.5 text-red-600">{formatCurrency(totals.expense)}</p>
+              <p className="text-xs text-muted-foreground font-medium">Balance General</p>
+              <p className={`text-lg sm:text-2xl font-bold mt-1 ${totals.income - totals.expense >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(totals.income - totals.expense)}
+              </p>
             </div>
-            <div className="text-red-600 opacity-60">⏱</div>
+            <Wallet className="w-5 h-5 text-primary" />
           </div>
         </Card>
       </div>
