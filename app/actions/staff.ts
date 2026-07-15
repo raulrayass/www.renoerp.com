@@ -1,43 +1,19 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { staff, staffPayments, ministries } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
-import type { NewStaff, NewStaffPayment, NewMinistry } from '@/lib/db/schema'
+import { staff, staffPayments } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
+import type { NewStaff, NewStaffPayment } from '@/lib/db/schema'
 
-export async function getMinistries(userId: string) {
-  return await db
-    .select()
-    .from(ministries)
-    .where(eq(ministries.userId, userId))
-}
-
-export async function createDefaultMinistries(userId: string) {
-  const defaultMinistries = [
-    'Deportes',
-    'Cocina',
-    'Pastor@',
-    'Lider de equipo',
-    'Logistica',
-    'Administración',
-    'Multimendia',
-  ]
-
-  const existing = await getMinistries(userId)
-  const existingNames = existing.map(m => m.name)
-  const toCreate = defaultMinistries.filter(name => !existingNames.includes(name))
-
-  if (toCreate.length > 0) {
-    await db.insert(ministries).values(
-      toCreate.map(name => ({
-        userId,
-        name,
-      }))
-    )
-  }
-
-  return getMinistries(userId)
-}
+export const MINISTRIES = [
+  'Deportes',
+  'Cocina',
+  'Pastor@',
+  'Lider de equipo',
+  'Logistica',
+  'Administración',
+  'Multimendia',
+]
 
 export async function getStaff(userId: string) {
   return await db
@@ -137,4 +113,40 @@ export async function getStaffPayments(staffId: number) {
     .select()
     .from(staffPayments)
     .where(eq(staffPayments.staffId, staffId))
+}
+
+export async function seedStaffData(userId: string) {
+  try {
+    const existing = await getStaff(userId)
+    if (existing.length > 0) return existing
+
+    const newStaffMember = await createStaff(userId, {
+      name: 'Enrique Medina',
+      category: 'Pastor',
+      sex: 'H',
+      shirtSize: 'M',
+      phone: '3334001726',
+      churchId: null,
+      age: null,
+      checkedIn: false,
+      leadTeamId: null,
+      totalAmount: '1200.00',
+      amountPaid: '100.00',
+      status: 'pending',
+    })
+
+    if (newStaffMember) {
+      await addStaffPayment(userId, newStaffMember.id, {
+        amount: '100.00',
+        paymentDate: new Date(),
+        paymentMethod: 'cash',
+        notes: 'Pago inicial',
+      })
+    }
+
+    return await getStaff(userId)
+  } catch (e) {
+    console.error('Error seeding staff data:', e)
+    return []
+  }
 }
