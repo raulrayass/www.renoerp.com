@@ -12,7 +12,7 @@ import {
   getStaffPayments,
   bulkCreateStaff,
   toggleCheckIn,
-} from "@/app/actions/staff"'
+} from "@/app/actions/staff"
 import { getChurches } from '@/app/actions/churches'
 import { getTeams } from '@/app/actions/teams'
 import { getRooms } from '@/app/actions/rooms'
