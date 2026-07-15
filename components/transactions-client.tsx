@@ -429,9 +429,10 @@ export function TransactionsClient({ userId }: { userId: string }) {
                     </span>
                   </SelectTrigger>
                   <SelectContent>
-                    {filteredCategories.length === 0
-                      ? <SelectItem value="none" disabled>Sin categorías disponibles</SelectItem>
-                      : filteredCategories.map((c) => (
+                    {filteredCategories.length === 0 ? (
+                      <SelectItem value="none" disabled>Sin categorías disponibles</SelectItem>
+                    ) : (
+                      filteredCategories.map((c) => (
                         <SelectItem key={c.id} value={String(c.id)}>
                           <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
@@ -439,7 +440,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
                           </div>
                         </SelectItem>
                       ))
-                    }
+                    )}
                   </SelectContent>
                 </Select>
               </div>
