@@ -247,7 +247,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
               <p className="text-xs text-muted-foreground font-medium">Total Ingresos</p>
               <p className="text-lg sm:text-2xl font-bold text-foreground mt-1">{formatCurrency(totals.income)}</p>
             </div>
-            <TrendingUp className="w-5 h-5 text-green-600" />
+            <div className="bg-emerald-600/10 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
+            </div>
           </div>
         </Card>
         <Card className="p-3 sm:p-4">
@@ -256,7 +258,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
               <p className="text-xs text-muted-foreground font-medium">Total Egresos</p>
               <p className="text-lg sm:text-2xl font-bold text-foreground mt-1">{formatCurrency(totals.expense)}</p>
             </div>
-            <TrendingDown className="w-5 h-5 text-orange-600" />
+            <div className="bg-orange-600/10 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+              <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+            </div>
           </div>
         </Card>
         <Card className="p-3 sm:p-4">
@@ -267,7 +271,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 {formatCurrency(totals.income - totals.expense)}
               </p>
             </div>
-            <Wallet className="w-5 h-5 text-primary" />
+            <div className="bg-primary/10 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+              <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            </div>
           </div>
         </Card>
       </div>
@@ -432,7 +438,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
               </div>
               <div className="flex flex-col gap-1">
                 <Label htmlFor="date" className="text-xs sm:text-sm">Fecha</Label>
-                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="h-6 sm:h-8 text-xs" required />
+                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="h-7 sm:h-8 text-xs" required />
               </div>
             </div>
             <div className="space-y-1">
