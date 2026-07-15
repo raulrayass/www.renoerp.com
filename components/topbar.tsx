@@ -20,7 +20,7 @@ import {
 const navItems = [
   { href: '/', label: 'Dashboard', icon: Square },
   { href: '/attendees', label: 'Camperos', icon: Users },
-  { href: '/staff', label: 'Personal', icon: Users },
+  { href: '/staff', label: 'Staff', icon: Users },
   { href: '/teams', label: 'Equipos', icon: Zap },
   { href: '/rooms', label: 'Habitaciones', icon: Home },
   { href: '/games', label: 'Juegos', icon: Trophy },
