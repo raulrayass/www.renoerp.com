@@ -148,7 +148,7 @@ export function DashboardClient({ userId }: { userId: string }) {
       {/* Per-category comparison */}
       <Card className="p-5">
         <h2 className="font-semibold text-foreground mb-1">Ingreso y Egreso por categoria</h2>
-        <p className="text-xs text-muted-foreground mb-4">Comparativo de cada categoria del campamento</p>
+        <p className="text-xs text-muted-foreground mb-4"></p>
         {hasAnyData && categoryComparison.length > 0 ? (
           <ResponsiveContainer width="100%" height={Math.max(220, categoryComparison.length * 52)}>
             <BarChart
