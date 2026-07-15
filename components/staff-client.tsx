@@ -247,7 +247,7 @@ export function StaffClient({ userId }: Props) {
     startTransition(async () => {
       try {
         await deleteStaff(userId, id)
-        toast.success('Personal de ministerio eliminado')
+        toast.success('Staff eliminado')
         await loadAttendees()
       } catch (error) {
         toast.error('Error al eliminar el staff')
@@ -1004,7 +1004,7 @@ export function StaffClient({ userId }: Props) {
                 Cancelar
               </Button>
               <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white">
-                {editingId ? 'Guardar Cambios' : 'Agregar Personal de ministerio'}
+                {editingId ? 'Guardar Cambios' : 'Agregar staff'}
               </Button>
             </div>
           </form>
