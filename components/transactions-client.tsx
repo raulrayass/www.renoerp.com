@@ -401,7 +401,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
             <div className="flex flex-col gap-1">
               <Label htmlFor="desc" className="text-xs sm:text-sm">Descripción</Label>
               <Input
-                id="desc" placeholder="Ej: Compra de suministros"
+                id="desc" placeholder="Ej: compra de"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className="h-6 sm:h-8 text-xs"
