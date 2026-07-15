@@ -77,14 +77,14 @@ export function DashboardClient({ userId }: { userId: string }) {
           value={formatCurrency(totalIncome)}
           icon={TrendingUp}
           color="green"
-          subtitle="Acumulado total"
+          subtitle=""
         />
         <StatCard
           label="Total Egresos"
           value={formatCurrency(totalExpense)}
           icon={TrendingDown}
           color="orange"
-          subtitle="Acumulado total"
+          subtitle=""
         />
       </div>
 
@@ -148,7 +148,7 @@ export function DashboardClient({ userId }: { userId: string }) {
       {/* Per-category comparison */}
       <Card className="p-5">
         <h2 className="font-semibold text-foreground mb-1">Ingreso y Egreso por categoria</h2>
-        <p className="text-xs text-muted-foreground mb-4">Comparativo de cada categoria del campamento</p>
+        <p className="text-xs text-muted-foreground mb-4"></p>
         {hasAnyData && categoryComparison.length > 0 ? (
           <ResponsiveContainer width="100%" height={Math.max(220, categoryComparison.length * 52)}>
             <BarChart
@@ -219,7 +219,7 @@ export function DashboardClient({ userId }: { userId: string }) {
           <h2 className="font-semibold text-foreground mb-1">Camperos por Iglesia</h2>
           <p className="text-xs text-muted-foreground mb-4"></p>
           {churchData && churchData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={380}>
               <PieChart>
                 <Pie
                   data={churchData}

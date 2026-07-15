@@ -375,7 +375,7 @@ export function GamesClient({ userId }: Props) {
                 id="description"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Ej: Juego amistoso"
+                placeholder="Ej: reto"
               />
             </div>
             <div>
