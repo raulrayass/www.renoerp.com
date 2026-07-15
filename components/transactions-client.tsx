@@ -239,21 +239,34 @@ export function TransactionsClient({ userId }: { userId: string }) {
         </div>
       </div>
 
-      {/* Summary */}
-      <div className={`grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2.5`}>
-        <Card className="border-l-4 border-l-green-600 p-1 sm:p-2">
-          <p className="text-xs text-muted-foreground">Ingresos</p>
-          <p className="text-xs sm:text-sm font-bold mt-0.5 text-green-600">{formatCurrency(totals.income)}</p>
+      {/* Summary - Stacked vertically */}
+      <div className="space-y-1.5 sm:space-y-2">
+        <Card className="border-l-4 border-l-blue-600 p-2 sm:p-2.5">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-medium">Esperado</p>
+              <p className="text-xs sm:text-sm font-bold mt-0.5 text-blue-600">{formatCurrency(totals.income)}</p>
+            </div>
+            <div className="text-blue-600 opacity-60">💰</div>
+          </div>
         </Card>
-        <Card className="border-l-4 border-l-orange-600 p-1 sm:p-2">
-          <p className="text-xs text-muted-foreground">Egresos</p>
-          <p className="text-xs sm:text-sm font-bold mt-0.5 text-orange-600">{formatCurrency(totals.expense)}</p>
+        <Card className="border-l-4 border-l-green-600 p-2 sm:p-2.5">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-medium">Recaudado</p>
+              <p className="text-xs sm:text-sm font-bold mt-0.5 text-green-600">{formatCurrency(totals.income)}</p>
+            </div>
+            <div className="text-green-600 opacity-60">✓</div>
+          </div>
         </Card>
-        <Card className="border-l-4 border-l-slate-600 p-1 sm:p-2">
-          <p className="text-xs text-muted-foreground">Balance</p>
-          <p className={`text-xs sm:text-sm font-bold mt-0.5 ${totals.income - totals.expense >= 0 ? 'text-slate-700 dark:text-slate-300' : 'text-red-600'}`}>
-            {formatCurrency(totals.income - totals.expense)}
-          </p>
+        <Card className="border-l-4 border-l-red-600 p-2 sm:p-2.5">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-medium">Pendiente</p>
+              <p className="text-xs sm:text-sm font-bold mt-0.5 text-red-600">{formatCurrency(totals.expense)}</p>
+            </div>
+            <div className="text-red-600 opacity-60">⏱</div>
+          </div>
         </Card>
       </div>
 

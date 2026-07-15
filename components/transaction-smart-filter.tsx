@@ -45,63 +45,75 @@ export function TransactionSmartFilter({
   onDateToChange,
   onClearFilters,
 }: TransactionSmartFilterProps) {
-  const hasActiveFilters = typeFilter !== 'all' || categoryFilter !== 'all' || methodFilter !== 'all' || dateFrom || dateTo || search
+  const activeFiltersCount = [
+    search ? 1 : 0,
+    typeFilter !== 'all' ? 1 : 0,
+    categoryFilter !== 'all' ? 1 : 0,
+    methodFilter !== 'all' ? 1 : 0,
+    dateFrom ? 1 : 0,
+    dateTo ? 1 : 0,
+  ].reduce((a, b) => a + b, 0)
 
   return (
-    <div className="space-y-1 bg-card border-2 border-border rounded-lg p-2 sm:p-3">
-      {/* Header with search and clear button */}
-      <div className="flex items-center justify-between gap-1 sm:gap-2">
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Buscar..."
-            className="pl-7 sm:pl-10 h-6 sm:h-8 text-xs border-2 border-border rounded-md"
-          />
-          {search && (
-            <button
-              onClick={() => onSearchChange('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="w-3 h-3 sm:w-4 sm:h-4" />
-            </button>
-          )}
-        </div>
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearFilters}
-            className="h-6 sm:h-8 text-xs px-1.5 shrink-0"
+    <div className="space-y-1.5 bg-card border-2 border-border rounded-lg p-3 sm:p-3.5">
+      {/* Search bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Buscar..."
+          className="pl-10 h-8 text-xs border-2 border-border rounded-md"
+        />
+        {search && (
+          <button
+            onClick={() => onSearchChange('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           >
-            Limpiar
-          </Button>
+            <X className="w-4 h-4" />
+          </button>
         )}
       </div>
 
-      {/* Filters Row 1: Type, Category, Method - apilados en móvil */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-0.5 sm:gap-1">
-        {/* Type filter */}
-        <Select value={typeFilter} onValueChange={onTypeChange}>
-          <SelectTrigger className="text-xs h-6 sm:h-8 py-0 px-1.5 sm:px-2 border-2 border-border rounded-md">
-            <span className="text-foreground text-xs truncate">
-              {typeFilter === 'all' ? 'Tipo' : typeFilter === 'income' ? 'Ingresos' : 'Egresos'}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="income">Ingresos</SelectItem>
-            <SelectItem value="expense">Egresos</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Type quick filters - Row 1 */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-1">
+        <Button
+          variant={typeFilter === 'income' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onTypeChange(typeFilter === 'income' ? 'all' : 'income')}
+          className="h-8 text-xs py-1 px-2 border-2"
+        >
+          Ingresos
+        </Button>
+        <Button
+          variant={typeFilter === 'expense' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onTypeChange(typeFilter === 'expense' ? 'all' : 'expense')}
+          className="h-8 text-xs py-1 px-2 border-2"
+        >
+          Egresos
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onClearFilters()}
+          className="h-8 text-xs py-1 px-2 border-2"
+        >
+          Todos
+        </Button>
+      </div>
 
+      {/* Dropdowns - Row 2 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
         {/* Category filter */}
         <Select value={categoryFilter} onValueChange={onCategoryChange}>
-          <SelectTrigger className="text-xs h-6 sm:h-8 py-0 px-1.5 sm:px-2 border-2 border-border rounded-md">
-            <span className="text-foreground text-xs truncate">
-              {categoryFilter === 'all' ? 'Categoría' : categories.find(c => String(c.id) === categoryFilter)?.name || 'Categoría'}
-            </span>
+          <SelectTrigger className="text-xs h-8 py-1 px-2 border-2 border-border rounded-md">
+            <SelectValue placeholder="Categoría">
+              {categoryFilter 
+                ? categories.find(c => String(c.id) === categoryFilter)?.name || 'Categoría'
+                : 'Categoría'
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas</SelectItem>
@@ -115,10 +127,10 @@ export function TransactionSmartFilter({
 
         {/* Method filter */}
         <Select value={methodFilter} onValueChange={onMethodChange}>
-          <SelectTrigger className="text-xs h-6 sm:h-8 py-0 px-1.5 sm:px-2 border-2 border-border rounded-md">
-            <span className="text-foreground text-xs truncate">
-              {methodFilter === 'all' ? 'Método' : paymentMethods.find(m => m.value === methodFilter)?.label || 'Método'}
-            </span>
+          <SelectTrigger className="text-xs h-8 py-1 px-2 border-2 border-border rounded-md">
+            <SelectValue placeholder="Método">
+              {methodFilter === 'cash' ? 'Efectivo' : methodFilter === 'transfer' ? 'Transferencia' : methodFilter === 'check' ? 'Cheque' : 'Método'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
@@ -131,17 +143,17 @@ export function TransactionSmartFilter({
         </Select>
       </div>
 
-      {/* Filters Row 2: Date range */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-0.5 sm:gap-1">
+      {/* Date range - Row 3 */}
+      <div className="grid grid-cols-2 gap-1">
         <div className="relative">
           <Input
             type="date"
             value={dateFrom}
             onChange={(e) => onDateFromChange(e.target.value)}
-            className="h-6 sm:h-8 text-xs border-2 border-border rounded-md px-2"
+            className="h-8 text-xs border-2 border-border rounded-md px-2"
           />
           {!dateFrom && (
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
               Desde
             </span>
           )}
@@ -151,15 +163,32 @@ export function TransactionSmartFilter({
             type="date"
             value={dateTo}
             onChange={(e) => onDateToChange(e.target.value)}
-            className="h-6 sm:h-8 text-xs border-2 border-border rounded-md px-2"
+            className="h-8 text-xs border-2 border-border rounded-md px-2"
           />
           {!dateTo && (
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
               Hasta
             </span>
           )}
         </div>
       </div>
+
+      {/* Active filters indicator */}
+      {activeFiltersCount > 0 && (
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">
+            {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} activo{activeFiltersCount !== 1 ? 's' : ''}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearFilters}
+            className="h-7 text-xs"
+          >
+            Limpiar todo
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
