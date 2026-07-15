@@ -147,7 +147,7 @@ export async function addStaffPayment(
     .from(staff)
     .where(and(eq(staff.userId, userId), eq(staff.id, staffId)))
 
-  if (!staffMember) throw new Error('Personal no encontrado')
+  if (!staffMember) throw new Error('Staff no encontrado')
 
   // Validate payment doesn't exceed remaining amount
   const originalTotal = parseFloat(staffMember.totalAmount as string)
@@ -187,12 +187,12 @@ export async function addStaffPayment(
 
   // Determine category name based on payment method
   const categoryNameMap: Record<string, string> = {
-    'cash': 'Pago de Personal - Efectivo',
-    'transfer': 'Pago de Personal - Transferencia/Depósito',
-    'deposit': 'Pago de Personal - Transferencia/Depósito',
-    'mobile': 'Pago de Personal - Transferencia/Depósito',
+    'cash': 'Pago de Staff - Efectivo',
+    'transfer': 'Pago de Staff - Transferencia/Depósito',
+    'deposit': 'Pago de Staff - Transferencia/Depósito',
+    'mobile': 'Pago de Staff - Transferencia/Depósito',
   }
-  const categoryName = categoryNameMap[paymentMethod] || 'Pago de Personal - Efectivo'
+  const categoryName = categoryNameMap[paymentMethod] || 'Pago de Staff - Efectivo'
 
   // Find or create category based on payment method
   let [staffPaymentCat] = await db
@@ -202,8 +202,8 @@ export async function addStaffPayment(
 
   if (!staffPaymentCat) {
     const colorMap: Record<string, string> = {
-      'Pago de Personal - Efectivo': '#22c55e', // green
-      'Pago de Personal - Transferencia/Depósito': '#3b82f6', // blue
+      'Pago de Staff - Efectivo': '#22c55e', // green
+      'Pago de Staff - Transferencia/Depósito': '#3b82f6', // blue
     }
     const [newCat] = await db
       .insert(categories)
@@ -243,7 +243,7 @@ export async function deleteStaffPayment(userId: string, paymentId: number) {
     .from(staff)
     .where(eq(staff.id, payment.staffId))
 
-  if (!staffMember) throw new Error('Personal no encontrado')
+  if (!staffMember) throw new Error('Staff no encontrado')
 
   // Delete corresponding transaction
   await db
@@ -322,7 +322,7 @@ export async function bulkCreateStaff(
 
   // Get category for payments
   const staffPaymentCat = await db.query.categories.findFirst({
-    where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Personal')),
+    where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Staff')),
   })
 
   if (!staffPaymentCat) return
