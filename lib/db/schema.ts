@@ -121,15 +121,15 @@ export const staff = pgTable('staff', {
   shirtSize: text('shirtSize'), // 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
   sex: text('sex'), // 'H' | 'M'
   phone: text('phone'),
-  church: text('church'), // Guardamos el nombre de la iglesia como text, no como ID
-  category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimedia'
-  checkedIn: boolean('checkedIn').notNull().default(false),
-  totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
-  amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
-  status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
-  notes: text('notes'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  churchId: integer('churchId'), // Referencia a tabla churches
+  category: text('category').notNull(), // Ministerio
+  leadTeamId: integer('leadTeamId'), // Referencia a tabla teams
+  checkedIn: boolean('checkedIn'),
+  totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }),
+  amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }),
+  status: text('status'), // 'pending' | 'partial' | 'paid'
+  createdAt: timestamp('createdAt'),
+  updatedAt: timestamp('updatedAt'),
 })
 
 export const staffPayments = pgTable('staff_payments', {
