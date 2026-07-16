@@ -122,7 +122,7 @@ export const staff = pgTable('staff', {
   sex: text('sex'), // 'H' | 'M'
   phone: text('phone'),
   church: text('church'),
-  category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimendia'
+  category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimedia'
   checkedIn: boolean('checkedIn').notNull().default(false),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
   discount: integer('discount').notNull().default(0), // porcentaje: 0, 10, 20, 30

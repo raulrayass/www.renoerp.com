@@ -13,7 +13,7 @@ import {
   bulkCreateStaff,
   toggleCheckIn,
 } from "@/app/actions/staff"
-import { getChurches } from '@/app/actions/churches'
+import { getAllChurches } from '@/app/actions/churches'
 import { getTeams } from '@/app/actions/teams'
 import { getRooms } from '@/app/actions/rooms'
 import { Staff, StaffPayment, Church, Team, Room } from '@/lib/db/schema'
@@ -48,7 +48,7 @@ const MINISTRIES = [
   'Lider de equipo',
   'Logistica',
   'Administración',
-  'Multimendia',
+  'Multimedia',
 ]
 
 const emptyForm = {
@@ -119,7 +119,7 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function loadChurches() {
-    const data = await getChurches(userId)
+    const data = await getAllChurches(userId)
     setChurches(data)
   }
 
