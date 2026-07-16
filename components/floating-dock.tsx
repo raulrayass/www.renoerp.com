@@ -10,7 +10,7 @@ const navItems = [
   { href: '/staff', label: 'Staff', icon: Briefcase },
   { href: '/teams', label: 'Equipos', icon: Zap },
   { href: '/rooms', label: 'Habitaciones', icon: Home },
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/', label: 'Dashboard', icon: Briefcase },
   { href: '/games', label: 'Juegos', icon: Trophy },
   { href: '/churches', label: 'Iglesias', icon: Church },
   { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
