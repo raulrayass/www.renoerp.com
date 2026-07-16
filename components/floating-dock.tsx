@@ -36,7 +36,7 @@ export function FloatingDock() {
                   'flex items-center justify-center w-11 h-11 rounded-full shrink-0 -mt-3 transition-all duration-200 shadow-lg ring-4 ring-card',
                   active
                     ? 'bg-green-600 text-white scale-110'
-                    : 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-card border-2 border-green-600 text-green-600 hover:bg-green-50'
                 )}
                 title={label}
               >
