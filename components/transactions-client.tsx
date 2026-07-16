@@ -33,6 +33,15 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value)
 }
 
+// Muestra la fecha de la transacción + la hora real de registro (createdAt)
+function formatDateTime(dateStr: string, createdAt: any) {
+  if (!createdAt) return dateStr
+  const hora = new Date(createdAt).toLocaleTimeString('es-MX', {
+    hour: '2-digit', minute: '2-digit', hour12: true,
+  })
+  return `${dateStr} · ${hora}`
+}
+
 const defaultForm = {
   type: 'expense',
   amount: '',
@@ -197,11 +206,28 @@ export function TransactionsClient({ userId }: { userId: string }) {
     const data = filtered.map((t) => {
       const amount = parseFloat(t.amount as string)
       const signedAmount = t.type === 'income' ? amount : -amount
+
+      // Método de pago en español
+      const metodo = !t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo'
+        : t.paymentMethod === 'transfer' ? 'Transferencia'
+        : t.paymentMethod === 'deposit' ? 'Depósito'
+        : 'Efectivo'
+
+      // Fecha y hora reales de registro (createdAt)
+      const registrado = t.createdAt
+        ? new Date(t.createdAt).toLocaleString('es-MX', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: true,
+          })
+        : ''
+
       return {
         Fecha: t.date,
+        'Fecha y Hora de Registro': registrado,
         Tipo: t.type === 'income' ? 'Ingreso' : 'Egreso',
         Categoria: t.categoryName ?? 'Sin categoria',
         Descripcion: t.description,
+        'Método de Pago': metodo,
         'Monto ($)': signedAmount,
       }
     })
@@ -333,14 +359,14 @@ export function TransactionsClient({ userId }: { userId: string }) {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground text-xs truncate">{t.description}</p>
                     <div className="hidden sm:flex gap-2 mt-0.5 text-xs text-muted-foreground">
-                      <span>{t.date}</span>
+                      <span>{formatDateTime(t.date, t.createdAt)}</span>
                       <span>•</span>
                       <span>{t.categoryName ?? 'Sin categoría'}</span>
                       <span>•</span>
                       <span>{!t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}</span>
                     </div>
                     <div className="sm:hidden flex gap-1.5 mt-0.5 text-xs text-muted-foreground">
-                      <span className="text-xs">{t.date}</span>
+                      <span className="text-xs">{formatDateTime(t.date, t.createdAt)}</span>
                       <span>•</span>
                       <span className="truncate text-xs">{t.categoryName ?? 'Sin categoría'}</span>
                     </div>
