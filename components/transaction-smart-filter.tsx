@@ -144,13 +144,13 @@ export function TransactionSmartFilter({
       </div>
 
       {/* Date range - Row 3 */}
-      <div className="grid grid-cols-2 gap-0.5 overflow-hidden">
+      <div className="grid grid-cols-2 gap-0.5 min-w-0">
         <div className="relative min-w-0">
           <Input
             type="date"
             value={dateFrom}
             onChange={(e) => onDateFromChange(e.target.value)}
-            className="h-7 text-xs border-2 border-border rounded-md px-1 py-0 w-full"
+            className="h-7 text-xs border-2 border-border rounded-md px-1 py-0 w-full min-w-0 appearance-none"
           />
           {!dateFrom && (
             <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
@@ -163,7 +163,7 @@ export function TransactionSmartFilter({
             type="date"
             value={dateTo}
             onChange={(e) => onDateToChange(e.target.value)}
-            className="h-7 text-xs border-2 border-border rounded-md px-1 py-0 w-full"
+            className="h-7 text-xs border-2 border-border rounded-md px-1 py-0 w-full min-w-0 appearance-none"
           />
           {!dateTo && (
             <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
