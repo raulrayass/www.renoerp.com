@@ -387,14 +387,11 @@ export function StaffClient({ userId }: Props) {
       const remaining = total - paid
       return {
         Nombre: a.name,
-        Edad: a.age || '',
         Sexo: a.sex || '',
         'Talla Camisa': a.shirtSize || '',
         Teléfono: a.phone || '',
         Iglesia: a.church || '',
         Ministerio: a.category || '',
-        'Monto Original ($)': originalTotal.toFixed(2),
-        'Descuento (%)': discount,
         'Monto Total ($)': total.toFixed(2),
         'Pagado ($)': paid.toFixed(2),
         'Falta Pagar ($)': remaining.toFixed(2),
@@ -419,10 +416,8 @@ export function StaffClient({ userId }: Props) {
 
     const matchesStatus = statusFilter === 'all' || a.status === statusFilter
     const matchesChurch = !churchFilter || a.church === churches.find(c => c.id === parseInt(churchFilter))?.name
-    const matchesTeam = !teamFilter || a.teamId === parseInt(teamFilter)
-    const matchesRoom = !roomFilter || a.roomId === parseInt(roomFilter)
 
-    return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom
+    return matchesSearch && matchesStatus && matchesChurch
   })
 
   const summary = staffList.reduce(
