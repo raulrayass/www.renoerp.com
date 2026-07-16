@@ -25,6 +25,26 @@ export function FloatingDock() {
       <div className="flex items-center justify-between gap-0.5 px-2 py-1.5 rounded-2xl bg-card border border-border shadow-lg backdrop-blur-sm">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href
+          const isDashboard = href === '/'
+
+          if (isDashboard) {
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  'flex items-center justify-center w-11 h-11 rounded-full shrink-0 -mt-3 transition-all duration-200 shadow-lg ring-4 ring-card',
+                  active
+                    ? 'bg-green-600 text-white scale-110'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                )}
+                title={label}
+              >
+                <Icon className="w-5 h-5" />
+              </Link>
+            )
+          }
+
           return (
             <Link
               key={href}
