@@ -296,25 +296,27 @@ export async function bulkCreateStaff(
   const createdStaff = await db
     .insert(staff)
     .values(
-      staffList.map((s) => ({
-        userId,
-        name: s.name.trim(),
-        age: s.age ?? null,
-        sex: s.sex || null,
-        shirtSize: s.shirtSize || null,
-        phone: (s.phone || '').trim(),
-        church: (s.church || '').trim(),
-        category: (s.category || '').trim(),
-        totalAmount: parseFloat(s.totalAmount.toString()),
-        amountPaid: parseFloat((s.initialPayment || 0).toString()),
-        status:
-          s.initialPayment && s.initialPayment > 0
-            ? s.initialPayment >= s.totalAmount
-              ? 'paid'
-              : 'partial'
-            : 'pending',
-        notes: (s.notes || '').trim(),
-      }))
+staffList.map((s) => ({
+  userId,
+  name: s.name.trim(),
+  age: s.age ?? null,
+  sex: s.sex || null,
+  shirtSize: s.shirtSize || null,
+  phone: (s.phone || '').trim(),
+  church: (s.church || '').trim(),
+  category: (s.category || '').trim() || 'Sin ministerio',
+  totalAmount: parseFloat(s.totalAmount.toString()),
+  amountPaid: parseFloat((s.initialPayment || 0).toString()),
+  discount: 0,
+  checkedIn: false,
+  status:
+    s.initialPayment && s.initialPayment > 0
+      ? s.initialPayment >= s.totalAmount
+        ? 'paid'
+        : 'partial'
+      : 'pending',
+  notes: (s.notes || '').trim(),
+}))
     )
     .returning()
 
