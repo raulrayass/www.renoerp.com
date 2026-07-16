@@ -55,7 +55,6 @@ export async function createStaff(
     church?: string
     category?: string
     totalAmount: number
-    discount?: number // 0, 10, 20, 30
     notes?: string
   }
 ) {
@@ -69,7 +68,7 @@ export async function createStaff(
     church: data.church || '',
     category: data.category || '',
     totalAmount: parseFloat(data.totalAmount.toString()),
-    discount: data.discount ?? 0,
+    amountPaid: 0,
     status: 'pending',
     notes: data.notes || '',
   })
@@ -87,7 +86,6 @@ export async function updateStaff(
     church: string
     category: string
     totalAmount: number
-    discount: number
     notes: string
   }>
 ) {
