@@ -29,6 +29,10 @@ const paymentMethods = [
   { value: 'deposit', label: 'Depósito' },
 ]
 
+// Clases base compartidas por todos los controles del filtro para mantener
+// altura, texto, padding, borde y radio consistentes.
+const CONTROL = 'h-8 text-xs px-2 py-0 border-2 border-border rounded-md'
+
 export function TransactionSmartFilter({
   search,
   onSearchChange,
@@ -55,15 +59,15 @@ export function TransactionSmartFilter({
   ].reduce((a, b) => a + b, 0)
 
   return (
-    <div className="space-y-1 bg-card border-2 border-border rounded-lg p-1.5 sm:p-2 overflow-hidden">
+    <div className="space-y-1.5 bg-card border-2 border-border rounded-lg p-2 overflow-hidden">
       {/* Search bar */}
       <div className="relative">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
         <Input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Buscar..."
-          className="pl-9 h-7 text-xs border-2 border-border rounded-md"
+          className={`${CONTROL} w-full pl-8`}
         />
         {search && (
           <button
@@ -76,12 +80,12 @@ export function TransactionSmartFilter({
       </div>
 
       {/* Type quick filters - Row 1 */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-0.5">
+      <div className="grid grid-cols-3 gap-1.5">
         <Button
           variant={typeFilter === 'income' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onTypeChange(typeFilter === 'income' ? 'all' : 'income')}
-          className="h-7 text-xs py-0 px-1.5 border-2"
+          className={`${CONTROL} w-full`}
         >
           Ingresos
         </Button>
@@ -89,7 +93,7 @@ export function TransactionSmartFilter({
           variant={typeFilter === 'expense' ? 'default' : 'outline'}
           size="sm"
           onClick={() => onTypeChange(typeFilter === 'expense' ? 'all' : 'expense')}
-          className="h-7 text-xs py-0 px-1.5 border-2"
+          className={`${CONTROL} w-full`}
         >
           Egresos
         </Button>
@@ -97,22 +101,24 @@ export function TransactionSmartFilter({
           variant="outline"
           size="sm"
           onClick={() => onClearFilters()}
-          className="h-7 text-xs py-0 px-1.5 border-2"
+          className={`${CONTROL} w-full`}
         >
           Todos
         </Button>
       </div>
 
       {/* Dropdowns - Row 2 */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-0.5">
+      <div className="grid grid-cols-2 gap-1.5">
         {/* Category filter */}
         <Select value={categoryFilter} onValueChange={onCategoryChange}>
-          <SelectTrigger className="text-xs h-7 py-0 px-1.5 border-2 border-border rounded-md">
+          <SelectTrigger className={`${CONTROL} w-full justify-between`}>
             <SelectValue placeholder="Categoría">
-              {categoryFilter 
-                ? categories.find(c => String(c.id) === categoryFilter)?.name || 'Categoría'
-                : 'Categoría'
-              }
+              <span className="truncate text-left">
+                {categoryFilter && categoryFilter !== 'all'
+                  ? categories.find(c => String(c.id) === categoryFilter)?.name || 'Categoría'
+                  : 'Categoría'
+                }
+              </span>
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -127,9 +133,11 @@ export function TransactionSmartFilter({
 
         {/* Method filter */}
         <Select value={methodFilter} onValueChange={onMethodChange}>
-          <SelectTrigger className="text-xs h-7 py-0 px-1.5 border-2 border-border rounded-md">
+          <SelectTrigger className={`${CONTROL} w-full justify-between`}>
             <SelectValue placeholder="Método">
-              {methodFilter === 'cash' ? 'Efectivo' : methodFilter === 'transfer' ? 'Transferencia' : methodFilter === 'deposit' ? 'Depósito' : 'Método'}
+              <span className="truncate text-left">
+                {methodFilter === 'cash' ? 'Efectivo' : methodFilter === 'transfer' ? 'Transferencia' : methodFilter === 'deposit' ? 'Depósito' : 'Método'}
+              </span>
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -144,16 +152,16 @@ export function TransactionSmartFilter({
       </div>
 
       {/* Date range - Row 3 */}
-      <div className="grid grid-cols-2 gap-0.5 min-w-0">
+      <div className="grid grid-cols-2 gap-1.5 min-w-0">
         <div className="relative min-w-0">
           <Input
             type="date"
             value={dateFrom}
             onChange={(e) => onDateFromChange(e.target.value)}
-            className="h-7 text-xs border-2 border-border rounded-md px-1 py-0 w-full min-w-0 appearance-none"
+            className={`${CONTROL} w-full min-w-0 appearance-none`}
           />
           {!dateFrom && (
-            <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
               Desde
             </span>
           )}
@@ -163,10 +171,10 @@ export function TransactionSmartFilter({
             type="date"
             value={dateTo}
             onChange={(e) => onDateToChange(e.target.value)}
-            className="h-7 text-xs border-2 border-border rounded-md px-1 py-0 w-full min-w-0 appearance-none"
+            className={`${CONTROL} w-full min-w-0 appearance-none`}
           />
           {!dateTo && (
-            <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
               Hasta
             </span>
           )}
@@ -175,7 +183,7 @@ export function TransactionSmartFilter({
 
       {/* Active filters indicator */}
       {activeFiltersCount > 0 && (
-        <div className="flex items-center justify-between text-xs gap-1">
+        <div className="flex items-center justify-between text-xs gap-1 pt-0.5">
           <span className="text-muted-foreground truncate">
             {activeFiltersCount} filtro{activeFiltersCount !== 1 ? 's' : ''} activo{activeFiltersCount !== 1 ? 's' : ''}
           </span>
@@ -183,7 +191,7 @@ export function TransactionSmartFilter({
             variant="ghost"
             size="sm"
             onClick={onClearFilters}
-            className="h-6 text-xs px-1.5"
+            className="h-7 text-xs px-2"
           >
             Limpiar
           </Button>

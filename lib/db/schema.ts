@@ -121,10 +121,12 @@ export const staff = pgTable('staff', {
   shirtSize: text('shirtSize'), // 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
   sex: text('sex'), // 'H' | 'M'
   phone: text('phone'),
-  church: text('church'), // Guardamos el nombre de la iglesia como text, no como ID
-  category: text('category'), // Ministerio: 'Deportes' | 'Cocina' | 'Pastor@' | 'Lider de equipo' | 'Logistica' | 'Administración' | 'Multimedia'
+  church: text('church'), // Nombre de la iglesia (texto libre, igual que attendees)
+  category: text('category'), // Ministerio
+  leadTeamId: integer('leadTeamId'), // Referencia a tabla teams
   checkedIn: boolean('checkedIn').notNull().default(false),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
+  discount: integer('discount').notNull().default(0), // porcentaje: 0, 10, 20, 30
   amountPaid: numeric('amountPaid', { precision: 12, scale: 2 }).notNull().default('0'),
   status: text('status').notNull().default('pending'), // 'pending' | 'partial' | 'paid'
   notes: text('notes'),
