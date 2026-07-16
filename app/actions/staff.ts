@@ -110,12 +110,21 @@ export async function toggleCheckIn(userId: string, staffId: number, checkedIn: 
 }
 
 export async function deleteStaff(userId: string, staffId: number) {
-  // Delete all payments and transactions for this staff member
+  // Obtener el staff para conocer su nombre (necesario para borrar transacciones)
+  const [staffMember] = await db
+    .select()
+    .from(staff)
+    .where(and(eq(staff.userId, userId), eq(staff.id, staffId)))
+
+  if (!staffMember) throw new Error('Staff no encontrado')
+
+  // Obtener todos los pagos del staff
   const payments = await db
     .select()
     .from(staffPayments)
     .where(and(eq(staffPayments.userId, userId), eq(staffPayments.staffId, staffId)))
 
+  // Borrar la transacción correspondiente a cada pago (por nombre + monto)
   for (const payment of payments) {
     await db
       .delete(transactions)
@@ -123,7 +132,8 @@ export async function deleteStaff(userId: string, staffId: number) {
         and(
           eq(transactions.userId, userId),
           eq(transactions.type, 'income'),
-          eq(transactions.amount, payment.amount)
+          eq(transactions.amount, payment.amount),
+          eq(transactions.description, `Pago de ${staffMember.name}`)
         )
       )
   }
@@ -297,26 +307,26 @@ export async function bulkCreateStaff(
     .insert(staff)
     .values(
       staffList.map((s) => ({
-      userId,
-      name: s.name.trim(),
-      age: s.age ?? null,
-      sex: s.sex || null,
-      shirtSize: s.shirtSize || null,
-      phone: (s.phone || '').trim(),
-      church: (s.church || '').trim(),
-      category: (s.category || '').trim() || 'Sin ministerio',
-      totalAmount: parseFloat(s.totalAmount.toString()),
-      amountPaid: parseFloat((s.initialPayment || 0).toString()),
-      discount: 0,
-      checkedIn: false,
-      status:
-        s.initialPayment && s.initialPayment > 0
-          ? s.initialPayment >= s.totalAmount
-            ? 'paid'
-            : 'partial'
-          : 'pending',
-      notes: (s.notes || '').trim(),
-    }))
+        userId,
+        name: s.name.trim(),
+        age: s.age ?? null,
+        sex: s.sex || null,
+        shirtSize: s.shirtSize || null,
+        phone: (s.phone || '').trim(),
+        church: (s.church || '').trim(),
+        category: (s.category || '').trim() || 'Sin ministerio',
+        totalAmount: parseFloat(s.totalAmount.toString()),
+        amountPaid: parseFloat((s.initialPayment || 0).toString()),
+        discount: 0,
+        checkedIn: false,
+        status:
+          s.initialPayment && s.initialPayment > 0
+            ? s.initialPayment >= s.totalAmount
+              ? 'paid'
+              : 'partial'
+            : 'pending',
+        notes: (s.notes || '').trim(),
+      }))
     )
     .returning()
 
@@ -339,22 +349,39 @@ export async function bulkCreateStaff(
     staffPaymentCat = created[0]
   }
 
-  // Create transactions for initial payments
+  // Create staff_payments records AND transactions for initial payments
+  const paymentsToInsert: any[] = []
   const transactionsToInsert: any[] = []
+  const today = new Date().toISOString().split('T')[0]
+
   for (let i = 0; i < createdStaff.length; i++) {
     const initialPayment = parseFloat((staffList[i].initialPayment || 0).toString())
     if (initialPayment > 0) {
+      // Registro en staff_payments (esto es lo que faltaba y causaba transacciones huérfanas)
+      paymentsToInsert.push({
+        staffId: createdStaff[i].id,
+        userId,
+        amount: initialPayment,
+        paymentMethod: 'cash',
+        paymentDate: today,
+        notes: 'Pago inicial (importación)',
+      })
+      // Transacción correspondiente (misma descripción que usa deleteStaff)
       transactionsToInsert.push({
         userId,
         categoryId: staffPaymentCat.id,
         type: 'income',
         amount: initialPayment,
-        description: `Pago inicial de ${staffList[i].name}`,
-        date: new Date().toISOString().split('T')[0],
+        description: `Pago de ${staffList[i].name}`,
+        date: today,
+        paymentMethod: 'cash',
       })
     }
   }
 
+  if (paymentsToInsert.length > 0) {
+    await db.insert(staffPayments).values(paymentsToInsert)
+  }
   if (transactionsToInsert.length > 0) {
     await db.insert(transactions).values(transactionsToInsert)
   }
@@ -411,8 +438,8 @@ export async function generateExcelTemplate() {
     columns: ['Nombre', 'Sexo', 'Talla Camisa', 'Teléfono', 'Iglesia', 'Ministerio', 'Monto Total ($)', 'Pagado ($)', 'Estado', 'Check-in', 'Notas'],
     data: [
       ['Enrique Medina', 'H', 'M', '3334001726', 'NC Zapopan', 'Pastor', 1200, 100, 'Pendiente', 'No', ''],
-      ['Juan García', 'H', 'L', '5551234567', 'Iglesia Central', 'Deportes', 1500, 1500, 'Pagado', 'Sí', ''],
-      ['María López', 'M', 'S', '5559876543', 'Iglesia del Barrio', 'Cocina', 800, 400, 'Parcial', 'No', ''],
+      ['Raul Rayas', 'H', 'L', '5551234567', 'Masai Guadalajara', 'Deportes', 1500, 1500, 'Pagado', 'Sí', ''],
+      ['Javier Insunza', 'M', 'S', '5559876543', 'NC Tlajo', 'Cocina', 800, 400, 'Parcial', 'No', ''],
     ],
   }
 }
