@@ -22,7 +22,7 @@ export function FloatingDock() {
 
   return (
     <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 lg:hidden px-3 max-w-[calc(100vw-1.5rem)]">
-      <div className="flex items-center gap-0.5 px-1.5 py-1 rounded-2xl bg-card border border-border shadow-lg backdrop-blur-sm overflow-x-auto">
+      <div className="flex items-center gap-1 px-2 py-1.5 rounded-2xl bg-card border border-border shadow-lg backdrop-blur-sm overflow-x-auto">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href
           return (
@@ -30,14 +30,14 @@ export function FloatingDock() {
               key={href}
               href={href}
               className={cn(
-                'flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 p-0 shrink-0',
+                'flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 p-0 shrink-0',
                 active
                   ? 'bg-accent text-accent-foreground shadow-md scale-110'
                   : 'text-foreground hover:bg-muted'
               )}
               title={label}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-5 h-5" />
             </Link>
           )
         })}
