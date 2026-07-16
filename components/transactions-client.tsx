@@ -33,6 +33,15 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value)
 }
 
+// Muestra la fecha de la transacción + la hora real de registro (createdAt)
+function formatDateTime(dateStr: string, createdAt: any) {
+  if (!createdAt) return dateStr
+  const hora = new Date(createdAt).toLocaleTimeString('es-MX', {
+    hour: '2-digit', minute: '2-digit', hour12: true,
+  })
+  return `${dateStr} · ${hora}`
+}
+
 const defaultForm = {
   type: 'expense',
   amount: '',
@@ -189,7 +198,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
     })
   }
 
-function exportToExcel() {
+  function exportToExcel() {
     if (filtered.length === 0) {
       toast.error('No hay transacciones para exportar')
       return
@@ -221,13 +230,6 @@ function exportToExcel() {
         'Método de Pago': metodo,
         'Monto ($)': signedAmount,
       }
-    })
-    const ws = XLSX.utils.json_to_sheet(data)
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Transacciones')
-    XLSX.writeFile(wb, `Transacciones_${new Date().toISOString().split('T')[0]}.xlsx`)
-    toast.success('Transacciones exportadas correctamente')
-  }
     })
     const ws = XLSX.utils.json_to_sheet(data)
     const wb = XLSX.utils.book_new()
@@ -357,14 +359,14 @@ function exportToExcel() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground text-xs truncate">{t.description}</p>
                     <div className="hidden sm:flex gap-2 mt-0.5 text-xs text-muted-foreground">
-                      <span>{t.date}</span>
+                      <span>{formatDateTime(t.date, t.createdAt)}</span>
                       <span>•</span>
                       <span>{t.categoryName ?? 'Sin categoría'}</span>
                       <span>•</span>
                       <span>{!t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo' : t.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'}</span>
                     </div>
                     <div className="sm:hidden flex gap-1.5 mt-0.5 text-xs text-muted-foreground">
-                      <span className="text-xs">{t.date}</span>
+                      <span className="text-xs">{formatDateTime(t.date, t.createdAt)}</span>
                       <span>•</span>
                       <span className="truncate text-xs">{t.categoryName ?? 'Sin categoría'}</span>
                     </div>
