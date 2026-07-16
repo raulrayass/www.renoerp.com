@@ -320,12 +320,24 @@ export async function bulkCreateStaff(
     )
     .returning()
 
-  // Get category for payments
-  const staffPaymentCat = await db.query.categories.findFirst({
+  // Get or create category for payments
+  let staffPaymentCat = await db.query.categories.findFirst({
     where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Staff')),
   })
 
-  if (!staffPaymentCat) return
+  if (!staffPaymentCat) {
+    const created = await db
+      .insert(categories)
+      .values({
+        userId,
+        name: 'Pago de Staff',
+        type: 'income',
+        color: '#3b82f6',
+        icon: 'users',
+      })
+      .returning()
+    staffPaymentCat = created[0]
+  }
 
   // Create transactions for initial payments
   const transactionsToInsert: any[] = []
