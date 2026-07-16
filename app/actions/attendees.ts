@@ -130,12 +130,21 @@ export async function toggleCheckIn(userId: string, attendeeId: number, checkedI
 }
 
 export async function deleteAttendee(userId: string, attendeeId: number) {
-  // Delete all payments and transactions for this attendee
+  // Obtener el campero para conocer su nombre (necesario para borrar transacciones)
+  const [attendee] = await db
+    .select()
+    .from(attendees)
+    .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
+
+  if (!attendee) throw new Error('Campero no encontrado')
+
+  // Obtener todos los pagos del campero
   const payments = await db
     .select()
     .from(attendeePayments)
     .where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, attendeeId)))
 
+  // Borrar la transacción correspondiente a cada pago (por nombre + monto)
   for (const payment of payments) {
     await db
       .delete(transactions)
@@ -143,7 +152,8 @@ export async function deleteAttendee(userId: string, attendeeId: number) {
         and(
           eq(transactions.userId, userId),
           eq(transactions.type, 'income'),
-          eq(transactions.amount, payment.amount)
+          eq(transactions.amount, payment.amount),
+          eq(transactions.description, `Pago de ${attendee.name}`)
         )
       )
   }
@@ -346,29 +356,59 @@ export async function bulkCreateAttendees(
     )
     .returning()
 
-  // Get category for payments
-  const campPaymentCat = await db.query.categories.findFirst({
-    where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Camperos')),
+  // Get or create category for payments (nombre correcto y consistente con addAttendeePayment)
+  const categoryName = 'Pago de Camperos - Efectivo'
+  let campPaymentCat = await db.query.categories.findFirst({
+    where: (c) => and(eq(c.userId, userId), eq(c.name, categoryName)),
   })
 
-  if (!campPaymentCat) return
+  if (!campPaymentCat) {
+    const created = await db
+      .insert(categories)
+      .values({
+        userId,
+        name: categoryName,
+        type: 'income',
+        color: '#22c55e',
+        icon: 'users',
+      })
+      .returning()
+    campPaymentCat = created[0]
+  }
 
-  // Create transactions for initial payments
+  // Create attendee_payments records AND transactions for initial payments
+  const paymentsToInsert: any[] = []
   const transactionsToInsert: any[] = []
+  const today = new Date().toISOString().split('T')[0]
+
   for (let i = 0; i < createdAttendees.length; i++) {
     const initialPayment = parseFloat((attendeesList[i].initialPayment || 0).toString())
     if (initialPayment > 0) {
+      // Registro en attendee_payments (esto es lo que faltaba y causaba transacciones huérfanas)
+      paymentsToInsert.push({
+        attendeeId: createdAttendees[i].id,
+        userId,
+        amount: initialPayment,
+        paymentMethod: 'cash',
+        paymentDate: today,
+        notes: 'Pago inicial (importación)',
+      })
+      // Transacción correspondiente (misma descripción que usa deleteAttendee)
       transactionsToInsert.push({
         userId,
         categoryId: campPaymentCat.id,
         type: 'income',
         amount: initialPayment,
-        description: `Pago inicial de ${attendeesList[i].name}`,
-        date: new Date().toISOString().split('T')[0],
+        description: `Pago de ${attendeesList[i].name}`,
+        date: today,
+        paymentMethod: 'cash',
       })
     }
   }
 
+  if (paymentsToInsert.length > 0) {
+    await db.insert(attendeePayments).values(paymentsToInsert)
+  }
   if (transactionsToInsert.length > 0) {
     await db.insert(transactions).values(transactionsToInsert)
   }
