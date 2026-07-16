@@ -13,7 +13,7 @@ import {
   bulkCreateStaff,
   toggleCheckIn,
 } from "@/app/actions/staff"
-import { getAllChurches } from '@/app/actions/churches'
+import { getChurches } from '@/app/actions/churches'
 import { getTeams } from '@/app/actions/teams'
 import { getRooms } from '@/app/actions/rooms'
 import { Staff, StaffPayment, Church, Team, Room } from '@/lib/db/schema'
@@ -119,7 +119,7 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function loadChurches() {
-    const data = await getAllChurches(userId)
+    const data = await getChurches(userId)
     setChurches(data)
   }
 
@@ -142,14 +142,6 @@ export function StaffClient({ userId }: Props) {
     }
     if (!form.phone.trim()) {
       toast.error('El teléfono es obligatorio')
-      return
-    }
-    if (!form.church.trim()) {
-      toast.error('Selecciona una iglesia')
-      return
-    }
-    if (!form.category.trim()) {
-      toast.error('Selecciona un ministerio')
       return
     }
     if (isNaN(amount) || amount <= 0) {
