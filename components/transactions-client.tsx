@@ -189,7 +189,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
     })
   }
 
-  function exportToExcel() {
+function exportToExcel() {
     if (filtered.length === 0) {
       toast.error('No hay transacciones para exportar')
       return
@@ -197,13 +197,37 @@ export function TransactionsClient({ userId }: { userId: string }) {
     const data = filtered.map((t) => {
       const amount = parseFloat(t.amount as string)
       const signedAmount = t.type === 'income' ? amount : -amount
+
+      // Método de pago en español
+      const metodo = !t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo'
+        : t.paymentMethod === 'transfer' ? 'Transferencia'
+        : t.paymentMethod === 'deposit' ? 'Depósito'
+        : 'Efectivo'
+
+      // Fecha y hora reales de registro (createdAt)
+      const registrado = t.createdAt
+        ? new Date(t.createdAt).toLocaleString('es-MX', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: true,
+          })
+        : ''
+
       return {
         Fecha: t.date,
+        'Fecha y Hora de Registro': registrado,
         Tipo: t.type === 'income' ? 'Ingreso' : 'Egreso',
         Categoria: t.categoryName ?? 'Sin categoria',
         Descripcion: t.description,
+        'Método de Pago': metodo,
         'Monto ($)': signedAmount,
       }
+    })
+    const ws = XLSX.utils.json_to_sheet(data)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Transacciones')
+    XLSX.writeFile(wb, `Transacciones_${new Date().toISOString().split('T')[0]}.xlsx`)
+    toast.success('Transacciones exportadas correctamente')
+  }
     })
     const ws = XLSX.utils.json_to_sheet(data)
     const wb = XLSX.utils.book_new()
