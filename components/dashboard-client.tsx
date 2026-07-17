@@ -53,44 +53,48 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <Card className="p-4">
-          <div className="flex justify-between items-start mb-3">
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Balance Total</p>
-              <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(balance)}</p>
+        <div className="glow-primary">
+          <Card className="p-4 hero-card">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Balance Total</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(balance)}</p>
+              </div>
+              <Wallet className="w-5 h-5 text-primary" />
             </div>
-            <Wallet className="w-5 h-5 text-primary" />
-          </div>
-          <div className="space-y-1 text-xs">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Efectivo:</span>
-              <span className="font-medium">{formatCurrency(paymentMethodBreakdown?.cash?.available ?? 0)}</span>
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Efectivo:</span>
+                <span className="font-medium">{formatCurrency(paymentMethodBreakdown?.cash?.available ?? 0)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Banca Móvil:</span>
+                <span className="font-medium">{formatCurrency((paymentMethodBreakdown?.transfer?.available ?? 0) + (paymentMethodBreakdown?.deposit?.available ?? 0))}</span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Banca Móvil:</span>
-              <span className="font-medium">{formatCurrency((paymentMethodBreakdown?.transfer?.available ?? 0) + (paymentMethodBreakdown?.deposit?.available ?? 0))}</span>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
         <StatCard
           label="Total Ingresos"
           value={formatCurrency(totalIncome)}
           icon={TrendingUp}
           color="green"
-          subtitle=""
+          subtitle="Acumulado total"
+          className="glass-card"
         />
         <StatCard
           label="Total Egresos"
           value={formatCurrency(totalExpense)}
           icon={TrendingDown}
           color="orange"
-          subtitle=""
+          subtitle="Acumulado total"
+          className="glass-card"
         />
       </div>
 
       {/* Monthly chart + Expense pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 gradient-card">
           <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-4">Ingresos vs Egresos por mes</h2>
           {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
             <ResponsiveContainer width="100%" height={240}>
@@ -114,7 +118,7 @@ export function DashboardClient({ userId }: { userId: string }) {
           )}
         </Card>
 
-        <Card>
+        <Card className="gradient-card">
           <h2 className="font-semibold text-foreground mb-1">Egresos por categoria</h2>
           {expenseByCategory.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
@@ -146,9 +150,9 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* Per-category comparison */}
-      <Card className="p-5">
+      <Card className="p-5 gradient-card">
         <h2 className="font-semibold text-foreground mb-1">Ingreso y Egreso por categoria</h2>
-        <p className="text-xs text-muted-foreground mb-4"></p>
+        <p className="text-xs text-muted-foreground mb-4">Comparativo de cada categoria del campamento</p>
         {hasAnyData && categoryComparison.length > 0 ? (
           <ResponsiveContainer width="100%" height={Math.max(220, categoryComparison.length * 52)}>
             <BarChart
@@ -185,7 +189,7 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* Income pie + Recent */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <Card>
+        <Card className="gradient-card">
           <h2 className="font-semibold text-foreground mb-1">Ingresos por categoria</h2>
           {incomeByCategory.length > 0 ? (
             <ResponsiveContainer width="100%" height={260}>
@@ -215,7 +219,7 @@ export function DashboardClient({ userId }: { userId: string }) {
           )}
         </Card>
 
-        <Card>
+        <Card className="gradient-card">
           <h2 className="font-semibold text-foreground mb-1">Camperos por Iglesia</h2>
           <p className="text-xs text-muted-foreground mb-4"></p>
           {churchData && churchData.length > 0 ? (
@@ -250,7 +254,7 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* Recent transactions */}
-      <Card className="p-5">
+      <Card className="p-5 gradient-card">
         <h2 className="font-semibold text-foreground mb-4">Movimientos recientes</h2>
         {recentTransactions.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">

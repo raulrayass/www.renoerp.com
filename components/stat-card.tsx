@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { LucideIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface StatCardProps {
   label: string
@@ -11,8 +12,8 @@ interface StatCardProps {
     direction: 'up' | 'down'
   }
   subtitle?: string
+  className?: string
 }
-
 const colorMap = {
   primary: { bg: 'bg-primary/10', icon: 'text-primary', text: 'text-primary' },
   green: { bg: 'bg-emerald-600/10', icon: 'text-emerald-600', text: 'text-emerald-600' },
@@ -20,12 +21,10 @@ const colorMap = {
   orange: { bg: 'bg-orange-600/10', icon: 'text-orange-600', text: 'text-orange-600' },
   blue: { bg: 'bg-blue-600/10', icon: 'text-blue-600', text: 'text-blue-600' },
 }
-
-export function StatCard({ label, value, icon: Icon, color = 'primary', trend, subtitle }: StatCardProps) {
+export function StatCard({ label, value, icon: Icon, color = 'primary', trend, subtitle, className }: StatCardProps) {
   const colors = colorMap[color]
-
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className={cn('hover:shadow-md transition-shadow', className)}>
       <CardContent className="p-1 sm:p-2">
         <div className="flex items-start justify-between gap-0.5">
           <div className="flex-1 min-w-0">
