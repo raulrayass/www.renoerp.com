@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Square, ArrowLeftRight, Tag, Users, Church, Zap, Home, Trophy, Briefcase } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLoading } from '@/components/loading-screen'
 
 const navItems = [
   { href: '/attendees', label: 'Camperos', icon: Users },
@@ -19,6 +20,9 @@ const navItems = [
 
 export function FloatingDock() {
   const pathname = usePathname()
+  const { isLoading } = useLoading()
+
+  if (isLoading) return null
 
   return (
     <nav className="fixed bottom-4 left-2 right-2 z-50 lg:hidden">

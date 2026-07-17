@@ -1,25 +1,44 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, createContext, useContext } from 'react'
 
-export function LoadingScreen() {
-  const [isVisible, setIsVisible] = useState(true)
+interface LoadingContextType {
+  isLoading: boolean
+}
+
+const LoadingContext = createContext<LoadingContextType>({ isLoading: false })
+
+export function useLoading() {
+  return useContext(LoadingContext)
+}
+
+export function LoadingProvider({ children }: { children: React.ReactNode }) {
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Fade out after 2 seconds
     const timer = setTimeout(() => {
-      setIsVisible(false)
+      setIsLoading(false)
     }, 2000)
 
     return () => clearTimeout(timer)
   }, [])
 
-  if (!isVisible) return null
+  return (
+    <LoadingContext.Provider value={{ isLoading }}>
+      {children}
+    </LoadingContext.Provider>
+  )
+}
+
+export function LoadingScreen() {
+  const { isLoading } = useLoading()
+
+  if (!isLoading) return null
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-b from-background via-background to-background dark:from-black dark:via-black dark:to-black z-50 transition-opacity duration-500"
       style={{
-        opacity: isVisible ? 1 : 0,
+        opacity: isLoading ? 1 : 0,
       }}>
       <div className="flex flex-col items-center justify-center gap-8">
         {/* Logo Container */}
