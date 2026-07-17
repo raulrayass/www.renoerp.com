@@ -15,16 +15,16 @@ interface StatCardProps {
   className?: string
 }
 const colorMap = {
-  primary: { bg: 'bg-primary/10', icon: 'text-primary', text: 'text-primary' },
-  green: { bg: 'bg-emerald-600/10', icon: 'text-emerald-600', text: 'text-emerald-600' },
-  red: { bg: 'bg-red-600/10', icon: 'text-red-600', text: 'text-red-600' },
-  orange: { bg: 'bg-orange-600/10', icon: 'text-orange-600', text: 'text-orange-600' },
-  blue: { bg: 'bg-blue-600/10', icon: 'text-blue-600', text: 'text-blue-600' },
+  primary: { bg: 'bg-black/40 border border-emerald-500/30', icon: 'text-emerald-500', text: 'text-emerald-500' },
+  green: { bg: 'bg-black/40 border border-emerald-500/30', icon: 'text-emerald-500', text: 'text-emerald-500' },
+  red: { bg: 'bg-black/40 border border-red-500/30', icon: 'text-red-500', text: 'text-red-500' },
+  orange: { bg: 'bg-black/40 border border-orange-500/30', icon: 'text-orange-500', text: 'text-orange-500' },
+  blue: { bg: 'bg-black/40 border border-blue-500/30', icon: 'text-blue-500', text: 'text-blue-500' },
 }
 export function StatCard({ label, value, icon: Icon, color = 'primary', trend, subtitle, className }: StatCardProps) {
   const colors = colorMap[color]
   return (
-    <Card className={cn('hover:shadow-md transition-shadow', className)}>
+    <Card className={cn('bg-black/50 border-emerald-500/30 hover:shadow-md transition-shadow', className)}>
       <CardContent className="p-1 sm:p-2">
         <div className="flex items-start justify-between gap-0.5">
           <div className="flex-1 min-w-0">
