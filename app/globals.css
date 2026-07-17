@@ -290,4 +290,15 @@ input:focus, textarea:focus, select:focus {
     z-index: -1;
     pointer-events: none;
   }
+
+  /* Borde verde muy tenue (para definir tarjetas sobre fondo negro) */
+  .border-glow {
+    border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border)) !important;
+  }
+
+  /* Borde verde marcado + glow (para tarjetas destacadas) */
+  .border-glow-strong {
+    border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent) !important;
+    box-shadow: 0 0 20px -6px color-mix(in srgb, var(--primary) 30%, transparent);
+  }
 }

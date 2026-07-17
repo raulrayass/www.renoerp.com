@@ -309,8 +309,6 @@ export function AttendeesClient({ userId }: Props) {
       'Habitación',
       'Monto Total ($)',
       'Pago Inicial ($)',
-      'Estado',
-      'Check-in',
       'Notas',
     ]
 
@@ -333,8 +331,6 @@ export function AttendeesClient({ userId }: Props) {
         'Nombre habitación',
         '1000',
         '0',
-        'Pendiente',
-        'No',
         '',
       ],
     ]

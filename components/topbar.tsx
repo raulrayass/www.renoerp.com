@@ -36,7 +36,7 @@ export function Topbar() {
   return (
     <header className="sticky top-0 z-40 bg-transparent">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between h-12 gap-3 sm:gap-4 px-4 py-3 rounded-2xl bg-card border border-border shadow-lg backdrop-blur-sm">
+        <div className="flex items-center justify-between h-12 gap-3 sm:gap-4 px-4 py-3 rounded-2xl bg-card border-glow shadow-lg backdrop-blur-sm">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 hover:opacity-80 transition-opacity">
             <Image
@@ -63,7 +63,7 @@ export function Topbar() {
                   className={cn(
                     'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
                     active
-                      ? 'bg-accent/10 text-primary shadow-md'
+                      ? 'bg-primary/10 text-primary ring-1 ring-primary/30 shadow-md'
                       : 'text-foreground/60 hover:text-foreground hover:bg-muted'
                   )}
                 >
@@ -80,7 +80,7 @@ export function Topbar() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-all duration-200 group">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/80 to-primary/60 flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md group-hover:from-primary group-hover:to-primary/70 transition-all duration-200">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md transition-all duration-200">
                   <User className="w-4 h-4 text-primary-foreground" />
                 </div>
                 <span className="hidden sm:block truncate text-foreground text-sm font-medium max-w-[120px]">

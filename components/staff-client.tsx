@@ -295,8 +295,6 @@ export function StaffClient({ userId }: Props) {
       'Ministerio',
       'Monto Total ($)',
       'Pagado ($)',
-      'Estado',
-      'Check-in',
       'Notas',
     ]
 
@@ -311,8 +309,6 @@ export function StaffClient({ userId }: Props) {
         'Pastor',
         '1200',
         '100',
-        'Pendiente',
-        'No',
         '',
       ],
     ]
