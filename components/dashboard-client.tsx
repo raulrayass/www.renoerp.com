@@ -92,6 +92,46 @@ export function DashboardClient({ userId }: { userId: string }) {
         />
       </div>
 
+      {/* Recent transactions - NOW PRIORITIZED AFTER KPIs */}
+      <Card className="p-5 gradient-card">
+        <h2 className="font-semibold text-foreground mb-4">Movimientos recientes</h2>
+        {recentTransactions.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center py-8">
+            No hay transacciones aun. Ve a Transacciones para agregar.
+          </p>
+        ) : (
+          <div className="flex flex-col divide-y divide-border">
+            {recentTransactions.map((t) => (
+              <div key={t.id} className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: (t.categoryColor ?? '#888') + '22' }}
+                  >
+                    {t.type === 'income'
+                      ? <ArrowUpRight className="w-4 h-4" style={{ color: INCOME_COLOR }} />
+                      : <ArrowDownRight className="w-4 h-4" style={{ color: EXPENSE_COLOR }} />
+                    }
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{t.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.categoryName ?? 'Sin categoria'} &middot; {t.date}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className="text-sm font-semibold shrink-0"
+                  style={{ color: t.type === 'income' ? INCOME_COLOR : EXPENSE_COLOR }}
+                >
+                  {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
       {/* Monthly chart + Expense pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <Card className="lg:col-span-2 gradient-card">
@@ -187,7 +227,7 @@ export function DashboardClient({ userId }: { userId: string }) {
         )}
       </Card>
 
-      {/* Income pie + Recent */}
+      {/* Income pie + Church data */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <Card className="gradient-card">
           <h2 className="font-semibold text-foreground mb-1">Ingresos por categoria</h2>
@@ -252,46 +292,6 @@ export function DashboardClient({ userId }: { userId: string }) {
           )}
         </Card>
       </div>
-
-      {/* Recent transactions */}
-      <Card className="p-5 gradient-card">
-        <h2 className="font-semibold text-foreground mb-4">Movimientos recientes</h2>
-        {recentTransactions.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-8">
-            No hay transacciones aun. Ve a Transacciones para agregar.
-          </p>
-        ) : (
-          <div className="flex flex-col divide-y divide-border">
-            {recentTransactions.map((t) => (
-              <div key={t.id} className="flex items-center justify-between py-3">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: (t.categoryColor ?? '#888') + '22' }}
-                  >
-                    {t.type === 'income'
-                      ? <ArrowUpRight className="w-4 h-4" style={{ color: INCOME_COLOR }} />
-                      : <ArrowDownRight className="w-4 h-4" style={{ color: EXPENSE_COLOR }} />
-                    }
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{t.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {t.categoryName ?? 'Sin categoria'} &middot; {t.date}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className="text-sm font-semibold shrink-0"
-                  style={{ color: t.type === 'income' ? INCOME_COLOR : EXPENSE_COLOR }}
-                >
-                  {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
       </div>
     </div>
   )
