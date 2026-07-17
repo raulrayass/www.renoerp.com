@@ -51,29 +51,31 @@ export function DashboardClient({ userId }: { userId: string }) {
     <div className="w-full h-full overflow-y-auto">
       <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-5 flex flex-col gap-4 max-w-7xl mx-auto">
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <div className="glow-primary">
-          <Card className="p-4 hero-card">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium">Balance Total</p>
-                <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(balance)}</p>
-              </div>
-              <Wallet className="w-5 h-5 text-primary" />
+      {/* ===== 1. Balance Total (héroe) ===== */}
+      <div className="glow-primary">
+        <Card className="p-4 hero-card">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <p className="text-xs text-muted-foreground font-medium">Balance Total</p>
+              <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(balance)}</p>
             </div>
-            <div className="space-y-1 text-xs">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Efectivo:</span>
-                <span className="font-medium">{formatCurrency(paymentMethodBreakdown?.cash?.available ?? 0)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Banca Móvil:</span>
-                <span className="font-medium">{formatCurrency((paymentMethodBreakdown?.transfer?.available ?? 0) + (paymentMethodBreakdown?.deposit?.available ?? 0))}</span>
-              </div>
+            <Wallet className="w-5 h-5 text-primary" />
+          </div>
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Efectivo:</span>
+              <span className="font-medium">{formatCurrency(paymentMethodBreakdown?.cash?.available ?? 0)}</span>
             </div>
-          </Card>
-        </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Banca Móvil:</span>
+              <span className="font-medium">{formatCurrency((paymentMethodBreakdown?.transfer?.available ?? 0) + (paymentMethodBreakdown?.deposit?.available ?? 0))}</span>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* ===== 2. Ingresos + Egresos ===== */}
+      <div className="grid grid-cols-2 gap-2.5">
         <StatCard
           label="Total Ingresos"
           value={formatCurrency(totalIncome)}
@@ -92,7 +94,7 @@ export function DashboardClient({ userId }: { userId: string }) {
         />
       </div>
 
-      {/* Recent transactions - NOW PRIORITIZED AFTER KPIs */}
+      {/* ===== 3. Movimientos recientes ===== */}
       <Card className="p-5 gradient-card">
         <h2 className="font-semibold text-foreground mb-4">Movimientos recientes</h2>
         {recentTransactions.length === 0 ? (
@@ -131,6 +133,8 @@ export function DashboardClient({ userId }: { userId: string }) {
           </div>
         )}
       </Card>
+
+      {/* ===== 4. Gráficas (todo lo demás) ===== */}
 
       {/* Monthly chart + Expense pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -227,7 +231,7 @@ export function DashboardClient({ userId }: { userId: string }) {
         )}
       </Card>
 
-      {/* Income pie + Church data */}
+      {/* Income pie + Church pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <Card className="gradient-card">
           <h2 className="font-semibold text-foreground mb-1">Ingresos por categoria</h2>
