@@ -490,105 +490,193 @@ export function AttendeesClient({ userId }: Props) {
   const getRoomName = (id: string) => rooms.find(r => r.id === parseInt(id))?.name || ''
 
   return (
-    <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
-      {/* Header */}
-      <PageHeader title="Camperos">
-        <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
-          <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-          <span>Plantilla</span>
-        </Button>
-        <label className="relative inline-block">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 pointer-events-none">
-            <Upload className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-            <span>Importar</span>
+    <div className="w-full flex flex-col gap-3 sm:gap-4 pb-20 sm:pb-0">
+      {/* Mobile Header - No topbar, just title */}
+      <div className="lg:hidden px-4 pt-4 pb-2">
+        <h1 className="text-2xl font-bold text-foreground">Camperos</h1>
+      </div>
+
+      {/* Desktop Header - With topbar */}
+      <div className="hidden lg:block px-6 py-3">
+        <PageHeader title="Camperos">
+          <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+            <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            <span>Plantilla</span>
           </Button>
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleImportExcel}
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
-        </label>
-        <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
-          <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-          <span>Exportar</span>
-        </Button>
-        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
-          <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-          <span>Agregar</span>
-        </Button>
-      </PageHeader>
+          <label className="relative inline-block">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 pointer-events-none">
+              <Upload className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+              <span>Importar</span>
+            </Button>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleImportExcel}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          </label>
+          <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+            <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            <span>Exportar</span>
+          </Button>
+          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            <span>Agregar</span>
+          </Button>
+        </PageHeader>
+      </div>
 
-      {/* Stats Bar */}
-      {!loading && attendeeList.length > 0 && (
-        <StatsBar
-          items={[
-            { label: 'Total Camperos', value: attendeeList.length, icon: <Users2 className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'primary' },
-            { label: 'Pagados', value: paidCount, icon: <CreditCard className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'success' },
-            { label: 'Check-in', value: checkedInCount, icon: <LogIn className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'primary' },
-          ]}
-        />
-      )}
-
-      {/* Summary Cards */}
-      {!loading && attendeeList.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-1.5">
-          <StatCard
-            label="Esperado"
-            value={formatMXN(summary.expected)}
-            color="blue"
-            icon={DollarSign}
-          />
-          <StatCard
-            label="Recaudado"
-            value={formatMXN(summary.collected)}
-            color="green"
-            icon={CreditCard}
-          />
-          <StatCard
-            label="Pendiente"
-            value={formatMXN(pendingAmount)}
-            color="red"
-            icon={History}
-          />
-          <StatCard
-            label="Check-in"
-            value={`${checkedInCount}/${attendeeList.length}`}
-            color="primary"
-            icon={UserCheck}
-            subtitle={`${paidCount} pagados • ${partialCount} parciales`}
-          />
+      <div className="px-3 sm:px-4 lg:px-6 flex flex-col gap-3 sm:gap-4 max-w-7xl mx-auto w-full">
+        {/* Mobile action buttons */}
+        <div className="lg:hidden flex items-center justify-between gap-2">
+          <div className="flex gap-1.5 flex-wrap">
+            <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1 text-xs h-8 px-2">
+              <Download className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Plantilla</span>
+            </Button>
+            <label className="relative inline-block">
+              <Button variant="outline" size="sm" className="gap-1 text-xs h-8 px-2 pointer-events-none">
+                <Upload className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">Importar</span>
+              </Button>
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleImportExcel}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </label>
+            <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1 text-xs h-8 px-2">
+              <Download className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Exportar</span>
+            </Button>
+          </div>
+          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs h-8 px-3 bg-green-600 hover:bg-green-700 text-white rounded-full">
+            <Plus className="w-4 h-4 shrink-0" />
+          </Button>
         </div>
-      )}
 
-      {/* Smart filter system */}
-      {!loading && attendeeList.length > 0 && (
-        <SmartFilter
-          search={search}
-          onSearchChange={setSearch}
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-          churchFilter={churchFilter}
-          onChurchChange={setChurchFilter}
-          churches={churches}
-          teamFilter={teamFilter}
-          onTeamChange={setTeamFilter}
-          teams={teams}
-          roomFilter={roomFilter}
-          onRoomChange={setRoomFilter}
-          rooms={rooms}
-          onClearFilters={() => {
-            setSearch('')
-            setStatusFilter('all')
-            setChurchFilter('')
-            setTeamFilter('')
-            setRoomFilter('')
-          }}
-        />
-      )}
+        {/* Stats - Compact for mobile, full for desktop */}
+        {!loading && attendeeList.length > 0 && (
+          <div className="lg:hidden flex gap-2 overflow-x-auto -mx-3 px-3 pb-1">
+            <div className="flex gap-1.5 min-w-max">
+              <div className="bg-black/50 border border-emerald-500/30 rounded-lg px-3 py-1.5 text-center min-w-fit">
+                <div className="text-xs text-muted-foreground">Total</div>
+                <div className="text-sm font-bold text-foreground">{attendeeList.length}</div>
+              </div>
+              <div className="bg-black/50 border border-emerald-500/30 rounded-lg px-3 py-1.5 text-center min-w-fit">
+                <div className="text-xs text-muted-foreground">Pagados</div>
+                <div className="text-sm font-bold text-green-500">{paidCount}</div>
+              </div>
+              <div className="bg-black/50 border border-emerald-500/30 rounded-lg px-3 py-1.5 text-center min-w-fit">
+                <div className="text-xs text-muted-foreground">Check-in</div>
+                <div className="text-sm font-bold text-blue-500">{checkedInCount}</div>
+              </div>
+            </div>
+          </div>
+        )}
 
+        {/* Search bar */}
+        {!loading && attendeeList.length > 0 && (
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-10 bg-black/30 border border-emerald-500/20 rounded-full"
+            />
+          </div>
+        )}
 
-      {/* Attendees List */}
+        {/* Status filter tabs */}
+        {!loading && attendeeList.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto -mx-3 px-3">
+            <button
+              onClick={() => setStatusFilter('all')}
+              className={cn(
+                'px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
+                statusFilter === 'all'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-black/40 text-muted-foreground hover:bg-black/60'
+              )}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => setStatusFilter('paid')}
+              className={cn(
+                'px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
+                statusFilter === 'paid'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-black/40 text-muted-foreground hover:bg-black/60'
+              )}
+            >
+              Pagado
+            </button>
+            <button
+              onClick={() => setStatusFilter('partial')}
+              className={cn(
+                'px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
+                statusFilter === 'partial'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-black/40 text-muted-foreground hover:bg-black/60'
+              )}
+            >
+              Parcial
+            </button>
+            <button
+              onClick={() => setStatusFilter('pending')}
+              className={cn(
+                'px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
+                statusFilter === 'pending'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-black/40 text-muted-foreground hover:bg-black/60'
+              )}
+            >
+              Pendiente
+            </button>
+          </div>
+        )}
+
+        {/* Summary Cards - Recaudado prominence */}
+        {!loading && attendeeList.length > 0 && (
+          <>
+            {/* Main recaudado card - Full width */}
+            <Card className="bg-black/50 border border-emerald-500/30">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1 uppercase">Recaudado</p>
+                    <p className="text-xl sm:text-2xl font-bold text-emerald-500">{formatMXN(summary.collected)}</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <CreditCard className="w-6 h-6 text-emerald-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Two column cards - Esperado and Pendiente */}
+            <div className="grid grid-cols-2 gap-2">
+              <Card className="bg-black/50 border border-blue-500/30">
+                <CardContent className="p-3">
+                  <p className="text-xs text-muted-foreground mb-1">Esperado</p>
+                  <p className="text-lg font-bold text-blue-500">{formatMXN(summary.expected)}</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-black/50 border border-red-500/30">
+                <CardContent className="p-3">
+                  <p className="text-xs text-muted-foreground mb-1">Pendiente</p>
+                  <p className="text-lg font-bold text-red-500">{formatMXN(pendingAmount)}</p>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
+
+        {/* Attendees List */}
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
@@ -1323,6 +1411,7 @@ export function AttendeesClient({ userId }: Props) {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }
