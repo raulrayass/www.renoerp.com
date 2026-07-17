@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, Poppins } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { UserProvider } from '@/components/user-provider'
+import { LoadingScreen } from '@/components/loading-screen'
 import './globals.css'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -59,6 +60,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} bg-background`}>
       <body className="font-sans antialiased">
+        <LoadingScreen />
         <UserProvider>
           {children}
         </UserProvider>
