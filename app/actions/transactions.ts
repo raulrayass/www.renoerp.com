@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { transactions, categories } from '@/lib/db/schema'
+import { transactions, categories, staff, attendees, staffPayments, attendeePayments } from '@/lib/db/schema'
 import { and, eq, desc, gte, lte } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 
@@ -190,9 +190,94 @@ export async function updateTransaction(
 }
 
 export async function deleteTransaction(userId: string, id: number) {
+  // Get the transaction to see if it's a payment
+  const [transaction] = await db
+    .select()
+    .from(transactions)
+    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+
+  if (!transaction) throw new Error('Transacción no encontrada')
+
+  // If it's an income transaction, check if it's a payment for staff or attendees
+  if (transaction.type === 'income' && transaction.description?.startsWith('Pago de ')) {
+    const name = transaction.description.replace('Pago de ', '')
+    
+    // Check if it's a staff payment
+    const [staffMember] = await db
+      .select()
+      .from(staff)
+      .where(and(eq(staff.userId, userId), eq(staff.name, name)))
+    
+    if (staffMember) {
+      // Find and delete the corresponding staff payment
+      const [payment] = await db
+        .select()
+        .from(staffPayments)
+        .where(and(eq(staffPayments.userId, userId), eq(staffPayments.staffId, staffMember.id), eq(staffPayments.amount, transaction.amount)))
+      
+      if (payment) {
+        // Update staff amountPaid and status
+        const newPaidAmount = Math.max(0, parseFloat(staffMember.amountPaid as string) - parseFloat(payment.amount as string))
+        const originalTotal = parseFloat(staffMember.totalAmount as string)
+        const discount = staffMember.discount || 0
+        const totalAmount = originalTotal * (1 - discount / 100)
+        const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
+
+        await db
+          .update(staff)
+          .set({
+            amountPaid: newPaidAmount,
+            status: newStatus,
+            updatedAt: new Date(),
+          })
+          .where(eq(staff.id, staffMember.id))
+
+        // Delete the staff payment
+        await db.delete(staffPayments).where(eq(staffPayments.id, payment.id))
+      }
+    } else {
+      // Check if it's an attendee payment
+      const [attendee] = await db
+        .select()
+        .from(attendees)
+        .where(and(eq(attendees.userId, userId), eq(attendees.name, name)))
+      
+      if (attendee) {
+        // Find and delete the corresponding attendee payment
+        const [payment] = await db
+          .select()
+          .from(attendeePayments)
+          .where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, attendee.id), eq(attendeePayments.amount, transaction.amount)))
+        
+        if (payment) {
+          // Update attendee amountPaid and status
+          const newPaidAmount = Math.max(0, parseFloat(attendee.amountPaid as string) - parseFloat(payment.amount as string))
+          const originalTotal = parseFloat(attendee.totalAmount as string)
+          const discount = attendee.discount || 0
+          const totalAmount = originalTotal * (1 - discount / 100)
+          const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
+
+          await db
+            .update(attendees)
+            .set({
+              amountPaid: newPaidAmount,
+              status: newStatus,
+              updatedAt: new Date(),
+            })
+            .where(eq(attendees.id, attendee.id))
+
+          // Delete the attendee payment
+          await db.delete(attendeePayments).where(eq(attendeePayments.id, payment.id))
+        }
+      }
+    }
+  }
+
+  // Delete the transaction
   await db
     .delete(transactions)
     .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+  
   revalidatePath('/')
   revalidatePath('/transactions')
 }
