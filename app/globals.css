@@ -244,10 +244,12 @@ input:focus, textarea:focus, select:focus {
 
   /* ===== Efectos estilo Draftea (adaptados a claro/oscuro) ===== */
 
-  /* Glass-card: fondo sólido con contorno verde tenue (sin blur, que fallaba en modo claro) */
+  /* Glassmorphism: tarjeta esmerilada translúcida */
   .glass-card {
-    background-color: var(--card);
-    border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border)) !important;
+    background-color: color-mix(in srgb, var(--card) 70%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   }
 
   /* Tarjeta héroe: degradado sutil + glow verde ambiental */
