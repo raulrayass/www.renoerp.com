@@ -441,35 +441,33 @@ export function StaffClient({ userId }: Props) {
 
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
-      {/* Header - Hidden on mobile */}
-      <div className="hidden lg:block">
-        <PageHeader title="Staff">
-          <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
-            <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-            <span>Plantilla</span>
+      {/* Header */}
+      <PageHeader title="Staff">
+        <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+          <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Plantilla</span>
+        </Button>
+        <label className="relative inline-block">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 pointer-events-none">
+            <Upload className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            <span>Importar</span>
           </Button>
-          <label className="relative inline-block">
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 pointer-events-none">
-              <Upload className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-              <span>Importar</span>
-            </Button>
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleImportExcel}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </label>
-          <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
-            <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-            <span>Exportar</span>
-          </Button>
-          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-            <span>Agregar</span>
-          </Button>
-        </PageHeader>
-      </div>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleImportExcel}
+            className="absolute inset-0 opacity-0 cursor-pointer"
+          />
+        </label>
+        <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+          <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Exportar</span>
+        </Button>
+        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Agregar</span>
+        </Button>
+      </PageHeader>
 
       {/* Stats Bar */}
       {!loading && staffList.length > 0 && (
