@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import {
   getAllAttendees,
   getAttendees,
@@ -93,6 +95,26 @@ export function AttendeesClient({ userId }: Props) {
   const [teamFilter, setTeamFilter] = useState('')
   const [roomFilter, setRoomFilter] = useState('')
 
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setEditingId(null)
+      setForm({ ...emptyForm })
+      setDialogOpen(true)
+    }
+  }, [searchParams])
+
+  // Limpia el query param al cerrar el modal para que no reabra al volver
+  function clearNewParam() {
+    if (searchParams.get('new') === '1') {
+      router.replace(pathname, { scroll: false })
+    }
+  }
+
   useEffect(() => {
     initializeDefaults()
   }, [userId])
@@ -182,6 +204,7 @@ export function AttendeesClient({ userId }: Props) {
         setDialogOpen(false)
         setForm({ ...emptyForm })
         setEditingId(null)
+        clearNewParam()
         await loadAttendees()
       } catch (error) {
         toast.error('Error al guardar el campero')
@@ -528,6 +551,9 @@ export function AttendeesClient({ userId }: Props) {
           <span>Agregar</span>
         </Button>
       </PageHeader>
+
+      {/* Tabs del grupo Personas */}
+      <GroupTabs tabs={PERSONAS_TABS} />
 
       {/* Quick Stats - 3 column grid */}
       {!loading && attendeeList.length > 0 && (
@@ -1082,6 +1108,7 @@ export function AttendeesClient({ userId }: Props) {
           } else {
             setForm({ ...emptyForm })
             setEditingId(null)
+            clearNewParam()
           }
         }}
       >
@@ -1336,7 +1363,7 @@ export function AttendeesClient({ userId }: Props) {
             </div>
 
             <div className="flex gap-2 justify-end pt-2 border-t">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); clearNewParam() }}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white">
