@@ -300,3 +300,5 @@ input:focus, textarea:focus, select:focus {
     box-shadow: 0 0 20px -6px color-mix(in srgb, var(--primary) 30%, transparent);
   }
 }
+
+

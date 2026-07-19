@@ -2,13 +2,19 @@
 
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, DollarSign, MapPin, Trophy, Plus, Search } from 'lucide-react'
+import { Square, Users, DollarSign, MapPin, Trophy, Plus, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLoading } from '@/components/loading-screen'
 
-// Los 4 ítems laterales + Inicio elevado al centro = 5 destinos del mockup:
-// Personas · Finanzas · [Inicio] · Logística · Juegos
-const leftItems = [
+// 5 destinos, todos del mismo tamaño y uniformes:
+// Inicio · Personas · Finanzas · Logística · Juegos
+const navItems = [
+  {
+    href: '/',
+    label: 'Inicio',
+    icon: Square,
+    match: (p: string) => p === '/',
+  },
   {
     href: '/attendees',
     label: 'Personas',
@@ -21,9 +27,6 @@ const leftItems = [
     icon: DollarSign,
     match: (p: string) => ['/transactions', '/categories'].some((r) => p.startsWith(r)),
   },
-]
-
-const rightItems = [
   {
     href: '/rooms',
     label: 'Logística',
@@ -40,7 +43,7 @@ const rightItems = [
 
 // Acción contextual del "+" flotante según la pantalla.
 function getPrimaryAction(pathname: string): { label: string; href: string } | null {
-  if (pathname === '/') return null // en Inicio no mostramos el "+"
+  if (pathname === '/') return null // en Inicio no hay acción de agregar
   if (pathname.startsWith('/transactions') || pathname.startsWith('/categories'))
     return { label: 'Nueva transacción', href: '/transactions?new=1' }
   if (pathname.startsWith('/rooms') || pathname.startsWith('/churches'))
@@ -51,8 +54,7 @@ function getPrimaryAction(pathname: string): { label: string; href: string } | n
   return { label: 'Agregar campero', href: '/attendees?new=1' }
 }
 
-// Pantallas que tienen barra de búsqueda con id="page-search".
-// En estas la lupa hace foco en ese input; en el resto no aparece.
+// Pantallas con barra de búsqueda con id="page-search".
 function hasPageSearch(pathname: string): boolean {
   return (
     pathname.startsWith('/attendees') ||
@@ -67,78 +69,53 @@ export function FloatingDock() {
 
   if (isLoading) return null
 
-  const homeActive = pathname === '/'
   const action = getPrimaryAction(pathname)
   const showSearch = hasPageSearch(pathname)
 
+  // Foco SÍNCRONO en el tap para que el teclado móvil aparezca.
+  // No usar setTimeout: rompe el "user gesture" y el teclado no sale.
   function focusPageSearch() {
     const el = document.getElementById('page-search') as HTMLInputElement | null
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      // pequeño delay para que el scroll no interrumpa el focus en móvil
-      setTimeout(() => el.focus(), 250)
-    }
+    if (!el) return
+    el.focus({ preventScroll: true })
+    // el scroll se hace después; el focus ya ocurrió dentro del gesto
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
   return (
-    <div className="fixed bottom-4 left-3 right-3 z-50 lg:hidden flex items-end gap-2">
-      {/* Píldora con los ítems — ancho estable, nunca se encoge */}
-      <nav className="flex-1 min-w-0">
-        <div className="relative flex items-end justify-between px-3 pt-2 pb-2 rounded-3xl bg-card/95 border border-border shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
-          <div className="flex flex-1 items-center justify-around">
-            {leftItems.map((item) => (
-              <DockItem key={item.href} item={item} active={item.match(pathname)} />
-            ))}
-          </div>
-
-          {/* Inicio elevado al centro */}
-          <div className="flex flex-col items-center justify-end px-2 shrink-0">
-            <Link
-              href="/"
-              title="Inicio"
-              aria-label="Inicio"
-              className={cn(
-                'flex items-center justify-center w-14 h-14 -mt-8 rounded-full ring-4 ring-card shadow-lg transition-all duration-200 active:scale-95',
-                homeActive
-                  ? 'bg-green-600 text-white shadow-green-600/30'
-                  : 'bg-card border-2 border-green-600 text-green-600 hover:bg-green-50'
-              )}
-            >
-              <LayoutDashboard className="w-6 h-6" />
-            </Link>
-          </div>
-
-          <div className="flex flex-1 items-center justify-around">
-            {rightItems.map((item) => (
-              <DockItem key={item.href} item={item} active={item.match(pathname)} />
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      {/* Botones de acción circulares, separados a la derecha (estilo Draftea) */}
-      <div className="flex items-end gap-2 shrink-0">
-        {showSearch && (
-          <button
-            onClick={focusPageSearch}
-            title="Buscar"
-            aria-label="Buscar"
-            className="flex items-center justify-center w-14 h-14 rounded-full bg-card border border-border text-foreground shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md transition-all duration-200 hover:bg-muted active:scale-95"
-          >
-            <Search className="w-6 h-6" strokeWidth={2.25} />
-          </button>
-        )}
+    <div className="fixed bottom-4 left-3 right-3 z-50 lg:hidden">
+      {/* Botones de acción SUPERPUESTOS (no consumen ancho de la píldora) */}
+      <div className="absolute -top-16 right-0 flex flex-col items-end gap-2">
         {action && (
           <button
             onClick={() => router.push(action.href)}
             title={action.label}
             aria-label={action.label}
-            className="flex items-center justify-center w-14 h-14 rounded-full bg-green-600 text-white shadow-[0_8px_30px_rgba(0,0,0,0.12)] shadow-green-600/30 backdrop-blur-md transition-all duration-200 hover:bg-green-700 active:scale-95"
+            className="flex items-center justify-center w-14 h-14 rounded-full bg-green-600 text-white shadow-lg shadow-green-600/30 transition-all duration-200 hover:bg-green-700 active:scale-95"
           >
             <Plus className="w-7 h-7" strokeWidth={2.5} />
           </button>
         )}
+        {showSearch && (
+          <button
+            onClick={focusPageSearch}
+            title="Buscar"
+            aria-label="Buscar"
+            className="flex items-center justify-center w-12 h-12 rounded-full bg-card border border-border text-foreground shadow-lg transition-all duration-200 hover:bg-muted active:scale-95"
+          >
+            <Search className="w-5 h-5" strokeWidth={2.25} />
+          </button>
+        )}
       </div>
+
+      {/* Píldora con los 5 ítems — usa todo el ancho disponible */}
+      <nav>
+        <div className="flex items-center justify-between px-1.5 py-1.5 rounded-3xl bg-card/95 border border-border shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
+          {navItems.map((item) => (
+            <DockItem key={item.href} item={item} active={item.match(pathname)} />
+          ))}
+        </div>
+      </nav>
     </div>
   )
 }
@@ -156,12 +133,12 @@ function DockItem({
       href={item.href}
       title={item.label}
       className={cn(
-        'flex flex-col items-center justify-center gap-0.5 min-w-[52px] py-1 rounded-xl transition-all duration-200',
+        'flex flex-1 flex-col items-center justify-center gap-0.5 py-1.5 rounded-2xl transition-colors duration-200',
         active ? 'text-green-600' : 'text-muted-foreground hover:text-foreground'
       )}
     >
-      <Icon className={cn('w-5 h-5 transition-transform', active && 'scale-110')} />
-      <span className={cn('text-[10px] font-medium leading-none', active && 'font-semibold')}>
+      <Icon className="w-5 h-5" />
+      <span className={cn('text-[10px] leading-none', active ? 'font-semibold' : 'font-medium')}>
         {item.label}
       </span>
     </Link>

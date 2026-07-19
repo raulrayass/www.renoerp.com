@@ -1,6 +1,6 @@
 'use client'
 
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 
 export interface DonutSlice {
   name: string
@@ -10,9 +10,7 @@ export interface DonutSlice {
 
 interface DonutChartProps {
   data: DonutSlice[]
-  // Formatea el valor para la leyenda y el centro (ej. moneda o "N camperos")
   formatValue?: (v: number) => string
-  // Texto pequeño bajo el total en el centro
   centerLabel?: string
   height?: number
 }
@@ -27,9 +25,9 @@ export function DonutChart({
   const sorted = [...data].sort((a, b) => b.value - a.value)
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4 w-full">
       {/* Donut con total al centro */}
-      <div className="relative" style={{ width: height, height }}>
+      <div className="relative" style={{ width: height, height, maxWidth: '100%' }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -50,6 +48,13 @@ export function DonutChart({
                 <Cell key={i} fill={entry.color} />
               ))}
             </Pie>
+            <Tooltip
+              formatter={(value: number, name: string) => {
+                const pct = total > 0 ? Math.round((value / total) * 100) : 0
+                return [`${formatValue(value)} (${pct}%)`, name]
+              }}
+              contentStyle={{ borderRadius: '10px', fontSize: '13px', border: '1px solid var(--border)', background: 'var(--card)' }}
+            />
           </PieChart>
         </ResponsiveContainer>
         {/* Centro */}
