@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Users, DollarSign, MapPin, Trophy, Plus } from 'lucide-react'
+import { Home, Users, DollarSign, MapPin, Trophy, Plus, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLoading } from '@/components/loading-screen'
 
@@ -51,6 +51,15 @@ function getPrimaryAction(pathname: string): { label: string; href: string } | n
   return { label: 'Agregar campero', href: '/attendees?new=1' }
 }
 
+// Pantallas que tienen barra de búsqueda con id="page-search".
+// En estas la lupa hace foco en ese input; en el resto no aparece.
+function hasPageSearch(pathname: string): boolean {
+  return (
+    pathname.startsWith('/attendees') ||
+    pathname.startsWith('/transactions')
+  )
+}
+
 export function FloatingDock() {
   const pathname = usePathname()
   const router = useRouter()
@@ -60,11 +69,21 @@ export function FloatingDock() {
 
   const homeActive = pathname === '/'
   const action = getPrimaryAction(pathname)
+  const showSearch = hasPageSearch(pathname)
+
+  function focusPageSearch() {
+    const el = document.getElementById('page-search') as HTMLInputElement | null
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // pequeño delay para que el scroll no interrumpa el focus en móvil
+      setTimeout(() => el.focus(), 250)
+    }
+  }
 
   return (
     <div className="fixed bottom-4 left-3 right-3 z-50 lg:hidden flex items-end gap-2">
-      {/* Píldora con los ítems */}
-      <nav className="flex-1">
+      {/* Píldora con los ítems — ancho estable, nunca se encoge */}
+      <nav className="flex-1 min-w-0">
         <div className="relative flex items-end justify-between px-3 pt-2 pb-2 rounded-3xl bg-card/95 border border-border shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
           <div className="flex flex-1 items-center justify-around">
             {leftItems.map((item) => (
@@ -97,17 +116,29 @@ export function FloatingDock() {
         </div>
       </nav>
 
-      {/* Botón de acción circular, separado a la derecha (estilo Draftea) */}
-      {action && (
-        <button
-          onClick={() => router.push(action.href)}
-          title={action.label}
-          aria-label={action.label}
-          className="flex items-center justify-center w-14 h-14 shrink-0 rounded-full bg-green-600 text-white shadow-[0_8px_30px_rgba(0,0,0,0.12)] shadow-green-600/30 backdrop-blur-md transition-all duration-200 hover:bg-green-700 active:scale-95"
-        >
-          <Plus className="w-7 h-7" strokeWidth={2.5} />
-        </button>
-      )}
+      {/* Botones de acción circulares, separados a la derecha (estilo Draftea) */}
+      <div className="flex items-end gap-2 shrink-0">
+        {showSearch && (
+          <button
+            onClick={focusPageSearch}
+            title="Buscar"
+            aria-label="Buscar"
+            className="flex items-center justify-center w-14 h-14 rounded-full bg-card border border-border text-foreground shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md transition-all duration-200 hover:bg-muted active:scale-95"
+          >
+            <Search className="w-6 h-6" strokeWidth={2.25} />
+          </button>
+        )}
+        {action && (
+          <button
+            onClick={() => router.push(action.href)}
+            title={action.label}
+            aria-label={action.label}
+            className="flex items-center justify-center w-14 h-14 rounded-full bg-green-600 text-white shadow-[0_8px_30px_rgba(0,0,0,0.12)] shadow-green-600/30 backdrop-blur-md transition-all duration-200 hover:bg-green-700 active:scale-95"
+          >
+            <Plus className="w-7 h-7" strokeWidth={2.5} />
+          </button>
+        )}
+      </div>
     </div>
   )
 }
