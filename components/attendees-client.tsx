@@ -26,7 +26,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn, Filter, ChevronDown as ChevronDownIcon } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn, Filter, ChevronDown as ChevronDownIcon, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -88,6 +88,7 @@ export function AttendeesClient({ userId }: Props) {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [checkInFilter, setCheckInFilter] = useState('all')
   const [churchFilter, setChurchFilter] = useState('')
   const [teamFilter, setTeamFilter] = useState('')
   const [roomFilter, setRoomFilter] = useState('')
@@ -452,6 +453,12 @@ export function AttendeesClient({ userId }: Props) {
     // Status quick filter
     const matchesStatus = statusFilter === 'all' || a.status === statusFilter
 
+    // Check-in filter
+    const matchesCheckIn =
+      checkInFilter === 'all' ||
+      (checkInFilter === 'checked' && a.checkedIn) ||
+      (checkInFilter === 'unchecked' && !a.checkedIn)
+
     // Church quick filter
     const matchesChurch = !churchFilter || a.church === churches.find(c => c.id === parseInt(churchFilter))?.name
 
@@ -461,8 +468,16 @@ export function AttendeesClient({ userId }: Props) {
     // Room filter
     const matchesRoom = !roomFilter || a.roomId === parseInt(roomFilter)
 
-    return matchesSearch && matchesStatus && matchesChurch && matchesTeam && matchesRoom
+    return matchesSearch && matchesStatus && matchesCheckIn && matchesChurch && matchesTeam && matchesRoom
   })
+
+  const hasActiveFilters =
+    !!search ||
+    statusFilter !== 'all' ||
+    checkInFilter !== 'all' ||
+    !!churchFilter ||
+    !!teamFilter ||
+    !!roomFilter
 
   // Calculate totals based on ALL attendees (not filtered)
   const summary = attendeeList.reduce(
@@ -577,6 +592,12 @@ export function AttendeesClient({ userId }: Props) {
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Pendiente</p>
                   <p className="text-sm sm:text-base font-bold text-red-600">{formatMXN(pendingAmount)}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <Progress value={summary.expected > 0 ? Math.min(100, (pendingAmount / summary.expected) * 100) : 0} className="h-2" />
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {summary.expected > 0 ? Math.round((pendingAmount / summary.expected) * 100) : 0}%
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -592,11 +613,14 @@ export function AttendeesClient({ userId }: Props) {
                 <h3 className="font-semibold text-xs sm:text-sm">Check-in</h3>
               </div>
               <div className="space-y-2 sm:space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm text-foreground">{checkedInCount} / {attendeeList.length}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {Math.round((checkedInCount / attendeeList.length) * 100)}%
-                  </span>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs sm:text-sm text-foreground">{checkedInCount} / {attendeeList.length}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {Math.round((checkedInCount / attendeeList.length) * 100)}%
+                    </span>
+                  </div>
+                  <Progress value={Math.min(100, (checkedInCount / attendeeList.length) * 100)} className="h-2" />
                 </div>
                 <div className="space-y-1 sm:space-y-1.5 text-xs">
                   <div className="flex items-center gap-2">
@@ -627,8 +651,18 @@ export function AttendeesClient({ userId }: Props) {
             placeholder="Buscar campista..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 h-10 rounded-lg border border-border bg-white/5"
+            className="pl-10 pr-10 h-10 rounded-lg border border-border bg-white/5"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Limpiar búsqueda"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       )}
 
@@ -679,6 +713,32 @@ export function AttendeesClient({ userId }: Props) {
           >
             Pendientes
           </button>
+          {/* Check-in chips */}
+          <span className="w-px h-6 bg-border self-center mx-1" />
+          <button
+            onClick={() => setCheckInFilter(checkInFilter === 'checked' ? 'all' : 'checked')}
+            className={cn(
+              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border inline-flex items-center gap-1.5',
+              checkInFilter === 'checked'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white/5 text-foreground border-border hover:bg-white/10'
+            )}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Con check-in
+          </button>
+          <button
+            onClick={() => setCheckInFilter(checkInFilter === 'unchecked' ? 'all' : 'unchecked')}
+            className={cn(
+              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border inline-flex items-center gap-1.5',
+              checkInFilter === 'unchecked'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white/5 text-foreground border-border hover:bg-white/10'
+            )}
+          >
+            <Circle className="w-3.5 h-3.5" />
+            Sin check-in
+          </button>
           {/* Advanced filters toggle */}
           {(churches.length > 0 || teams.length > 0 || rooms.length > 0) && (
             <Button
@@ -691,6 +751,32 @@ export function AttendeesClient({ userId }: Props) {
               <span>Más filtros</span>
               <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
             </Button>
+          )}
+        </div>
+      )}
+
+      {/* Results count */}
+      {!loading && attendeeList.length > 0 && (
+        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+          <span>
+            Mostrando <span className="font-semibold text-foreground">{filteredAttendees.length}</span> de{' '}
+            <span className="font-semibold text-foreground">{attendeeList.length}</span> camperos
+          </span>
+          {hasActiveFilters && (
+            <button
+              onClick={() => {
+                setSearch('')
+                setStatusFilter('all')
+                setCheckInFilter('all')
+                setChurchFilter('')
+                setTeamFilter('')
+                setRoomFilter('')
+              }}
+              className="inline-flex items-center gap-1 text-primary hover:underline"
+            >
+              <X className="w-3.5 h-3.5" />
+              Limpiar filtros
+            </button>
           )}
         </div>
       )}
@@ -756,6 +842,7 @@ export function AttendeesClient({ userId }: Props) {
               onClick={() => {
                 setSearch('')
                 setStatusFilter('all')
+                setCheckInFilter('all')
                 setChurchFilter('')
                 setTeamFilter('')
                 setRoomFilter('')
