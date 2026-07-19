@@ -8,7 +8,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Banknote, Smartphone } from 'lucide-react'
-import { StatCard } from '@/components/stat-card'
 import { DonutChart } from '@/components/donut-chart'
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
@@ -61,51 +60,53 @@ export function DashboardClient({ userId }: { userId: string }) {
   ]
 
   return (
-    <div className="px-3 sm:px-4 lg:px-6 py-3 flex flex-col gap-3 max-w-7xl mx-auto w-full">
+    <div className="px-3 sm:px-4 lg:px-6 py-3 flex flex-col gap-3 max-w-7xl mx-auto w-full overflow-x-hidden">
 
-      {/* ===== 1. Balance Total (héroe) ===== */}
-      <div className="glow-primary">
-        <Card className="p-4 hero-card">
-          <div className="flex justify-between items-start mb-3">
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Balance Total</p>
-              <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(balance)}</p>
-            </div>
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-primary" />
-            </div>
+      {/* ===== 1. Balance Total (héroe) — mismo estilo que el resto ===== */}
+      <Card className="p-5 gradient-card">
+        <div className="flex justify-between items-start mb-3">
+          <div>
+            <p className="text-xs text-muted-foreground font-medium">Balance Total</p>
+            <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(balance)}</p>
           </div>
-          <div className="space-y-1 text-xs">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Efectivo:</span>
-              <span className="font-medium">{formatCurrency(cashAvailable)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Banca Móvil:</span>
-              <span className="font-medium">{formatCurrency(bancaMovil)}</span>
-            </div>
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <Wallet className="w-5 h-5 text-primary" />
           </div>
-        </Card>
-      </div>
+        </div>
+        <div className="space-y-1.5 text-sm border-t border-border pt-3">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Efectivo</span>
+            <span className="font-medium tabular-nums">{formatCurrency(cashAvailable)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Banca Móvil</span>
+            <span className="font-medium tabular-nums">{formatCurrency(bancaMovil)}</span>
+          </div>
+        </div>
+      </Card>
 
-      {/* ===== 2. Ingresos + Egresos ===== */}
+      {/* ===== 2. Ingresos + Egresos — mismas cards ===== */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard
-          label="Total Ingresos"
-          value={formatCurrency(totalIncome)}
-          icon={TrendingUp}
-          color="green"
-          subtitle="Acumulado total"
-          className="glass-card"
-        />
-        <StatCard
-          label="Total Egresos"
-          value={formatCurrency(totalExpense)}
-          icon={TrendingDown}
-          color="orange"
-          subtitle="Acumulado total"
-          className="glass-card"
-        />
+        <Card className="p-4 gradient-card">
+          <div className="flex items-start justify-between mb-2">
+            <p className="text-xs text-muted-foreground font-medium">Total Ingresos</p>
+            <div className="w-8 h-8 rounded-lg bg-emerald-600/10 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-4 h-4 text-emerald-600" />
+            </div>
+          </div>
+          <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums">{formatCurrency(totalIncome)}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Acumulado total</p>
+        </Card>
+        <Card className="p-4 gradient-card">
+          <div className="flex items-start justify-between mb-2">
+            <p className="text-xs text-muted-foreground font-medium">Total Egresos</p>
+            <div className="w-8 h-8 rounded-lg bg-orange-600/10 flex items-center justify-center shrink-0">
+              <TrendingDown className="w-4 h-4 text-orange-600" />
+            </div>
+          </div>
+          <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums">{formatCurrency(totalExpense)}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Acumulado total</p>
+        </Card>
       </div>
 
       {/* ===== 3. Disponible por método ===== */}
@@ -159,8 +160,8 @@ export function DashboardClient({ userId }: { userId: string }) {
         ) : (
           <div className="flex flex-col divide-y divide-border">
             {recentTransactions.map((t) => (
-              <div key={t.id} className="flex items-center justify-between py-3">
-                <div className="flex items-center gap-3">
+              <div key={t.id} className="flex items-center justify-between gap-2 py-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
                     style={{ backgroundColor: (t.categoryColor ?? '#888') + '22' }}
@@ -170,15 +171,15 @@ export function DashboardClient({ userId }: { userId: string }) {
                       : <ArrowDownRight className="w-4 h-4" style={{ color: EXPENSE_COLOR }} />
                     }
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{t.description}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">{t.description}</p>
+                    <p className="text-xs text-muted-foreground truncate">
                       {t.categoryName ?? 'Sin categoria'} &middot; {t.date}
                     </p>
                   </div>
                 </div>
                 <span
-                  className="text-sm font-semibold shrink-0"
+                  className="text-sm font-semibold shrink-0 tabular-nums"
                   style={{ color: t.type === 'income' ? INCOME_COLOR : EXPENSE_COLOR }}
                 >
                   {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
@@ -219,7 +220,7 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* ===== 6. Ingresos vs Egresos por mes ===== */}
-      <Card className="p-5 gradient-card">
+      <Card className="p-5 gradient-card overflow-hidden">
         <h2 className="font-semibold text-foreground mb-4">Ingresos vs Egresos por mes</h2>
         {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
           <ResponsiveContainer width="100%" height={240}>
@@ -231,11 +232,12 @@ export function DashboardClient({ userId }: { userId: string }) {
                 tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
                 axisLine={false}
                 tickLine={false}
+                width={44}
               />
               <Tooltip
                 formatter={(value: number) => formatCurrency(value)}
                 cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
-                contentStyle={{ borderRadius: '10px', fontSize: '13px', border: '1px solid var(--border)' }}
+                contentStyle={{ borderRadius: '10px', fontSize: '13px', border: '1px solid var(--border)', background: 'var(--card)' }}
               />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
               <Bar dataKey="income" name="Ingresos" fill={INCOME_COLOR} radius={[6, 6, 0, 0]} />
@@ -248,7 +250,7 @@ export function DashboardClient({ userId }: { userId: string }) {
       </Card>
 
       {/* ===== 7. Comparativo por categoría ===== */}
-      <Card className="p-5 gradient-card">
+      <Card className="p-5 gradient-card overflow-hidden">
         <h2 className="font-semibold text-foreground mb-1">Ingreso y Egreso por categoría</h2>
         <p className="text-xs text-muted-foreground mb-4">Comparativo de cada categoría del campamento</p>
         {hasAnyData && categoryComparison.length > 0 ? (
@@ -256,7 +258,7 @@ export function DashboardClient({ userId }: { userId: string }) {
             <BarChart
               data={categoryComparison}
               layout="vertical"
-              margin={{ left: 16, right: 16 }}
+              margin={{ left: 8, right: 8 }}
               barGap={3}
             >
               <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
@@ -270,7 +272,7 @@ export function DashboardClient({ userId }: { userId: string }) {
               <YAxis
                 type="category"
                 dataKey="name"
-                width={130}
+                width={110}
                 tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
                 axisLine={false}
                 tickLine={false}
@@ -278,7 +280,7 @@ export function DashboardClient({ userId }: { userId: string }) {
               <Tooltip
                 formatter={(value: number) => formatCurrency(value)}
                 cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
-                contentStyle={{ borderRadius: '10px', fontSize: '13px', border: '1px solid var(--border)' }}
+                contentStyle={{ borderRadius: '10px', fontSize: '13px', border: '1px solid var(--border)', background: 'var(--card)' }}
               />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
               <Bar dataKey="income" name="Ingresos" fill={INCOME_COLOR} radius={[0, 6, 6, 0]} barSize={14} />
