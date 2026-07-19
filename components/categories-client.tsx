@@ -1,18 +1,12 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { GroupTabs, FINANZAS_TABS } from '@/components/group-tabs'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -34,6 +28,7 @@ import { Plus, Pencil, Trash2, Tag, TrendingUp, TrendingDown, ArrowLeftRight } f
 import { Category } from '@/lib/db/schema'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
+import { PageHeader } from '@/components/page-header'
 
 const PRESET_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
@@ -60,17 +55,32 @@ interface Props {
 
 export function CategoriesClient({ userId }: Props) {
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [categories, setCategories] = useState<Category[]>([])
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
-
-  useEffect(() => {
-    getCategories(userId).then(setCategories)
-  }, [userId])
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [form, setForm] = useState(defaultForm)
+
+  useEffect(() => {
+    getCategories(userId).then(setCategories)
+  }, [userId])
+
+  // Abre el modal de nueva categoría cuando el FAB del dock navega con ?new=1
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      openCreate()
+    }
+  }, [searchParams])
+
+  function clearNewParam() {
+    if (searchParams.get('new') === '1') {
+      router.replace(pathname, { scroll: false })
+    }
+  }
 
   function openCreate() {
     setEditingId(null)
@@ -105,6 +115,7 @@ export function CategoriesClient({ userId }: Props) {
           toast.success('Categoría creada')
         }
         setDialogOpen(false)
+        clearNewParam()
         const updated = await getCategories(userId)
         setCategories(updated)
       } catch (error) {
@@ -137,18 +148,17 @@ export function CategoriesClient({ userId }: Props) {
   }
 
   return (
-    <div className="px-2 sm:px-4 lg:px-6 py-2 sm:py-4 flex flex-col gap-2 sm:gap-4 max-w-7xl mx-auto w-full">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-        <div>
-          <h1 className="text-lg sm:text-xl font-bold text-foreground">Categorías</h1>
-          <p className="text-muted-foreground text-xs mt-0.5"></p>
-        </div>
-        <Button onClick={openCreate} className="gap-2 h-8 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white">
-          <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="hidden sm:inline">Nueva categoría</span>
-          <span className="sm:hidden">Nueva</span>
+    <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
+      {/* Header */}
+      <PageHeader title="Finanzas">
+        <Button onClick={openCreate} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Nueva categoría</span>
         </Button>
-      </div>
+      </PageHeader>
+
+      {/* Tabs del grupo Finanzas */}
+      <GroupTabs tabs={FINANZAS_TABS} />
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
@@ -244,7 +254,13 @@ export function CategoriesClient({ userId }: Props) {
       )}
 
       {/* Create/Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (!open) clearNewParam()
+        }}
+      >
         <DialogContent className="sm:max-w-sm max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-sm sm:text-base">{editingId ? 'Editar categoría' : 'Nueva categoría'}</DialogTitle>
@@ -256,25 +272,23 @@ export function CategoriesClient({ userId }: Props) {
                 placeholder="Ej: Alimentos"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="h-6 sm:h-8 text-xs"
+                className="h-8 text-xs"
                 required
               />
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label className="text-xs sm:text-sm">Tipo</Label>
-              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-                <SelectTrigger className="h-6 sm:h-8 text-xs">
-                  <span className="text-foreground text-xs">
-                    {form.type === 'income' ? 'Ingreso' : form.type === 'expense' ? 'Egreso' : form.type === 'both' ? 'Ambos' : 'Tipo'}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="income">Ingreso</SelectItem>
-                  <SelectItem value="expense">Egreso</SelectItem>
-                  <SelectItem value="both">Ambos</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="cat-type" className="text-xs sm:text-sm">Tipo</Label>
+              <select
+                id="cat-type"
+                value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value })}
+                className="w-full text-xs border border-border rounded-md bg-background px-2 h-8"
+              >
+                <option value="income">Ingreso</option>
+                <option value="expense">Egreso</option>
+                <option value="both">Ambos</option>
+              </select>
             </div>
 
             <div className="flex flex-col gap-1">
@@ -314,10 +328,10 @@ export function CategoriesClient({ userId }: Props) {
             </div>
 
             <div className="flex justify-end gap-1.5 sm:gap-2 mt-1 sm:mt-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="h-7 sm:h-8 text-xs sm:text-sm">
+              <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); clearNewParam() }} className="h-8 text-xs sm:text-sm">
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending} className="h-7 sm:h-8 text-xs sm:text-sm">
+              <Button type="submit" disabled={isPending} className="h-8 text-xs sm:text-sm">
                 {isPending ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
               </Button>
             </div>
