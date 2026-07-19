@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { GroupTabs, LOGISTICA_TABS } from '@/components/group-tabs'
 import { getChurches, createChurch, updateChurch, deleteChurch } from '@/app/actions/churches'
 import { Church } from '@/lib/db/schema'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Trash2, Edit2, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { StatsBar } from '@/components/stats-bar'
+import { PageHeader } from '@/components/page-header'
 
 interface Props {
   userId: string
@@ -26,9 +29,28 @@ export function ChurchesClient({ userId }: Props) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [churchName, setChurchName] = useState('')
 
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   useEffect(() => {
     loadChurches()
   }, [userId])
+
+  // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setEditingId(null)
+      setChurchName('')
+      setDialogOpen(true)
+    }
+  }, [searchParams])
+
+  function clearNewParam() {
+    if (searchParams.get('new') === '1') {
+      router.replace(pathname, { scroll: false })
+    }
+  }
 
   async function loadChurches() {
     const data = await getChurches(userId)
@@ -53,6 +75,7 @@ export function ChurchesClient({ userId }: Props) {
         setDialogOpen(false)
         setChurchName('')
         setEditingId(null)
+        clearNewParam()
         await loadChurches()
       } catch (error: any) {
         toast.error(error.message || 'Error al guardar la iglesia')
@@ -74,17 +97,17 @@ export function ChurchesClient({ userId }: Props) {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+    <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Iglesias</h1>
-        </div>
-        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-2 bg-green-600 hover:bg-green-700 text-white">
-          <Plus className="w-4 h-4" />
-          Agregar Iglesia
+      <PageHeader title="Logística">
+        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Agregar Iglesia</span>
         </Button>
-      </div>
+      </PageHeader>
+
+      {/* Tabs del grupo Logística */}
+      <GroupTabs tabs={LOGISTICA_TABS} />
 
       {/* Stats Bar */}
       {churches.length > 0 && (
@@ -154,6 +177,7 @@ export function ChurchesClient({ userId }: Props) {
           if (!open) {
             setChurchName('')
             setEditingId(null)
+            clearNewParam()
           }
         }}
       >
@@ -173,7 +197,7 @@ export function ChurchesClient({ userId }: Props) {
               />
             </div>
             <div className="flex gap-2 justify-end pt-4">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); clearNewParam() }}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isPending}>
