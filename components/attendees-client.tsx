@@ -673,6 +673,7 @@ export function AttendeesClient({ userId }: Props) {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <Input
+            id="page-search"
             type="text"
             placeholder="Buscar campista..."
             value={search}
