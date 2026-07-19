@@ -528,7 +528,7 @@ export function AttendeesClient({ userId }: Props) {
               <div className="text-center">
                 <Users2 className="w-4 h-4 text-emerald-600 mx-auto mb-1" />
                 <p className="text-lg font-bold text-foreground">{attendeeList.length}</p>
-                <p className="text-xs text-muted-foreground">Campistas</p>
+                <p className="text-xs text-muted-foreground">Camperos</p>
               </div>
             </CardContent>
           </Card>
@@ -555,26 +555,26 @@ export function AttendeesClient({ userId }: Props) {
 
       {/* Main content cards - Finanzas and Check-in */}
       {!loading && attendeeList.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           {/* Finanzas Card */}
           <Card className="bg-white/5 border border-border">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                  <DollarSign className="w-5 h-5 text-green-600" />
+            <CardContent className="p-2.5 sm:p-4">
+              <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                  <DollarSign className="w-4 sm:w-5 h-4 sm:h-5 text-green-600" />
                 </div>
-                <h3 className="font-semibold text-sm">Finanzas</h3>
+                <h3 className="font-semibold text-xs sm:text-sm">Finanzas</h3>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Esperado</p>
-                  <p className="text-base font-bold text-foreground">{formatMXN(summary.expected)}</p>
+                  <p className="text-sm sm:text-base font-bold text-foreground">{formatMXN(summary.expected)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Recaudado</p>
-                  <p className="text-lg font-bold text-green-600">{formatMXN(summary.collected)}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Progress value={Math.min(100, (summary.collected / summary.expected) * 100)} className="h-1.5" />
+                  <p className="text-base sm:text-lg font-bold text-green-600">{formatMXN(summary.collected)}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <Progress value={Math.min(100, (summary.collected / summary.expected) * 100)} className="h-2" />
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {Math.round((summary.collected / summary.expected) * 100)}%
                     </span>
@@ -582,7 +582,7 @@ export function AttendeesClient({ userId }: Props) {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Pendiente</p>
-                  <p className="text-base font-bold text-red-600">{formatMXN(pendingAmount)}</p>
+                  <p className="text-sm sm:text-base font-bold text-red-600">{formatMXN(pendingAmount)}</p>
                 </div>
               </div>
             </CardContent>
@@ -590,21 +590,21 @@ export function AttendeesClient({ userId }: Props) {
 
           {/* Check-in Card */}
           <Card className="bg-white/5 border border-border">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                  <UserCheck className="w-5 h-5 text-blue-600" />
+            <CardContent className="p-2.5 sm:p-4">
+              <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                  <UserCheck className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />
                 </div>
-                <h3 className="font-semibold text-sm">Check-in</h3>
+                <h3 className="font-semibold text-xs sm:text-sm">Check-in</h3>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground">{checkedInCount} / {attendeeList.length}</span>
+                  <span className="text-xs sm:text-sm text-foreground">{checkedInCount} / {attendeeList.length}</span>
                   <span className="text-xs text-muted-foreground">
                     {Math.round((checkedInCount / attendeeList.length) * 100)}%
                   </span>
                 </div>
-                <div className="space-y-1.5 text-xs">
+                <div className="space-y-1 sm:space-y-1.5 text-xs">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-600" />
                     <span className="text-muted-foreground">{paidCount} Pagados</span>
@@ -878,18 +878,18 @@ export function AttendeesClient({ userId }: Props) {
                             {attendee.allergies && <p className="text-amber-700">Alergias: {attendee.allergies}</p>}
                           </div>
                         </div>
-                        <div className="flex gap-0.5 shrink-0">
+                        <div className="flex gap-1 sm:gap-1.5 shrink-0">
                           <Button
                             onClick={() => handleToggleCheckIn(attendee)}
                             size="sm"
                             variant="ghost"
                             className={cn(
-                              'h-6 w-6 p-0',
+                              'h-7 w-7 p-0.5',
                               attendee.checkedIn ? 'text-green-600 hover:bg-green-100' : 'hover:bg-muted'
                             )}
                             title={attendee.checkedIn ? 'Cancelar check-in' : 'Registrar check-in'}
                           >
-                            {attendee.checkedIn ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                            {attendee.checkedIn ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
                           </Button>
                           <Button
                             onClick={() => {
@@ -898,19 +898,19 @@ export function AttendeesClient({ userId }: Props) {
                             }}
                             size="sm"
                             variant="outline"
-                            className="h-6 w-6 p-0"
+                            className="h-7 w-7 p-0.5"
                             title="Registrar pago"
                           >
-                            <DollarSign className="w-3 h-3" />
+                            <DollarSign className="w-4 h-4" />
                           </Button>
                           <Button
                             onClick={() => openHistory(attendee.id)}
                             size="sm"
                             variant="ghost"
-                            className="h-6 w-6 p-0 hover:bg-accent/15"
+                            className="h-7 w-7 p-0.5 hover:bg-accent/15"
                             title="Ver historial de pagos"
                           >
-                            <History className="w-3 h-3 text-accent" />
+                            <History className="w-4 h-4 text-accent" />
                           </Button>
                           <Button
                             onClick={() => {
