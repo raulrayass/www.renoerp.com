@@ -36,7 +36,7 @@ export async function getTeamsCount(userId: string) {
 
 export async function createTeam(
   userId: string,
-  data: { name: string; color?: string }
+  data: { name: string; color?: string; country?: string | null; useCountry?: boolean }
 ) {
   if (!data.name.trim()) {
     throw new Error('El nombre del equipo es requerido')
@@ -57,13 +57,14 @@ export async function createTeam(
     userId,
     name: data.name.trim(),
     color: data.color || '#4a9d67',
+    country: data.useCountry ? data.country || null : null,
   })
 }
 
 export async function updateTeam(
   userId: string,
   teamId: number,
-  data: { name: string; color?: string }
+  data: { name: string; color?: string; country?: string | null; useCountry?: boolean }
 ) {
   if (!data.name.trim()) {
     throw new Error('El nombre del equipo es requerido')
@@ -82,7 +83,12 @@ export async function updateTeam(
 
   await db
     .update(teams)
-    .set({ name: data.name.trim(), color: data.color || '#4a9d67', updatedAt: new Date() })
+    .set({
+      name: data.name.trim(),
+      color: data.color || '#4a9d67',
+      country: data.useCountry ? data.country || null : null,
+      updatedAt: new Date(),
+    })
     .where(and(eq(teams.userId, userId), eq(teams.id, teamId)))
 }
 
