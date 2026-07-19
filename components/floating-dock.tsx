@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Users, DollarSign, MapPin, Trophy, Plus, Search } from 'lucide-react'
+import { LayoutDashboard, Users, DollarSign, MapPin, Trophy, Plus, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLoading } from '@/components/loading-screen'
 
@@ -104,7 +104,7 @@ export function FloatingDock() {
                   : 'bg-card border-2 border-green-600 text-green-600 hover:bg-green-50'
               )}
             >
-              <Home className="w-6 h-6" />
+              <LayoutDashboard className="w-6 h-6" />
             </Link>
           </div>
 
