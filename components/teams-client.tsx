@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useEffect, useTransition } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +14,7 @@ import { toast } from 'sonner'
 import { createTeam, updateTeam, deleteTeam, getTeams, getTeamMembers, getTeamMemberCounts } from '@/app/actions/teams'
 import { Team, Attendee } from '@/lib/db/schema'
 import { StatsBar } from '@/components/stats-bar'
+import { PageHeader } from '@/components/page-header'
 import { COUNTRIES } from '@/lib/countries'
 import { CountryFlagSvg } from '@/lib/country-flags-svg'
 
@@ -32,6 +35,10 @@ export function TeamsClient({ userId }: Props) {
   const [isPending, startTransition] = useTransition()
   const [loading, setLoading] = useState(true)
 
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const emptyForm = { name: '', color: '#4a9d67', country: null as string | null, useCountry: false }
 
   const PRESET_COLORS = [
@@ -45,9 +52,24 @@ export function TeamsClient({ userId }: Props) {
     { name: 'Cian', value: '#06b6d4' },
   ]
 
-  useState(() => {
+  useEffect(() => {
     loadTeams()
-  })
+  }, [userId])
+
+  // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setEditingId(null)
+      setForm({ ...emptyForm })
+      setDialogOpen(true)
+    }
+  }, [searchParams])
+
+  function clearNewParam() {
+    if (searchParams.get('new') === '1') {
+      router.replace(pathname, { scroll: false })
+    }
+  }
 
   async function loadTeams() {
     setLoading(true)
@@ -99,6 +121,7 @@ export function TeamsClient({ userId }: Props) {
         setDialogOpen(false)
         setForm({ ...emptyForm })
         setEditingId(null)
+        clearNewParam()
         await loadTeams()
       } catch (error) {
         toast.error('Error al guardar el equipo')
@@ -122,58 +145,58 @@ export function TeamsClient({ userId }: Props) {
   }
 
   return (
-    <div className="w-full h-full overflow-y-auto">
-      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Equipos</h1>
-          </div>
-          <Button onClick={() => setDialogOpen(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Agregar equipo
-          </Button>
+    <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
+      {/* Header */}
+      <PageHeader title="Personas">
+        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Agregar equipo</span>
+        </Button>
+      </PageHeader>
+
+      {/* Tabs del grupo Personas */}
+      <GroupTabs tabs={PERSONAS_TABS} />
+
+      {/* Stats Bar */}
+      {!loading && teamList.length > 0 && (
+        <StatsBar
+          items={[
+            { label: 'Equipos Totales', value: teamList.length, icon: <Users className="w-5 h-5" />, color: 'primary' },
+          ]}
+        />
+      )}
+
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="overflow-hidden">
+              <CardContent className="p-4 animate-pulse">
+                <div className="h-4 w-40 bg-muted rounded" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
-
-        {/* Stats Bar */}
-        {!loading && teamList.length > 0 && (
-          <StatsBar
-            items={[
-              { label: 'Equipos Totales', value: teamList.length, icon: <Users className="w-5 h-5" />, color: 'primary' },
-            ]}
-          />
-        )}
-
-        {loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="overflow-hidden">
-                <CardContent className="p-4 animate-pulse">
-                  <div className="h-4 w-40 bg-muted rounded" />
-                </CardContent>
-              </Card>
-            ))}
+      ) : teamList.length === 0 ? (
+        <Card className="p-12 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 bg-muted rounded-full" />
+            <p className="text-sm text-muted-foreground">No hay equipos registrados</p>
+            <Button onClick={() => setDialogOpen(true)} className="mt-2 gap-2">
+              <Plus className="w-4 h-4" />
+              Crear primer equipo
+            </Button>
           </div>
-        ) : teamList.length === 0 ? (
-          <Card className="p-12 text-center">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 bg-muted rounded-full" />
-              <p className="text-sm text-muted-foreground">No hay equipos registrados</p>
-              <Button onClick={() => setDialogOpen(true)} className="mt-2 gap-2">
-                <Plus className="w-4 h-4" />
-                Crear primer equipo
-              </Button>
-            </div>
-          </Card>
-        ) : (
-          <div className="space-y-2">
-            {teamList.map((team) => (
-              <div key={team.id}>
-                <Card className="overflow-hidden hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <button
-                        onClick={() => toggleTeamMembers(team.id)}
-                        className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-80 transition-opacity"
+        </Card>
+      ) : (
+        <div className="space-y-2">
+          {teamList.map((team) => (
+            <div key={team.id}>
+              <Card className="overflow-hidden hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      onClick={() => toggleTeamMembers(team.id)}
+                      className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-80 transition-opacity"
                     >
                       {team.country ? (
                         <div className="w-8 h-8 flex items-center justify-center shrink-0 rounded border border-border">
@@ -185,218 +208,218 @@ export function TeamsClient({ userId }: Props) {
                           style={{ backgroundColor: team.color || '#4a9d67' }}
                         />
                       )}
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-semibold text-sm truncate">{team.name}</h3>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Users className="w-3 h-3" />
-                            {memberCounts[team.id] || 0} integrante{(memberCounts[team.id] || 0) !== 1 ? 's' : ''}
-                          </p>
-                        </div>
-                      </button>
-                      <div className="flex gap-1 shrink-0">
-                        <Button
-                          onClick={() => toggleTeamMembers(team.id)}
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                          title={expandedTeamId === team.id ? 'Contraer' : 'Expandir'}
-                        >
-                          <ChevronDown
-                            className="w-4 h-4 transition-transform"
-                            style={{
-                              transform: expandedTeamId === team.id ? 'rotate(180deg)' : 'rotate(0deg)',
-                            }}
-                          />
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setEditingId(team.id)
-                            setForm({ 
-                              name: team.name, 
-                              color: team.color,
-                              country: team.country || null,
-                              useCountry: !!team.country
-                            })
-                            setDialogOpen(true)
-                          }}
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 hover:bg-blue-100"
-                          title="Editar equipo"
-                        >
-                          <Edit2 className="w-4 h-4 text-blue-600" />
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setDeletingId(team.id)
-                            setDeleteDialogOpen(true)
-                          }}
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 hover:bg-red-100"
-                          title="Eliminar equipo"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-sm truncate">{team.name}</h3>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {memberCounts[team.id] || 0} integrante{(memberCounts[team.id] || 0) !== 1 ? 's' : ''}
+                        </p>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Expanded Members List */}
-                {expandedTeamId === team.id && expandedMembers[team.id] && (
-                  <div className="mt-1 ml-4 border-l-2 border-muted pl-4 space-y-1">
-                    {expandedMembers[team.id]?.length === 0 ? (
-                      <p className="text-xs text-muted-foreground py-2">Sin integrantes</p>
-                    ) : (
-                      expandedMembers[team.id]?.map((member) => (
-                        <div key={member.id} className="text-xs py-1">
-                          <p className="font-medium text-foreground">{member.name}</p>
-                          {member.phone && <p className="text-muted-foreground">{member.phone}</p>}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Team Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={(open) => {
-          setDialogOpen(open)
-          if (!open) {
-            setForm({ ...emptyForm })
-            setEditingId(null)
-          }
-        }}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>{editingId ? 'Editar equipo' : 'Agregar equipo'}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nombre *</Label>
-                <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Ej: Nombre del equipo"
-                />
-              </div>
-
-              <div>
-                <Label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.useCountry}
-                    onChange={(e) => setForm({ ...form, useCountry: e.target.checked, country: e.target.checked ? form.country || 'MX' : null })}
-                    className="w-4 h-4 rounded"
-                  />
-                  Usar bandera de país en lugar de color
-                </Label>
-              </div>
-
-              {form.useCountry ? (
-                <div>
-                  <Label>País *</Label>
-                  <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg bg-muted/20">
-                    {COUNTRIES.map((country) => (
-                      <button
-                        key={country.code}
-                        type="button"
-                        onClick={() => setForm({ ...form, country: country.code })}
-                        className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all ${
-                          form.country === country.code
-                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20'
-                            : 'border-muted hover:border-emerald-300'
-                        }`}
+                    </button>
+                    <div className="flex gap-1 shrink-0">
+                      <Button
+                        onClick={() => toggleTeamMembers(team.id)}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        title={expandedTeamId === team.id ? 'Contraer' : 'Expandir'}
                       >
-                        <div className="w-8 h-6">
-                          <CountryFlagSvg code={country.code} className="w-full h-full" />
-                        </div>
-                        <span className="truncate text-xs font-medium">{country.code}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <Label>Color *</Label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {PRESET_COLORS.map((preset) => (
-                      <button
-                        key={preset.value}
-                        type="button"
-                        onClick={() => setForm({ ...form, color: preset.value })}
-                        className="relative flex items-center justify-center h-10 rounded-lg border-2 transition-all hover:scale-105"
-                        style={{
-                          backgroundColor: preset.value,
-                          borderColor: form.color === preset.value ? '#000' : 'transparent',
+                        <ChevronDown
+                          className="w-4 h-4 transition-transform"
+                          style={{
+                            transform: expandedTeamId === team.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                          }}
+                        />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setEditingId(team.id)
+                          setForm({
+                            name: team.name,
+                            color: team.color,
+                            country: team.country || null,
+                            useCountry: !!team.country
+                          })
+                          setDialogOpen(true)
                         }}
-                        title={preset.name}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 hover:bg-blue-100"
+                        title="Editar equipo"
                       >
-                        {form.color === preset.value && (
-                          <span className="text-white font-bold text-lg">✓</span>
-                        )}
-                      </button>
-                    ))}
+                        <Edit2 className="w-4 h-4 text-blue-600" />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setDeletingId(team.id)
+                          setDeleteDialogOpen(true)
+                        }}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 hover:bg-red-100"
+                        title="Eliminar equipo"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={form.color}
-                      onChange={(e) => setForm({ ...form, color: e.target.value })}
-                      className="w-10 h-10 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={form.color}
-                      onChange={(e) => setForm({ ...form, color: e.target.value })}
-                      placeholder="Código hex"
-                      className="text-xs"
-                    />
-                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Expanded Members List */}
+              {expandedTeamId === team.id && expandedMembers[team.id] && (
+                <div className="mt-1 ml-4 border-l-2 border-muted pl-4 space-y-1">
+                  {expandedMembers[team.id]?.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-2">Sin integrantes</p>
+                  ) : (
+                    expandedMembers[team.id]?.map((member) => (
+                      <div key={member.id} className="text-xs py-1">
+                        <p className="font-medium text-foreground">{member.name}</p>
+                        {member.phone && <p className="text-muted-foreground">{member.phone}</p>}
+                      </div>
+                    ))
+                  )}
                 </div>
               )}
-
-              <div className="flex gap-2 justify-end pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isPending}>
-                  {editingId ? 'Guardar cambios' : 'Crear equipo'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Delete Confirmation */}
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>¿Eliminar equipo?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción no se puede deshacer. Se eliminará el equipo pero los camperos asignados a este equipo no serán eliminados.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="flex gap-2 justify-end">
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => deletingId && handleDelete(deletingId)}
-                disabled={isPending}
-              >
-                Eliminar
-              </AlertDialogAction>
             </div>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* Team Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        setDialogOpen(open)
+        if (!open) {
+          setForm({ ...emptyForm })
+          setEditingId(null)
+          clearNewParam()
+        }
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingId ? 'Editar equipo' : 'Agregar equipo'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="name">Nombre *</Label>
+              <Input
+                id="name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Ej: Nombre del equipo"
+              />
+            </div>
+
+            <div>
+              <Label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.useCountry}
+                  onChange={(e) => setForm({ ...form, useCountry: e.target.checked, country: e.target.checked ? form.country || 'MX' : null })}
+                  className="w-4 h-4 rounded"
+                />
+                Usar bandera de país en lugar de color
+              </Label>
+            </div>
+
+            {form.useCountry ? (
+              <div>
+                <Label>País *</Label>
+                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg bg-muted/20">
+                  {COUNTRIES.map((country) => (
+                    <button
+                      key={country.code}
+                      type="button"
+                      onClick={() => setForm({ ...form, country: country.code })}
+                      className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all ${
+                        form.country === country.code
+                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20'
+                          : 'border-muted hover:border-emerald-300'
+                      }`}
+                    >
+                      <div className="w-8 h-6">
+                        <CountryFlagSvg code={country.code} className="w-full h-full" />
+                      </div>
+                      <span className="truncate text-xs font-medium">{country.code}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <Label>Color *</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {PRESET_COLORS.map((preset) => (
+                    <button
+                      key={preset.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, color: preset.value })}
+                      className="relative flex items-center justify-center h-10 rounded-lg border-2 transition-all hover:scale-105"
+                      style={{
+                        backgroundColor: preset.value,
+                        borderColor: form.color === preset.value ? '#000' : 'transparent',
+                      }}
+                      title={preset.name}
+                    >
+                      {form.color === preset.value && (
+                        <span className="text-white font-bold text-lg">✓</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={form.color}
+                    onChange={(e) => setForm({ ...form, color: e.target.value })}
+                    className="w-10 h-10 rounded cursor-pointer"
+                  />
+                  <Input
+                    value={form.color}
+                    onChange={(e) => setForm({ ...form, color: e.target.value })}
+                    placeholder="Código hex"
+                    className="text-xs"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 justify-end pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => { setDialogOpen(false); clearNewParam() }}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {editingId ? 'Guardar cambios' : 'Crear equipo'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar equipo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará el equipo pero los camperos asignados a este equipo no serán eliminados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingId && handleDelete(deletingId)}
+              disabled={isPending}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

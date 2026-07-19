@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import {
   getAllStaff,
   getStaff,
@@ -26,7 +28,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
@@ -96,9 +97,28 @@ export function StaffClient({ userId }: Props) {
   const [teamFilter, setTeamFilter] = useState('')
   const [roomFilter, setRoomFilter] = useState('')
 
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   useEffect(() => {
     initializeDefaults()
   }, [userId])
+
+  // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setEditingId(null)
+      setForm({ ...emptyForm })
+      setDialogOpen(true)
+    }
+  }, [searchParams])
+
+  function clearNewParam() {
+    if (searchParams.get('new') === '1') {
+      router.replace(pathname, { scroll: false })
+    }
+  }
 
   async function initializeDefaults() {
     setLoading(true)
@@ -174,6 +194,7 @@ export function StaffClient({ userId }: Props) {
         setDialogOpen(false)
         setForm({ ...emptyForm })
         setEditingId(null)
+        clearNewParam()
         await loadStaff()
       } catch (error) {
         toast.error('Error al guardar el staff')
@@ -435,14 +456,10 @@ export function StaffClient({ userId }: Props) {
   const partialCount = staffList.filter((a) => a.status === 'partial').length
   const pendingCount = staffList.filter((a) => a.status === 'pending').length
 
-  const getChurchName = (id: string) => churches.find(c => c.id === parseInt(id))?.name || ''
-  const getTeamName = (id: string) => teams.find(t => t.id === parseInt(id))?.name || ''
-  const getRoomName = (id: string) => rooms.find(r => r.id === parseInt(id))?.name || ''
-
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}
-      <PageHeader title="Staff">
+      <PageHeader title="Personas">
         <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
           <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
           <span>Plantilla</span>
@@ -468,6 +485,9 @@ export function StaffClient({ userId }: Props) {
           <span>Agregar</span>
         </Button>
       </PageHeader>
+
+      {/* Tabs del grupo Personas */}
+      <GroupTabs tabs={PERSONAS_TABS} />
 
       {/* Stats Bar */}
       {!loading && staffList.length > 0 && (
@@ -743,6 +763,7 @@ export function StaffClient({ userId }: Props) {
           } else {
             setForm({ ...emptyForm })
             setEditingId(null)
+            clearNewParam()
           }
         }}
       >
@@ -779,30 +800,32 @@ export function StaffClient({ userId }: Props) {
                 </div>
                 <div>
                   <Label htmlFor="shirtSize" className="text-sm font-medium">Talla</Label>
-                  <Select value={form.shirtSize} onValueChange={(value) => setForm({ ...form, shirtSize: value })}>
-                    <SelectTrigger id="shirtSize" className="mt-1">
-                      <SelectValue placeholder="—" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SHIRT_SIZES.map((size) => (
-                        <SelectItem key={size} value={size}>
-                          {size}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="shirtSize"
+                    value={form.shirtSize}
+                    onChange={(e) => setForm({ ...form, shirtSize: e.target.value })}
+                    className="mt-1 w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                  >
+                    <option value="">—</option>
+                    {SHIRT_SIZES.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <Label htmlFor="sex" className="text-sm font-medium">Sexo</Label>
-                  <Select value={form.sex} onValueChange={(value) => setForm({ ...form, sex: value })}>
-                    <SelectTrigger id="sex" className="mt-1">
-                      <SelectValue placeholder="—" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Hombre">Hombre</SelectItem>
-                      <SelectItem value="Mujer">Mujer</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="sex"
+                    value={form.sex}
+                    onChange={(e) => setForm({ ...form, sex: e.target.value })}
+                    className="mt-1 w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                  >
+                    <option value="">—</option>
+                    <option value="Hombre">Hombre</option>
+                    <option value="Mujer">Mujer</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -822,24 +845,24 @@ export function StaffClient({ userId }: Props) {
               </div>
               <div>
                 <Label htmlFor="church" className="text-sm font-medium">Iglesia *</Label>
-                <Select value={form.church} onValueChange={(value) => setForm({ ...form, church: value })}>
-                  <SelectTrigger id="church" className="mt-1">
-                    <SelectValue placeholder="Selecciona una iglesia" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {churches.length > 0 ? (
-                      churches.map((church) => (
-                        <SelectItem key={church.id} value={church.name}>
-                          {church.name}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <div className="p-2 text-sm text-muted-foreground text-center">
-                        Agrega iglesias en la sección de Iglesias
-                      </div>
-                    )}
-                  </SelectContent>
-                </Select>
+                <select
+                  id="church"
+                  value={form.church}
+                  onChange={(e) => setForm({ ...form, church: e.target.value })}
+                  className="mt-1 w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                >
+                  <option value="">Selecciona una iglesia</option>
+                  {churches.map((church) => (
+                    <option key={church.id} value={church.name}>
+                      {church.name}
+                    </option>
+                  ))}
+                </select>
+                {churches.length === 0 && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Agrega iglesias en la sección de Iglesias
+                  </p>
+                )}
               </div>
             </div>
 
@@ -848,18 +871,19 @@ export function StaffClient({ userId }: Props) {
               <h3 className="text-sm font-semibold text-foreground">Ministerio</h3>
               <div>
                 <Label htmlFor="category" className="text-sm font-medium">Ministerio *</Label>
-                <Select value={form.category} onValueChange={(value) => setForm({ ...form, category: value })}>
-                  <SelectTrigger id="category" className="mt-1">
-                    <SelectValue placeholder="Selecciona un ministerio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MINISTRIES.map((ministry) => (
-                      <SelectItem key={ministry} value={ministry}>
-                        {ministry}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  id="category"
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="mt-1 w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                >
+                  <option value="">Selecciona un ministerio</option>
+                  {MINISTRIES.map((ministry) => (
+                    <option key={ministry} value={ministry}>
+                      {ministry}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -917,7 +941,7 @@ export function StaffClient({ userId }: Props) {
             </div>
 
             <div className="flex gap-2 justify-end pt-2 border-t">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); clearNewParam() }}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white">
