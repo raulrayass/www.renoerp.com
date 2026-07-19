@@ -9,9 +9,10 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts'
-import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Banknote, Smartphone } from 'lucide-react'
 import { SectionHeader } from '@/components/section-header'
 import { StatCard } from '@/components/stat-card'
+import { PageHeader } from '@/components/page-header'
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
 
@@ -47,9 +48,23 @@ export function DashboardClient({ userId }: { userId: string }) {
 
   const hasAnyData = totalIncome > 0 || totalExpense > 0
 
+  // Desglose por método de pago para las barras (estilo mockup)
+  const cashAvailable = paymentMethodBreakdown?.cash?.available ?? 0
+  const transferAvailable = paymentMethodBreakdown?.transfer?.available ?? 0
+  const depositAvailable = paymentMethodBreakdown?.deposit?.available ?? 0
+  const totalAvailable = cashAvailable + transferAvailable + depositAvailable
+  const pct = (v: number) => (totalAvailable > 0 ? Math.round((v / totalAvailable) * 100) : 0)
+
+  const methodBars = [
+    { label: 'Efectivo', value: cashAvailable, color: INCOME_COLOR, icon: Banknote },
+    { label: 'Transferencia', value: transferAvailable, color: '#3b82f6', icon: Smartphone },
+    { label: 'Depósito', value: depositAvailable, color: '#9333ea', icon: Smartphone },
+  ]
+
   return (
-    <div className="w-full h-full overflow-y-auto">
-      <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-5 flex flex-col gap-4 max-w-7xl mx-auto">
+    <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-3 max-w-7xl mx-auto w-full">
+      {/* Header */}
+      <PageHeader title="Inicio" description="Resumen del campamento" />
 
       {/* ===== 1. Balance Total (héroe) ===== */}
       <div className="glow-primary">
@@ -64,11 +79,11 @@ export function DashboardClient({ userId }: { userId: string }) {
           <div className="space-y-1 text-xs">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Efectivo:</span>
-              <span className="font-medium">{formatCurrency(paymentMethodBreakdown?.cash?.available ?? 0)}</span>
+              <span className="font-medium">{formatCurrency(cashAvailable)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Banca Móvil:</span>
-              <span className="font-medium">{formatCurrency((paymentMethodBreakdown?.transfer?.available ?? 0) + (paymentMethodBreakdown?.deposit?.available ?? 0))}</span>
+              <span className="font-medium">{formatCurrency(transferAvailable + depositAvailable)}</span>
             </div>
           </div>
         </Card>
@@ -94,12 +109,53 @@ export function DashboardClient({ userId }: { userId: string }) {
         />
       </div>
 
-      {/* ===== 3. Movimientos recientes ===== */}
+      {/* ===== 3. Disponible por método de pago (barras estilo mockup) ===== */}
+      {totalAvailable > 0 && (
+        <Card className="p-5 gradient-card">
+          <h2 className="font-semibold text-foreground mb-4">Disponible por método</h2>
+          <div className="space-y-3">
+            {methodBars.map((m) => {
+              const Icon = m.icon
+              return (
+                <div key={m.label}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: m.color + '1a' }}
+                      >
+                        <Icon className="w-3.5 h-3.5" style={{ color: m.color }} />
+                      </div>
+                      <span className="text-sm font-medium text-foreground">{m.label}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-foreground tabular-nums">
+                        {formatCurrency(m.value)}
+                      </span>
+                      <span className="text-xs text-muted-foreground w-9 text-right tabular-nums">
+                        {pct(m.value)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${pct(m.value)}%`, backgroundColor: m.color }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
+      )}
+
+      {/* ===== 4. Movimientos recientes ===== */}
       <Card className="p-5 gradient-card">
         <h2 className="font-semibold text-foreground mb-4">Movimientos recientes</h2>
         {recentTransactions.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">
-            No hay transacciones aun. Ve a Transacciones para agregar.
+            No hay transacciones aun. Ve a Finanzas para agregar.
           </p>
         ) : (
           <div className="flex flex-col divide-y divide-border">
@@ -134,7 +190,7 @@ export function DashboardClient({ userId }: { userId: string }) {
         )}
       </Card>
 
-      {/* ===== 4. Gráficas (todo lo demás) ===== */}
+      {/* ===== 5. Gráficas ===== */}
 
       {/* Monthly chart + Expense pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -295,7 +351,6 @@ export function DashboardClient({ userId }: { userId: string }) {
             </div>
           )}
         </Card>
-      </div>
       </div>
     </div>
   )

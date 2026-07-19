@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useEffect, useTransition } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,6 +15,7 @@ import { getTeams } from '@/app/actions/teams'
 import { Game, GameScore, Team } from '@/lib/db/schema'
 import { cn } from '@/lib/utils'
 import { StatsBar } from '@/components/stats-bar'
+import { PageHeader } from '@/components/page-header'
 
 interface Props {
   userId: string
@@ -35,11 +37,30 @@ export function GamesClient({ userId }: Props) {
   const [isPending, startTransition] = useTransition()
   const [loading, setLoading] = useState(true)
 
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const emptyForm = { name: '', description: '', gameDate: '' }
 
-  useState(() => {
+  useEffect(() => {
     loadGames()
-  })
+  }, [userId])
+
+  // Abre el modal de nuevo juego cuando el FAB del dock navega con ?new=1
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setEditingId(null)
+      setForm({ ...emptyForm })
+      setDialogOpen(true)
+    }
+  }, [searchParams])
+
+  function clearNewParam() {
+    if (searchParams.get('new') === '1') {
+      router.replace(pathname, { scroll: false })
+    }
+  }
 
   async function loadGames() {
     setLoading(true)
@@ -92,6 +113,7 @@ export function GamesClient({ userId }: Props) {
         setDialogOpen(false)
         setForm({ ...emptyForm })
         setEditingId(null)
+        clearNewParam()
         await loadGames()
       } catch (error) {
         toast.error('Error al guardar el juego')
@@ -185,17 +207,14 @@ export function GamesClient({ userId }: Props) {
     .sort((a, b) => b.totalPoints - a.totalPoints)
 
   return (
-    <div className="w-full h-full overflow-y-auto">
-      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Juegos y Puntaje</h1>
-        </div>
-        <Button onClick={() => setDialogOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Nuevo juego
+    <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
+      {/* Header */}
+      <PageHeader title="Juegos y Puntaje">
+        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Nuevo juego</span>
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Stats Bar */}
       {!loading && gameList.length > 0 && (
@@ -347,12 +366,13 @@ export function GamesClient({ userId }: Props) {
         </div>
       )}
 
-        {/* Game Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={(open) => {
+      {/* Game Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
         setDialogOpen(open)
         if (!open) {
           setForm({ ...emptyForm })
           setEditingId(null)
+          clearNewParam()
         }
       }}>
         <DialogContent className="max-w-md">
@@ -391,7 +411,7 @@ export function GamesClient({ userId }: Props) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setDialogOpen(false)}
+                onClick={() => { setDialogOpen(false); clearNewParam() }}
               >
                 Cancelar
               </Button>
@@ -446,7 +466,7 @@ export function GamesClient({ userId }: Props) {
                     id="teamId"
                     value={scoringForm.teamId}
                     onChange={(e) => setScoringForm({ ...scoringForm, teamId: e.target.value })}
-                    className="w-full px-3 py-2 border border-input rounded-md text-sm"
+                    className="w-full px-3 py-2 border border-input rounded-md text-sm bg-background h-10"
                   >
                     <option value="">Selecciona un equipo</option>
                     {teams.map((team) => (
@@ -530,7 +550,6 @@ export function GamesClient({ userId }: Props) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
-      </div>
     </div>
   )
 }
