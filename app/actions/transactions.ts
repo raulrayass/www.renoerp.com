@@ -181,10 +181,112 @@ export async function updateTransaction(
   id: number,
   data: { categoryId: number; type: string; amount: string; description: string; date: string; paymentMethod?: string }
 ) {
+  // Get the old transaction to see if we need to sync payments
+  const [oldTransaction] = await db
+    .select()
+    .from(transactions)
+    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+
+  if (!oldTransaction) throw new Error('Transacción no encontrada')
+
+  // Check if this is a payment transaction
+  if (oldTransaction.type === 'income' && oldTransaction.description?.startsWith('Pago de ')) {
+    const name = oldTransaction.description.replace('Pago de ', '')
+    const oldAmount = parseFloat(oldTransaction.amount as string)
+    const newAmount = parseFloat(data.amount)
+    const amountDifference = newAmount - oldAmount
+
+    // Check if it's a staff payment
+    const [staffMember] = await db
+      .select()
+      .from(staff)
+      .where(and(eq(staff.userId, userId), eq(staff.name, name)))
+
+    if (staffMember) {
+      // Find the corresponding staff payment
+      const [payment] = await db
+        .select()
+        .from(staffPayments)
+        .where(and(eq(staffPayments.userId, userId), eq(staffPayments.staffId, staffMember.id), eq(staffPayments.amount, oldTransaction.amount)))
+
+      if (payment) {
+        // Update staff payment amount and method
+        await db
+          .update(staffPayments)
+          .set({
+            amount: newAmount,
+            paymentMethod: data.paymentMethod || 'cash',
+            updatedAt: new Date(),
+          })
+          .where(eq(staffPayments.id, payment.id))
+
+        // Update staff amountPaid and status
+        const newPaidAmount = Math.max(0, parseFloat(staffMember.amountPaid as string) + amountDifference)
+        const originalTotal = parseFloat(staffMember.totalAmount as string)
+        const discount = staffMember.discount || 0
+        const totalAmount = originalTotal * (1 - discount / 100)
+        const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
+
+        await db
+          .update(staff)
+          .set({
+            amountPaid: newPaidAmount,
+            status: newStatus,
+            updatedAt: new Date(),
+          })
+          .where(eq(staff.id, staffMember.id))
+      }
+    } else {
+      // Check if it's an attendee payment
+      const [attendee] = await db
+        .select()
+        .from(attendees)
+        .where(and(eq(attendees.userId, userId), eq(attendees.name, name)))
+
+      if (attendee) {
+        // Find the corresponding attendee payment
+        const [payment] = await db
+          .select()
+          .from(attendeePayments)
+          .where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, attendee.id), eq(attendeePayments.amount, oldTransaction.amount)))
+
+        if (payment) {
+          // Update attendee payment amount and method
+          await db
+            .update(attendeePayments)
+            .set({
+              amount: newAmount,
+              paymentMethod: data.paymentMethod || 'cash',
+              updatedAt: new Date(),
+            })
+            .where(eq(attendeePayments.id, payment.id))
+
+          // Update attendee amountPaid and status
+          const newPaidAmount = Math.max(0, parseFloat(attendee.amountPaid as string) + amountDifference)
+          const originalTotal = parseFloat(attendee.totalAmount as string)
+          const discount = attendee.discount || 0
+          const totalAmount = originalTotal * (1 - discount / 100)
+          const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
+
+          await db
+            .update(attendees)
+            .set({
+              amountPaid: newPaidAmount,
+              status: newStatus,
+              updatedAt: new Date(),
+            })
+            .where(eq(attendees.id, attendee.id))
+        }
+      }
+    }
+  }
+
+  // Update the transaction
   await db
     .update(transactions)
     .set({ ...data, paymentMethod: data.paymentMethod || 'cash', updatedAt: new Date() })
     .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+
   revalidatePath('/')
   revalidatePath('/transactions')
 }
