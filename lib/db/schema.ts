@@ -81,6 +81,7 @@ export const teams = pgTable('teams', {
   userId: text('userId').notNull(),
   name: text('name').notNull(),
   color: text('color').notNull().default('#4a9d67'),
+  country: text('country'), // Country code (e.g., 'MX', 'BR', 'AR') - optional
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
