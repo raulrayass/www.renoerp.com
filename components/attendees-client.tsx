@@ -525,7 +525,7 @@ export function AttendeesClient({ userId }: Props) {
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}
-      <PageHeader title="Camperos">
+      <PageHeader title="Personas">
         <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
           <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
           <span>Plantilla</span>
