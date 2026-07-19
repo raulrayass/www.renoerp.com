@@ -26,7 +26,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn, Filter, ChevronDown as ChevronDownIcon } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
@@ -484,11 +483,6 @@ export function AttendeesClient({ userId }: Props) {
   const paidCount = attendeeList.filter((a) => a.status === 'paid').length
   const partialCount = attendeeList.filter((a) => a.status === 'partial').length
   const pendingCount = attendeeList.filter((a) => a.status === 'pending').length
-
-  // Helper functions to get display names from IDs
-  const getChurchName = (id: string) => churches.find(c => c.id === parseInt(id))?.name || ''
-  const getTeamName = (id: string) => teams.find(t => t.id === parseInt(id))?.name || ''
-  const getRoomName = (id: string) => rooms.find(r => r.id === parseInt(id))?.name || ''
 
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
@@ -1037,30 +1031,32 @@ export function AttendeesClient({ userId }: Props) {
                 </div>
                 <div>
                   <Label htmlFor="shirtSize" className="text-sm font-medium">Talla</Label>
-                  <Select value={form.shirtSize} onValueChange={(value) => setForm({ ...form, shirtSize: value })}>
-                    <SelectTrigger id="shirtSize" className="mt-1">
-                      <SelectValue placeholder="—" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SHIRT_SIZES.map((size) => (
-                        <SelectItem key={size} value={size}>
-                          {size}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="shirtSize"
+                    value={form.shirtSize}
+                    onChange={(e) => setForm({ ...form, shirtSize: e.target.value })}
+                    className="mt-1 w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                  >
+                    <option value="">—</option>
+                    {SHIRT_SIZES.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <Label htmlFor="sex" className="text-sm font-medium">Sexo</Label>
-                  <Select value={form.sex} onValueChange={(value) => setForm({ ...form, sex: value })}>
-                    <SelectTrigger id="sex" className="mt-1">
-                      <SelectValue placeholder="—" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Hombre">Hombre</SelectItem>
-                      <SelectItem value="Mujer">Mujer</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="sex"
+                    value={form.sex}
+                    onChange={(e) => setForm({ ...form, sex: e.target.value })}
+                    className="mt-1 w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                  >
+                    <option value="">—</option>
+                    <option value="Hombre">Hombre</option>
+                    <option value="Mujer">Mujer</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -1080,24 +1076,24 @@ export function AttendeesClient({ userId }: Props) {
               </div>
               <div>
                 <Label htmlFor="church" className="text-sm font-medium">Iglesia *</Label>
-                <Select value={form.church} onValueChange={(value) => setForm({ ...form, church: value })}>
-                  <SelectTrigger id="church" className="mt-1">
-                    <SelectValue placeholder="Selecciona una iglesia" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {churches.length > 0 ? (
-                      churches.map((church) => (
-                        <SelectItem key={church.id} value={church.name}>
-                          {church.name}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <div className="p-2 text-sm text-muted-foreground text-center">
-                        Agrega iglesias en la sección de Iglesias
-                      </div>
-                    )}
-                  </SelectContent>
-                </Select>
+                <select
+                  id="church"
+                  value={form.church}
+                  onChange={(e) => setForm({ ...form, church: e.target.value })}
+                  className="mt-1 w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                >
+                  <option value="">Selecciona una iglesia</option>
+                  {churches.map((church) => (
+                    <option key={church.id} value={church.name}>
+                      {church.name}
+                    </option>
+                  ))}
+                </select>
+                {churches.length === 0 && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Agrega iglesias en la sección de Iglesias
+                  </p>
+                )}
               </div>
             </div>
 
@@ -1166,39 +1162,35 @@ export function AttendeesClient({ userId }: Props) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="teamId" className="text-sm font-medium">Equipo</Label>
-                  <Select value={form.teamId || 'none'} onValueChange={(value) => setForm({ ...form, teamId: value === 'none' ? '' : value })}>
-                    <SelectTrigger id="teamId" className="mt-1">
-                      <span className="text-foreground">
-                        {form.teamId ? getTeamName(form.teamId) : 'Sin equipo'}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin equipo</SelectItem>
-                      {teams.map((team) => (
-                        <SelectItem key={team.id} value={String(team.id)}>
-                          {team.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="teamId"
+                    value={form.teamId}
+                    onChange={(e) => setForm({ ...form, teamId: e.target.value })}
+                    className="mt-1 w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                  >
+                    <option value="">Sin equipo</option>
+                    {teams.map((team) => (
+                      <option key={team.id} value={String(team.id)}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <Label htmlFor="roomId" className="text-sm font-medium">Habitación</Label>
-                  <Select value={form.roomId || 'none'} onValueChange={(value) => setForm({ ...form, roomId: value === 'none' ? '' : value })}>
-                    <SelectTrigger id="roomId" className="mt-1">
-                      <span className="text-foreground">
-                        {form.roomId ? getRoomName(form.roomId) : 'Sin habitación'}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin habitación</SelectItem>
-                      {rooms.map((room) => (
-                        <SelectItem key={room.id} value={String(room.id)}>
-                          {room.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="roomId"
+                    value={form.roomId}
+                    onChange={(e) => setForm({ ...form, roomId: e.target.value })}
+                    className="mt-1 w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                  >
+                    <option value="">Sin habitación</option>
+                    {rooms.map((room) => (
+                      <option key={room.id} value={String(room.id)}>
+                        {room.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
