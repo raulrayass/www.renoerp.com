@@ -13,6 +13,7 @@ import { createTeam, updateTeam, deleteTeam, getTeams, getTeamMembers, getTeamMe
 import { Team, Attendee } from '@/lib/db/schema'
 import { StatsBar } from '@/components/stats-bar'
 import { COUNTRIES } from '@/lib/countries'
+import { CountryFlagSvg } from '@/lib/country-flags-svg'
 
 interface Props {
   userId: string
@@ -173,17 +174,17 @@ export function TeamsClient({ userId }: Props) {
                       <button
                         onClick={() => toggleTeamMembers(team.id)}
                         className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-80 transition-opacity"
-                      >
-                        {team.country ? (
-                          <div className="w-8 h-8 text-2xl flex items-center justify-center shrink-0">
-                            {COUNTRIES.find(c => c.code === team.country)?.flag || '🏳️'}
-                          </div>
-                        ) : (
-                          <div
-                            className="w-8 h-8 rounded-full shrink-0 border-2 border-border"
-                            style={{ backgroundColor: team.color || '#4a9d67' }}
-                          />
-                        )}
+                    >
+                      {team.country ? (
+                        <div className="w-8 h-8 flex items-center justify-center shrink-0 rounded border border-border">
+                          <CountryFlagSvg code={team.country} className="w-full h-full p-0.5" />
+                        </div>
+                      ) : (
+                        <div
+                          className="w-8 h-8 rounded-full shrink-0 border-2 border-border"
+                          style={{ backgroundColor: team.color || '#4a9d67' }}
+                        />
+                      )}
                         <div className="min-w-0 flex-1">
                           <h3 className="font-semibold text-sm truncate">{team.name}</h3>
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -312,8 +313,10 @@ export function TeamsClient({ userId }: Props) {
                             : 'border-muted hover:border-emerald-300'
                         }`}
                       >
-                        <span className="text-2xl">{country.flag}</span>
-                        <span className="truncate text-xs font-medium">{country.name}</span>
+                        <div className="w-8 h-6">
+                          <CountryFlagSvg code={country.code} className="w-full h-full" />
+                        </div>
+                        <span className="truncate text-xs font-medium">{country.code}</span>
                       </button>
                     ))}
                   </div>
