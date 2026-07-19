@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Square, ArrowLeftRight, Tag, Users, LogOut, User, Church, Zap, Home, Trophy, Briefcase } from 'lucide-react'
+import { Square, Users, DollarSign, MapPin, Trophy, LogOut, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { Button } from '@/components/ui/button'
@@ -17,16 +17,39 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+// Mismas 5 categorías consolidadas que en FloatingDock (mobile),
+// para que el resaltado activo sea consistente en toda la app.
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: Square },
-  { href: '/attendees', label: 'Camperos', icon: Users },
-  { href: '/staff', label: 'Staff', icon: Briefcase },
-  { href: '/teams', label: 'Equipos', icon: Zap },
-  { href: '/rooms', label: 'Habitaciones', icon: Home },
-  { href: '/games', label: 'Juegos', icon: Trophy },
-  { href: '/churches', label: 'Iglesias', icon: Church },
-  { href: '/transactions', label: 'Transacciones', icon: ArrowLeftRight },
-  { href: '/categories', label: 'Categorías', icon: Tag },
+  {
+    href: '/',
+    label: 'Inicio',
+    icon: Square,
+    match: (p: string) => p === '/',
+  },
+  {
+    href: '/attendees',
+    label: 'Personas',
+    icon: Users,
+    match: (p: string) => ['/attendees', '/staff', '/teams'].some((r) => p.startsWith(r)),
+  },
+  {
+    href: '/transactions',
+    label: 'Finanzas',
+    icon: DollarSign,
+    match: (p: string) => ['/transactions', '/categories'].some((r) => p.startsWith(r)),
+  },
+  {
+    href: '/rooms',
+    label: 'Logística',
+    icon: MapPin,
+    match: (p: string) => ['/rooms', '/churches'].some((r) => p.startsWith(r)),
+  },
+  {
+    href: '/games',
+    label: 'Juegos',
+    icon: Trophy,
+    match: (p: string) => p.startsWith('/games'),
+  },
 ]
 
 export function Topbar() {
@@ -54,8 +77,8 @@ export function Topbar() {
 
           {/* Nav - Hidden on mobile, shown on md+ */}
           <nav className="hidden lg:flex items-center gap-1 flex-1 ml-6">
-            {navItems.map(({ href, label, icon: Icon }) => {
-              const active = pathname === href
+            {navItems.map(({ href, label, icon: Icon, match }) => {
+              const active = match(pathname)
               return (
                 <Link
                   key={href}
@@ -73,8 +96,6 @@ export function Topbar() {
               )
             })}
           </nav>
-
-
 
           {/* User area */}
           {user ? (

@@ -6,15 +6,9 @@ import { Square, Users, DollarSign, MapPin, Trophy, Plus, Search } from 'lucide-
 import { cn } from '@/lib/utils'
 import { useLoading } from '@/components/loading-screen'
 
-// 5 destinos, todos del mismo tamaño y uniformes:
-// Inicio · Personas · Finanzas · Logística · Juegos
+// 5 destinos, con Inicio centrado y resaltado:
+// Personas · Finanzas · Inicio · Logística · Juegos
 const navItems = [
-  {
-    href: '/',
-    label: 'Inicio',
-    icon: Square,
-    match: (p: string) => p === '/',
-  },
   {
     href: '/attendees',
     label: 'Personas',
@@ -26,6 +20,13 @@ const navItems = [
     label: 'Finanzas',
     icon: DollarSign,
     match: (p: string) => ['/transactions', '/categories'].some((r) => p.startsWith(r)),
+  },
+  {
+    href: '/',
+    label: 'Inicio',
+    icon: Square,
+    match: (p: string) => p === '/',
+    isHome: true,
   },
   {
     href: '/rooms',
@@ -72,30 +73,26 @@ export function FloatingDock() {
   const action = getPrimaryAction(pathname)
   const showSearch = hasPageSearch(pathname)
 
-  // Foco SÍNCRONO en el tap para que el teclado móvil aparezca.
-  // No usar setTimeout: rompe el "user gesture" y el teclado no sale.
+  // Foco SÍNCRONO en el tap para que el teclado móvil (iOS) aparezca.
+  // No usar setTimeout ni await antes de esto: rompe el "user gesture"
+  // y iOS Safari se niega a abrir el teclado.
   function focusPageSearch() {
     const el = document.getElementById('page-search') as HTMLInputElement | null
     if (!el) return
+    // Asegúrate en la página que este input NO tenga `readOnly` ni esté
+    // oculto con display:none / visibility:hidden en el momento del tap,
+    // o iOS ignorará el focus() aunque el código sea correcto.
     el.focus({ preventScroll: true })
     // el scroll se hace después; el focus ya ocurrió dentro del gesto
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
   }
 
   return (
     <div className="fixed bottom-4 left-3 right-3 z-50 lg:hidden">
-      {/* Botones de acción SUPERPUESTOS (no consumen ancho de la píldora) */}
-      <div className="absolute -top-16 right-0 flex flex-col items-end gap-2">
-        {action && (
-          <button
-            onClick={() => router.push(action.href)}
-            title={action.label}
-            aria-label={action.label}
-            className="flex items-center justify-center w-14 h-14 rounded-full bg-green-600 text-white shadow-lg shadow-green-600/30 transition-all duration-200 hover:bg-green-700 active:scale-95"
-          >
-            <Plus className="w-7 h-7" strokeWidth={2.5} />
-          </button>
-        )}
+      {/* Botones de acción SUPERPUESTOS, ahora uno junto al otro */}
+      <div className="absolute -top-16 right-0 flex flex-row items-center gap-2">
         {showSearch && (
           <button
             onClick={focusPageSearch}
@@ -106,9 +103,19 @@ export function FloatingDock() {
             <Search className="w-5 h-5" strokeWidth={2.25} />
           </button>
         )}
+        {action && (
+          <button
+            onClick={() => router.push(action.href)}
+            title={action.label}
+            aria-label={action.label}
+            className="flex items-center justify-center w-14 h-14 rounded-full bg-green-600 text-white shadow-lg shadow-green-600/30 transition-all duration-200 hover:bg-green-700 active:scale-95"
+          >
+            <Plus className="w-7 h-7" strokeWidth={2.5} />
+          </button>
+        )}
       </div>
 
-      {/* Píldora con los 5 ítems — usa todo el ancho disponible */}
+      {/* Píldora con los 5 ítems — Inicio centrado con resaltado verde */}
       <nav>
         <div className="flex items-center justify-between px-1.5 py-1.5 rounded-3xl bg-card/95 border border-border shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
           {navItems.map((item) => (
@@ -124,10 +131,47 @@ function DockItem({
   item,
   active,
 }: {
-  item: { href: string; label: string; icon: React.ComponentType<{ className?: string }> }
+  item: {
+    href: string
+    label: string
+    icon: React.ComponentType<{ className?: string }>
+    isHome?: boolean
+  }
   active: boolean
 }) {
   const Icon = item.icon
+
+  if (item.isHome) {
+    // Botón central de Inicio: resaltado verde leve, siempre visible,
+    // más marcado cuando está activo.
+    return (
+      <Link
+        href={item.href}
+        title={item.label}
+        className="flex flex-1 flex-col items-center justify-center gap-0.5 py-1"
+      >
+        <span
+          className={cn(
+            'flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200',
+            active
+              ? 'bg-green-600 text-white shadow-md shadow-green-600/30'
+              : 'bg-green-50 text-green-600'
+          )}
+        >
+          <Icon className="w-5 h-5" />
+        </span>
+        <span
+          className={cn(
+            'text-[10px] leading-none',
+            active ? 'font-semibold text-green-600' : 'font-medium text-muted-foreground'
+          )}
+        >
+          {item.label}
+        </span>
+      </Link>
+    )
+  }
+
   return (
     <Link
       href={item.href}
