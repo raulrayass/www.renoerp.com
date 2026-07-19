@@ -79,11 +79,7 @@ export function FloatingDock() {
   function focusPageSearch() {
     const el = document.getElementById('page-search') as HTMLInputElement | null
     if (!el) return
-    // Asegúrate en la página que este input NO tenga `readOnly` ni esté
-    // oculto con display:none / visibility:hidden en el momento del tap,
-    // o iOS ignorará el focus() aunque el código sea correcto.
     el.focus({ preventScroll: true })
-    // el scroll se hace después; el focus ya ocurrió dentro del gesto
     requestAnimationFrame(() => {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     })
@@ -91,16 +87,16 @@ export function FloatingDock() {
 
   return (
     <div className="fixed bottom-4 left-3 right-3 z-50 lg:hidden">
-      {/* Botones de acción SUPERPUESTOS, ahora uno junto al otro */}
+      {/* Botones de acción SUPERPUESTOS, mismo tamaño, uno junto al otro */}
       <div className="absolute -top-16 right-0 flex flex-row items-center gap-2">
         {showSearch && (
           <button
             onClick={focusPageSearch}
             title="Buscar"
             aria-label="Buscar"
-            className="flex items-center justify-center w-12 h-12 rounded-full bg-card border border-border text-foreground shadow-lg transition-all duration-200 hover:bg-muted active:scale-95"
+            className="flex items-center justify-center w-14 h-14 rounded-full bg-card border border-border text-foreground shadow-lg transition-all duration-200 hover:bg-muted active:scale-95"
           >
-            <Search className="w-5 h-5" strokeWidth={2.25} />
+            <Search className="w-6 h-6" strokeWidth={2.25} />
           </button>
         )}
         {action && (
@@ -115,7 +111,7 @@ export function FloatingDock() {
         )}
       </div>
 
-      {/* Píldora con los 5 ítems — Inicio centrado con resaltado verde */}
+      {/* Píldora con los 5 ítems — Inicio centrado, solo ícono */}
       <nav>
         <div className="flex items-center justify-between px-1.5 py-1.5 rounded-3xl bg-card/95 border border-border shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md">
           {navItems.map((item) => (
@@ -142,13 +138,14 @@ function DockItem({
   const Icon = item.icon
 
   if (item.isHome) {
-    // Botón central de Inicio: resaltado verde leve, siempre visible,
+    // Botón central de Inicio: solo ícono, resaltado verde leve,
     // más marcado cuando está activo.
     return (
       <Link
         href={item.href}
         title={item.label}
-        className="flex flex-1 flex-col items-center justify-center gap-0.5 py-1"
+        aria-label={item.label}
+        className="flex flex-1 items-center justify-center py-1"
       >
         <span
           className={cn(
@@ -159,14 +156,6 @@ function DockItem({
           )}
         >
           <Icon className="w-5 h-5" />
-        </span>
-        <span
-          className={cn(
-            'text-[10px] leading-none',
-            active ? 'font-semibold text-green-600' : 'font-medium text-muted-foreground'
-          )}
-        >
-          {item.label}
         </span>
       </Link>
     )
