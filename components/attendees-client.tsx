@@ -27,7 +27,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn, Filter, ChevronDown as ChevronDownIcon } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -67,6 +67,7 @@ export function AttendeesClient({ userId }: Props) {
   const [churches, setChurches] = useState<Church[]>([])
   const [teams, setTeams] = useState<Team[]>([])
   const [rooms, setRooms] = useState<Room[]>([])
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
@@ -519,72 +520,260 @@ export function AttendeesClient({ userId }: Props) {
         </Button>
       </PageHeader>
 
-      {/* Stats Bar */}
+      {/* Quick Stats - 3 column grid */}
       {!loading && attendeeList.length > 0 && (
-        <StatsBar
-          items={[
-            { label: 'Total Camperos', value: attendeeList.length, icon: <Users2 className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'primary' },
-            { label: 'Pagados', value: paidCount, icon: <CreditCard className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'success' },
-            { label: 'Check-in', value: checkedInCount, icon: <LogIn className="w-3 sm:w-4 h-3 sm:h-4" />, color: 'primary' },
-          ]}
-        />
+        <div className="grid grid-cols-3 gap-2">
+          <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/30">
+            <CardContent className="p-3">
+              <div className="text-center">
+                <Users2 className="w-4 h-4 text-emerald-600 mx-auto mb-1" />
+                <p className="text-lg font-bold text-foreground">{attendeeList.length}</p>
+                <p className="text-xs text-muted-foreground">Campistas</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/30">
+            <CardContent className="p-3">
+              <div className="text-center">
+                <CreditCard className="w-4 h-4 text-blue-600 mx-auto mb-1" />
+                <p className="text-lg font-bold text-foreground">{paidCount}</p>
+                <p className="text-xs text-muted-foreground">Pagados</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/30">
+            <CardContent className="p-3">
+              <div className="text-center">
+                <LogIn className="w-4 h-4 text-amber-600 mx-auto mb-1" />
+                <p className="text-lg font-bold text-foreground">{checkedInCount}</p>
+                <p className="text-xs text-muted-foreground">Check-in</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
-      {/* Summary Cards */}
+      {/* Main content cards - Finanzas and Check-in */}
       {!loading && attendeeList.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-1.5">
-          <StatCard
-            label="Esperado"
-            value={formatMXN(summary.expected)}
-            color="blue"
-            icon={DollarSign}
-          />
-          <StatCard
-            label="Recaudado"
-            value={formatMXN(summary.collected)}
-            color="green"
-            icon={CreditCard}
-          />
-          <StatCard
-            label="Pendiente"
-            value={formatMXN(pendingAmount)}
-            color="red"
-            icon={History}
-          />
-          <StatCard
-            label="Check-in"
-            value={`${checkedInCount}/${attendeeList.length}`}
-            color="primary"
-            icon={UserCheck}
-            subtitle={`${paidCount} pagados • ${partialCount} parciales`}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Finanzas Card */}
+          <Card className="bg-white/5 border border-border">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                </div>
+                <h3 className="font-semibold text-sm">Finanzas</h3>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">Esperado</p>
+                  <p className="text-base font-bold text-foreground">{formatMXN(summary.expected)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Recaudado</p>
+                  <p className="text-lg font-bold text-green-600">{formatMXN(summary.collected)}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Progress value={Math.min(100, (summary.collected / summary.expected) * 100)} className="h-1.5" />
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {Math.round((summary.collected / summary.expected) * 100)}%
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">Pendiente</p>
+                  <p className="text-base font-bold text-red-600">{formatMXN(pendingAmount)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Check-in Card */}
+          <Card className="bg-white/5 border border-border">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                  <UserCheck className="w-5 h-5 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-sm">Check-in</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-foreground">{checkedInCount} / {attendeeList.length}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {Math.round((checkedInCount / attendeeList.length) * 100)}%
+                  </span>
+                </div>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-600" />
+                    <span className="text-muted-foreground">{paidCount} Pagados</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-amber-500" />
+                    <span className="text-muted-foreground">{partialCount} Parciales</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-600" />
+                    <span className="text-muted-foreground">{attendeeList.length - paidCount - partialCount} Pendientes</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Search bar */}
+      {!loading && attendeeList.length > 0 && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input
+            type="text"
+            placeholder="Buscar campista..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 h-10 rounded-lg border border-border bg-white/5"
           />
         </div>
       )}
 
-      {/* Smart filter system */}
+      {/* Filter chips - Status and other filters */}
       {!loading && attendeeList.length > 0 && (
-        <SmartFilter
-          search={search}
-          onSearchChange={setSearch}
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-          churchFilter={churchFilter}
-          onChurchChange={setChurchFilter}
-          churches={churches}
-          teamFilter={teamFilter}
-          onTeamChange={setTeamFilter}
-          teams={teams}
-          roomFilter={roomFilter}
-          onRoomChange={setRoomFilter}
-          rooms={rooms}
-          onClearFilters={() => {
-            setSearch('')
-            setStatusFilter('all')
-            setChurchFilter('')
-            setTeamFilter('')
-            setRoomFilter('')
-          }}
-        />
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setStatusFilter('all')}
+            className={cn(
+              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+              statusFilter === 'all'
+                ? 'bg-green-600 text-white border-green-600'
+                : 'bg-white/5 text-foreground border-border hover:bg-white/10'
+            )}
+          >
+            Todos
+          </button>
+          <button
+            onClick={() => setStatusFilter('paid')}
+            className={cn(
+              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+              statusFilter === 'paid'
+                ? 'bg-green-600 text-white border-green-600'
+                : 'bg-white/5 text-foreground border-border hover:bg-white/10'
+            )}
+          >
+            Pagados
+          </button>
+          <button
+            onClick={() => setStatusFilter('partial')}
+            className={cn(
+              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+              statusFilter === 'partial'
+                ? 'bg-green-600 text-white border-green-600'
+                : 'bg-white/5 text-foreground border-border hover:bg-white/10'
+            )}
+          >
+            Parciales
+          </button>
+          <button
+            onClick={() => setStatusFilter('pending')}
+            className={cn(
+              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+              statusFilter === 'pending'
+                ? 'bg-green-600 text-white border-green-600'
+                : 'bg-white/5 text-foreground border-border hover:bg-white/10'
+            )}
+          >
+            Pendientes
+          </button>
+          {/* Advanced filters toggle */}
+          {(churches.length > 0 || teams.length > 0 || rooms.length > 0) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className="gap-1.5 text-xs h-9 ml-auto"
+            >
+              <Filter className="w-3.5 h-3.5" />
+              <span>Más filtros</span>
+              <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Advanced Filters Section */}
+      {showAdvancedFilters && !loading && attendeeList.length > 0 && (
+        <Card className="bg-white/5 border border-border">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {churches.length > 0 && (
+                <div>
+                  <Label className="text-xs mb-2 block">Iglesia</Label>
+                  <select
+                    value={churchFilter}
+                    onChange={(e) => setChurchFilter(e.target.value)}
+                    className="w-full text-sm border border-border rounded-md bg-background px-2 py-2"
+                  >
+                    <option value="">Todas</option>
+                    {churches.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {teams.length > 0 && (
+                <div>
+                  <Label className="text-xs mb-2 block">Equipo</Label>
+                  <select
+                    value={teamFilter}
+                    onChange={(e) => setTeamFilter(e.target.value)}
+                    className="w-full text-sm border border-border rounded-md bg-background px-2 py-2"
+                  >
+                    <option value="">Todos</option>
+                    {teams.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {rooms.length > 0 && (
+                <div>
+                  <Label className="text-xs mb-2 block">Habitación</Label>
+                  <select
+                    value={roomFilter}
+                    onChange={(e) => setRoomFilter(e.target.value)}
+                    className="w-full text-sm border border-border rounded-md bg-background px-2 py-2"
+                  >
+                    <option value="">Todas</option>
+                    {rooms.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+            <Button
+              onClick={() => {
+                setSearch('')
+                setStatusFilter('all')
+                setChurchFilter('')
+                setTeamFilter('')
+                setRoomFilter('')
+              }}
+              variant="outline"
+              size="sm"
+              className="w-full mt-3"
+            >
+              Limpiar todos los filtros
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
 
