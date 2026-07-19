@@ -1,14 +1,12 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { GroupTabs, FINANZAS_TABS } from '@/components/group-tabs'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
@@ -20,12 +18,12 @@ import {
   getTransactions, createTransaction, updateTransaction, deleteTransaction,
 } from '@/app/actions/transactions'
 import { getCategories } from '@/app/actions/categories'
-import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, FileDown, Filter, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
+import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, FileDown, TrendingUp, TrendingDown, Wallet, Search, X, Filter, ChevronDown as ChevronDownIcon } from 'lucide-react'
 import type { Category } from '@/lib/db/schema'
-import { RESPONSIVE_SIZES } from '@/lib/responsive-config'
 import * as XLSX from 'xlsx'
 import { toast } from 'sonner'
-import { TransactionSmartFilter } from '@/components/transaction-smart-filter'
+import { cn } from '@/lib/utils'
+import { PageHeader } from '@/components/page-header'
 
 type TransactionRow = Awaited<ReturnType<typeof getTransactions>>[number]
 
@@ -68,6 +66,11 @@ export function TransactionsClient({ userId }: { userId: string }) {
   const [search, setSearch] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   async function reload() {
     const [txs, cats] = await Promise.all([
@@ -82,6 +85,19 @@ export function TransactionsClient({ userId }: { userId: string }) {
     setLoading(true)
     reload().finally(() => setLoading(false))
   }, [userId])
+
+  // Abre el modal de nueva transacción cuando el FAB del dock navega con ?new=1
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      openCreate()
+    }
+  }, [searchParams])
+
+  function clearNewParam() {
+    if (searchParams.get('new') === '1') {
+      router.replace(pathname, { scroll: false })
+    }
+  }
 
   const filteredCategories = categories.filter(
     (c) => c.type === 'both' || c.type === form.type
@@ -101,6 +117,23 @@ export function TransactionsClient({ userId }: { userId: string }) {
     }
     return true
   })
+
+  const hasActiveFilters =
+    !!search ||
+    filterType !== 'all' ||
+    filterCat !== 'all' ||
+    filterMethod !== 'all' ||
+    !!dateFrom ||
+    !!dateTo
+
+  function clearFilters() {
+    setFilterType('all')
+    setFilterCat('all')
+    setFilterMethod('all')
+    setSearch('')
+    setDateFrom('')
+    setDateTo('')
+  }
 
   const totals = filtered.reduce(
     (acc, t) => {
@@ -175,6 +208,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
           toast.success('Transacción registrada')
         }
         setDialogOpen(false)
+        clearNewParam()
         await reload()
       } catch (error) {
         toast.error('Error al guardar la transacción')
@@ -207,13 +241,11 @@ export function TransactionsClient({ userId }: { userId: string }) {
       const amount = parseFloat(t.amount as string)
       const signedAmount = t.type === 'income' ? amount : -amount
 
-      // Método de pago en español
       const metodo = !t.paymentMethod || t.paymentMethod === 'cash' ? 'Efectivo'
         : t.paymentMethod === 'transfer' ? 'Transferencia'
         : t.paymentMethod === 'deposit' ? 'Depósito'
         : 'Efectivo'
 
-      // Fecha y hora reales de registro (createdAt)
       const registrado = t.createdAt
         ? new Date(t.createdAt).toLocaleString('es-MX', {
             day: '2-digit', month: '2-digit', year: 'numeric',
@@ -248,24 +280,22 @@ export function TransactionsClient({ userId }: { userId: string }) {
 
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
-      <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap">
-        <div>
-          <h1 className="text-lg sm:text-xl font-bold text-foreground">Transacciones</h1>
-          <p className="text-muted-foreground text-xs mt-0.5"></p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={exportToExcel} className="gap-2 hover:bg-slate-100">
-            <FileDown className="w-4 h-4" />
-            <span className="hidden sm:inline">Exportar</span>
-          </Button>
-          <Button onClick={openCreate} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
-            <Plus className="w-4 h-4" />
-            Nueva
-          </Button>
-        </div>
-      </div>
+      {/* Header */}
+      <PageHeader title="Finanzas">
+        <Button onClick={exportToExcel} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+          <FileDown className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Exportar</span>
+        </Button>
+        <Button onClick={openCreate} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Nueva</span>
+        </Button>
+      </PageHeader>
 
-      {/* Summary - Like Dashboard */}
+      {/* Tabs del grupo Finanzas */}
+      <GroupTabs tabs={FINANZAS_TABS} />
+
+      {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <Card className="p-3 sm:p-4">
           <div className="flex justify-between items-start">
@@ -304,30 +334,155 @@ export function TransactionsClient({ userId }: { userId: string }) {
         </Card>
       </div>
 
-      {/* Filters */}
-      <TransactionSmartFilter
-        search={search}
-        onSearchChange={setSearch}
-        typeFilter={filterType}
-        onTypeChange={setFilterType}
-        categoryFilter={filterCat}
-        onCategoryChange={setFilterCat}
-        categories={categories}
-        methodFilter={filterMethod}
-        onMethodChange={setFilterMethod}
-        dateFrom={dateFrom}
-        onDateFromChange={setDateFrom}
-        dateTo={dateTo}
-        onDateToChange={setDateTo}
-        onClearFilters={() => {
-          setFilterType('all')
-          setFilterCat('all')
-          setFilterMethod('all')
-          setSearch('')
-          setDateFrom('')
-          setDateTo('')
-        }}
-      />
+      {/* Search bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <Input
+          type="text"
+          placeholder="Buscar transacción..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-10 pr-10 h-10 rounded-lg border border-border bg-white/5"
+        />
+        {search && (
+          <button
+            type="button"
+            onClick={() => setSearch('')}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title="Limpiar búsqueda"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Filter chips */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setFilterType('all')}
+          className={cn(
+            'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+            filterType === 'all'
+              ? 'bg-green-600 text-white border-green-600'
+              : 'bg-white/5 text-foreground border-border hover:bg-white/10'
+          )}
+        >
+          Todas
+        </button>
+        <button
+          onClick={() => setFilterType('income')}
+          className={cn(
+            'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+            filterType === 'income'
+              ? 'bg-green-600 text-white border-green-600'
+              : 'bg-white/5 text-foreground border-border hover:bg-white/10'
+          )}
+        >
+          Ingresos
+        </button>
+        <button
+          onClick={() => setFilterType('expense')}
+          className={cn(
+            'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+            filterType === 'expense'
+              ? 'bg-green-600 text-white border-green-600'
+              : 'bg-white/5 text-foreground border-border hover:bg-white/10'
+          )}
+        >
+          Egresos
+        </button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          className="gap-1.5 text-xs h-9 ml-auto"
+        >
+          <Filter className="w-3.5 h-3.5" />
+          <span>Más filtros</span>
+          <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+        </Button>
+      </div>
+
+      {/* Results count */}
+      <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span>
+          Mostrando <span className="font-semibold text-foreground">{filtered.length}</span> de{' '}
+          <span className="font-semibold text-foreground">{transactions.length}</span> transacciones
+        </span>
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="inline-flex items-center gap-1 text-primary hover:underline"
+          >
+            <X className="w-3.5 h-3.5" />
+            Limpiar filtros
+          </button>
+        )}
+      </div>
+
+      {/* Advanced Filters */}
+      {showAdvancedFilters && (
+        <Card className="bg-white/5 border border-border">
+          <div className="p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs mb-2 block">Categoría</Label>
+                <select
+                  value={filterCat}
+                  onChange={(e) => setFilterCat(e.target.value)}
+                  className="w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                >
+                  <option value="all">Todas</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={String(cat.id)}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label className="text-xs mb-2 block">Método de pago</Label>
+                <select
+                  value={filterMethod}
+                  onChange={(e) => setFilterMethod(e.target.value)}
+                  className="w-full text-sm border border-border rounded-md bg-background px-2 py-2 h-10"
+                >
+                  <option value="all">Todos</option>
+                  <option value="cash">Efectivo</option>
+                  <option value="transfer">Transferencia</option>
+                  <option value="deposit">Depósito</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-xs mb-2 block">Desde</Label>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="h-10 text-sm"
+                />
+              </div>
+              <div>
+                <Label className="text-xs mb-2 block">Hasta</Label>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="h-10 text-sm"
+                />
+              </div>
+            </div>
+            <Button
+              onClick={clearFilters}
+              variant="outline"
+              size="sm"
+              className="w-full mt-3"
+            >
+              Limpiar todos los filtros
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Transactions List */}
       {filtered.length === 0 ? (
@@ -392,7 +547,13 @@ export function TransactionsClient({ userId }: { userId: string }) {
       )}
 
       {/* Create/Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (!open) clearNewParam()
+        }}
+      >
         <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-sm sm:text-base">{editingId ? 'Editar transacción' : 'Nueva transacción'}</DialogTitle>
@@ -400,18 +561,16 @@ export function TransactionsClient({ userId }: { userId: string }) {
           <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:gap-3 mt-1 sm:mt-2">
             <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
               <div className="flex flex-col gap-1">
-                <Label className="text-xs sm:text-sm">Tipo</Label>
-                <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v, categoryId: '' })}>
-                  <SelectTrigger className="h-6 sm:h-8 text-xs">
-                    <span className="text-foreground text-xs">
-                      {form.type === 'income' ? 'Ingreso' : form.type === 'expense' ? 'Egreso' : 'Tipo'}
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="income">Ingreso</SelectItem>
-                    <SelectItem value="expense">Egreso</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="tx-type" className="text-xs sm:text-sm">Tipo</Label>
+                <select
+                  id="tx-type"
+                  value={form.type}
+                  onChange={(e) => setForm({ ...form, type: e.target.value, categoryId: '' })}
+                  className="w-full text-xs border border-border rounded-md bg-background px-2 h-8"
+                >
+                  <option value="income">Ingreso</option>
+                  <option value="expense">Egreso</option>
+                </select>
               </div>
               <div className="flex flex-col gap-1">
                 <Label htmlFor="amount" className="text-xs sm:text-sm">Monto</Label>
@@ -419,7 +578,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
                   id="amount" type="number" step="0.01" min="0.01" placeholder="0"
                   value={form.amount}
                   onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                  className="h-6 sm:h-8 text-xs"
+                  className="h-8 text-xs"
                   required
                 />
               </div>
@@ -430,48 +589,30 @@ export function TransactionsClient({ userId }: { userId: string }) {
                 id="desc" placeholder="Ej: compra de"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="h-6 sm:h-8 text-xs"
+                className="h-8 text-xs"
                 required
               />
             </div>
             <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
               <div className="flex flex-col gap-1">
-                <Label className="text-xs sm:text-sm">Categoría</Label>
-                <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
-                  <SelectTrigger className="h-6 sm:h-8 text-xs">
-                    <span className="text-xs truncate">
-                      {form.categoryId && form.categoryId !== 'none'
-                        ? (() => {
-                          const selected = filteredCategories.find(c => String(c.id) === form.categoryId)
-                          return selected ? (
-                            <div className="flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: selected.color }} />
-                              <span className="truncate">{selected.name}</span>
-                            </div>
-                          ) : 'Cat.'
-                        })()
-                        : 'Cat.'
-                      }
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredCategories.length === 0
-                      ? <SelectItem value="none" disabled>Sin categorías disponibles</SelectItem>
-                      : filteredCategories.map((c) => (
-                        <SelectItem key={c.id} value={String(c.id)}>
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
-                            {c.name}
-                          </div>
-                        </SelectItem>
-                      ))
-                    }
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="tx-cat" className="text-xs sm:text-sm">Categoría</Label>
+                <select
+                  id="tx-cat"
+                  value={form.categoryId}
+                  onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                  className="w-full text-xs border border-border rounded-md bg-background px-2 h-8"
+                >
+                  <option value="">Selecciona categoría</option>
+                  {filteredCategories.map((c) => (
+                    <option key={c.id} value={String(c.id)}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex flex-col gap-1">
                 <Label htmlFor="date" className="text-xs sm:text-sm">Fecha</Label>
-                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="h-6 sm:h-7 text-xs" required />
+                <Input id="date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="h-8 text-xs" required />
               </div>
             </div>
             <div className="space-y-1">
@@ -497,8 +638,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
               </div>
             </div>
             <div className="flex justify-end gap-1.5 sm:gap-2 mt-1 sm:mt-2">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="h-7 sm:h-8 text-xs sm:text-sm hover:bg-slate-100">Cancelar</Button>
-              <Button type="submit" disabled={isPending || !form.categoryId || form.categoryId === 'none'} className="h-7 sm:h-8 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-400">
+              <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); clearNewParam() }} className="h-8 text-xs sm:text-sm hover:bg-slate-100">Cancelar</Button>
+              <Button type="submit" disabled={isPending || !form.categoryId} className="h-8 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white disabled:bg-slate-400">
                 {isPending ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
               </Button>
             </div>
