@@ -18,9 +18,10 @@ import {
   getTransactions, createTransaction, updateTransaction, deleteTransaction,
 } from '@/app/actions/transactions'
 import { getCategories } from '@/app/actions/categories'
-import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, FileDown, TrendingUp, TrendingDown, Wallet, Search, X, Filter, ChevronDown as ChevronDownIcon } from 'lucide-react'
+import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, FileDown, TrendingUp, TrendingDown, Wallet, Search, X, Filter, ChevronDown as ChevronDownIcon, Download } from 'lucide-react'
 import type { Category } from '@/lib/db/schema'
 import * as XLSX from 'xlsx'
+import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { PageHeader } from '@/components/page-header'
@@ -38,6 +39,111 @@ function formatDateTime(dateStr: string, createdAt: any) {
     hour: '2-digit', minute: '2-digit', hour12: true,
   })
   return `${dateStr} · ${hora}`
+}
+
+function exportarRecibo(transaction: TransactionRow) {
+  try {
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const width = doc.internal.pageSize.getWidth()
+    const height = doc.internal.pageSize.getHeight()
+    let y = 15
+
+    // Encabezado
+    doc.setFontSize(18)
+    doc.setFont('', 'bold')
+    doc.text('RECIBO DE TRANSACCIÓN', width / 2, y, { align: 'center' })
+    
+    y += 10
+    doc.setFontSize(8)
+    doc.setFont('', 'normal')
+    doc.setTextColor(100)
+    doc.text(`Permanece Camp - Sistema de Finanzas`, width / 2, y, { align: 'center' })
+    
+    y += 7
+    const dividerY = y
+    doc.setDrawColor(200)
+    doc.line(15, dividerY, width - 15, dividerY)
+
+    // Información principal
+    y += 8
+    doc.setFontSize(11)
+    doc.setFont('', 'bold')
+    doc.setTextColor(0)
+    
+    const typeText = transaction.type === 'income' ? 'INGRESO' : 'EGRESO'
+    const typeColor = transaction.type === 'income' ? [34, 197, 94] : [234, 88, 12]
+    doc.setTextColor(...typeColor)
+    doc.text(typeText, 15, y)
+    
+    y += 8
+    doc.setTextColor(0)
+    doc.setFont('', 'normal')
+    doc.setFontSize(10)
+    
+    // Datos de la transacción
+    const data = [
+      ['Descripción:', transaction.description],
+      ['Categoría:', transaction.categoryName ?? 'Sin categoría'],
+      ['Monto:', formatCurrency(parseFloat(transaction.amount as string))],
+      ['Tipo de pago:', !transaction.paymentMethod || transaction.paymentMethod === 'cash' ? 'Efectivo' : transaction.paymentMethod === 'transfer' ? 'Transferencia' : 'Depósito'],
+      ['Fecha de transacción:', transaction.date],
+      ['Hora de registro:', new Date(transaction.createdAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true })],
+    ]
+
+    const maxLabelWidth = 50
+    const maxValueWidth = width - 80
+    
+    data.forEach(([label, value]) => {
+      doc.setFont('', 'bold')
+      doc.text(label, 15, y)
+      doc.setFont('', 'normal')
+      
+      // Quebrar texto largo
+      const wrappedText = doc.splitTextToSize(value, maxValueWidth)
+      doc.text(wrappedText, 65, y)
+      y += wrappedText.length * 5 + 3
+    })
+
+    // Sección de monto destacado
+    y += 5
+    doc.setDrawColor(200)
+    doc.line(15, y, width - 15, y)
+    
+    y += 10
+    doc.setFontSize(14)
+    doc.setFont('', 'bold')
+    doc.setTextColor(...typeColor)
+    const montoText = `${transaction.type === 'income' ? '+' : '-'}${formatCurrency(parseFloat(transaction.amount as string))}`
+    doc.text('Monto Total:', 15, y)
+    doc.text(montoText, width - 15, y, { align: 'right' })
+
+    // Pie de página
+    y = height - 20
+    doc.setFontSize(8)
+    doc.setTextColor(100)
+    doc.setFont('', 'normal')
+    doc.text(
+      `Recibo generado: ${new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
+      width / 2,
+      y,
+      { align: 'center' }
+    )
+    
+    doc.text(
+      `ID Transacción: ${transaction.id}`,
+      width / 2,
+      y + 5,
+      { align: 'center' }
+    )
+
+    // Descargar
+    const filename = `Recibo_${transaction.type === 'income' ? 'Ingreso' : 'Egreso'}_${transaction.id}_${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(filename)
+    toast.success('Recibo descargado correctamente')
+  } catch (error) {
+    console.error('Error al generar recibo:', error)
+    toast.error('Error al generar el recibo')
+  }
 }
 
 const defaultForm = {
@@ -533,6 +639,9 @@ export function TransactionsClient({ userId }: { userId: string }) {
                     {t.type === 'income' ? '+' : '-'}{formatCurrency(parseFloat(t.amount as string))}
                   </p>
                   <div className="flex gap-0.5">
+                    <Button variant="ghost" size="icon" className="w-6 h-6 sm:w-7 sm:h-7" onClick={() => exportarRecibo(t)} title="Descargar recibo">
+                      <Download className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-600" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="w-6 h-6 sm:w-7 sm:h-7" onClick={() => openEdit(t)}>
                       <Pencil className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600" />
                     </Button>
