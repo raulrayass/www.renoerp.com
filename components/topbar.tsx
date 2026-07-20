@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -16,6 +17,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 // Mismas 5 categorías consolidadas que en FloatingDock (mobile),
 // para que el resaltado activo sea consistente en toda la app.
@@ -55,6 +65,13 @@ const navItems = [
 export function Topbar() {
   const pathname = usePathname()
   const { user, signOut } = useUser()
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true)
+    await signOut()
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-transparent">
@@ -118,7 +135,7 @@ export function Topbar() {
                 <DropdownMenuSeparator className="my-2" />
                 <DropdownMenuGroup>
                   <DropdownMenuItem
-                    onClick={signOut}
+                    onClick={() => setLogoutDialogOpen(true)}
                     className="text-destructive/80 focus:text-destructive focus:bg-destructive/5 hover:bg-destructive/5 gap-2.5 cursor-pointer py-2.5 px-3 transition-all duration-200 group/logout"
                   >
                     <div className="w-3.5 h-3.5 flex items-center justify-center rounded-md bg-destructive/10 group-hover/logout:bg-destructive/15">
@@ -132,6 +149,38 @@ export function Topbar() {
           ) : null}
         </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
+                <LogOut className="w-5 h-5 text-destructive" />
+              </div>
+              <AlertDialogTitle>Cerrar sesión</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-sm text-muted-foreground">
+              ¿Estás seguro de que deseas cerrar sesión? Tendrás que iniciar sesión nuevamente para acceder a Permanece Camp.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-3 justify-end pt-2">
+            <AlertDialogCancel disabled={isLoggingOut} className="gap-2">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmLogout}
+              disabled={isLoggingOut}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
+            >
+              {isLoggingOut && (
+                <div className="w-4 h-4 border-2 border-transparent border-t-current border-r-current rounded-full animate-spin" />
+              )}
+              {isLoggingOut ? 'Cerrando...' : 'Cerrar sesión'}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   )
 }
