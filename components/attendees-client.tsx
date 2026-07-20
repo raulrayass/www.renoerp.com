@@ -30,6 +30,8 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn, Filter, ChevronDown as ChevronDownIcon, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
+import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { SmartFilter } from '@/components/smart-filter'
@@ -522,6 +524,142 @@ export function AttendeesClient({ userId }: Props) {
   const partialCount = attendeeList.filter((a) => a.status === 'partial').length
   const pendingCount = attendeeList.filter((a) => a.status === 'pending').length
 
+  function exportPDF() {
+    if (attendeeList.length === 0) {
+      toast.error('No hay camperos para exportar')
+      return
+    }
+
+    try {
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const margin = 10
+
+      // Título
+      doc.setFontSize(16)
+      doc.text('Reporte de Camperos - Permanece Camp', margin, margin + 5)
+      
+      // Fecha de generación
+      doc.setFontSize(10)
+      doc.setTextColor(100)
+      doc.text(`Generado: ${new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`, margin, margin + 12)
+      doc.setTextColor(0)
+
+      // Preparar datos para la tabla
+      const tableData = attendeeList.map((a) => {
+        const originalTotal = parseFloat(a.totalAmount as string)
+        const discount = a.discount || 0
+        const total = originalTotal * (1 - discount / 100)
+        const paid = parseFloat(a.amountPaid as string)
+        const remaining = total - paid
+        
+        return [
+          a.name,
+          a.age ? a.age.toString() : '-',
+          a.sex || '-',
+          a.shirtSize || '-',
+          a.phone || '-',
+          a.church || '-',
+          teamMap.get(a.teamId)?.name || '-',
+          roomMap.get(a.roomId)?.name || '-',
+          a.emergencyContactName || '-',
+          a.emergencyContactPhone || '-',
+          a.allergies || '-',
+          a.checkedIn ? 'Sí' : 'No',
+          a.status === 'paid' ? 'Pagado' : a.status === 'partial' ? 'Parcial' : 'Pendiente',
+          `$${paid.toFixed(2)}`,
+          `$${remaining.toFixed(2)}`,
+          a.notes || '-',
+        ]
+      })
+
+      // Configurar tabla
+      autoTable(doc, {
+        startY: margin + 18,
+        margin: margin,
+        head: [
+          [
+            'Nombre',
+            'Edad',
+            'Sexo',
+            'Talla',
+            'Teléfono',
+            'Iglesia',
+            'Equipo',
+            'Habitación',
+            'Contacto 1',
+            'Tel. 1',
+            'Alergias',
+            'Check-in',
+            'Estado',
+            'Pagado',
+            'Falta',
+            'Notas',
+          ],
+        ],
+        body: tableData,
+        headStyles: {
+          fillColor: [34, 197, 94],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 9,
+          padding: 3,
+          halign: 'center',
+          valign: 'middle',
+        },
+        bodyStyles: {
+          textColor: [0, 0, 0],
+          fontSize: 8,
+          padding: 2.5,
+          valign: 'top',
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245],
+        },
+        columnStyles: {
+          0: { halign: 'left' }, // Nombre
+          1: { halign: 'center' }, // Edad
+          2: { halign: 'center' }, // Sexo
+          3: { halign: 'center' }, // Talla
+          4: { halign: 'center' }, // Teléfono
+          5: { halign: 'left' }, // Iglesia
+          6: { halign: 'left' }, // Equipo
+          7: { halign: 'left' }, // Habitación
+          8: { halign: 'left' }, // Contacto 1
+          9: { halign: 'center' }, // Tel. 1
+          10: { halign: 'left' }, // Alergias
+          11: { halign: 'center' }, // Check-in
+          12: { halign: 'center' }, // Estado
+          13: { halign: 'right' }, // Pagado
+          14: { halign: 'right' }, // Falta
+          15: { halign: 'left' }, // Notas
+        },
+        theme: 'grid',
+        didDrawPage: (data) => {
+          // Footer
+          const pageCount = (doc as any).internal.getPages().length
+          const currentPage = data.pageNumber
+          doc.setFontSize(8)
+          doc.setTextColor(150)
+          doc.text(
+            `Página ${currentPage} de ${pageCount}`,
+            pageWidth / 2,
+            pageHeight - 5,
+            { align: 'center' }
+          )
+        },
+      })
+
+      // Descargar PDF
+      doc.save(`Camperos_${new Date().toISOString().split('T')[0]}.pdf`)
+      toast.success('PDF exportado correctamente')
+    } catch (error) {
+      console.error('Error al generar PDF:', error)
+      toast.error('Error al generar el PDF')
+    }
+  }
+
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}
@@ -544,7 +682,11 @@ export function AttendeesClient({ userId }: Props) {
         </label>
         <Button onClick={exportCurrentData} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
           <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-          <span>Exportar</span>
+          <span>Exportar Excel</span>
+        </Button>
+        <Button onClick={exportPDF} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+          <Download className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span>Exportar PDF</span>
         </Button>
         <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
           <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
