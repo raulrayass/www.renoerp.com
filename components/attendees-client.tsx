@@ -28,7 +28,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn, Filter, ChevronDown as ChevronDownIcon, X } from 'lucide-react'
+import { Plus, Trash2, DollarSign, Upload, Download, Edit2, Users, History, Search, CheckCircle2, Circle, CreditCard, UserCheck, Users2, LogIn, Filter, ChevronDown as ChevronDownIcon, X, Maximize2, Minimize2 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -71,6 +71,7 @@ export function AttendeesClient({ userId }: Props) {
   const [teams, setTeams] = useState<Team[]>([])
   const [rooms, setRooms] = useState<Room[]>([])
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [fullscreenStats, setFullscreenStats] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
