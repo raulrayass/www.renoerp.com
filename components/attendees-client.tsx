@@ -466,6 +466,64 @@ export function AttendeesClient({ userId }: Props) {
     toast.success('Reporte exportado correctamente')
   }
 
+  // Apply smart filters
+  const filteredAttendees = attendeeList.filter((a) => {
+    // Smart search - searches name, phone, church simultaneously
+    const searchLower = search.toLowerCase()
+    const matchesSearch = !search ||
+      a.name.toLowerCase().includes(searchLower) ||
+      (a.phone && a.phone.includes(search)) ||
+      (a.church && a.church.toLowerCase().includes(searchLower))
+
+    // Status quick filter
+    const matchesStatus = statusFilter === 'all' || a.status === statusFilter
+
+    // Check-in filter
+    const matchesCheckIn =
+      checkInFilter === 'all' ||
+      (checkInFilter === 'checked' && a.checkedIn) ||
+      (checkInFilter === 'unchecked' && !a.checkedIn)
+
+    // Church quick filter
+    const matchesChurch = !churchFilter || a.church === churches.find(c => c.id === parseInt(churchFilter))?.name
+
+    // Team filter
+    const matchesTeam = !teamFilter || a.teamId === parseInt(teamFilter)
+
+    // Room filter
+    const matchesRoom = !roomFilter || a.roomId === parseInt(roomFilter)
+
+    return matchesSearch && matchesStatus && matchesCheckIn && matchesChurch && matchesTeam && matchesRoom
+  })
+
+  const hasActiveFilters =
+    !!search ||
+    statusFilter !== 'all' ||
+    checkInFilter !== 'all' ||
+    !!churchFilter ||
+    !!teamFilter ||
+    !!roomFilter
+
+  // Calculate totals based on ALL attendees (not filtered)
+  const summary = attendeeList.reduce(
+    (acc, a) => {
+      const originalTotal = parseFloat(a.totalAmount as string)
+      const discount = a.discount || 0
+      const total = originalTotal * (1 - discount / 100)
+      acc.expected += total
+      acc.collected += parseFloat(a.amountPaid as string)
+      return acc
+    },
+    { expected: 0, collected: 0 }
+  )
+  const pendingAmount = summary.expected - summary.collected
+  const teamMap = new Map(teams.map((t) => [t.id, t]))
+  const roomMap = new Map(rooms.map((r) => [r.id, r]))
+  const checkedInCount = attendeeList.filter((a) => a.checkedIn).length
+  const paidCount = attendeeList.filter((a) => a.status === 'paid').length
+  const partialCount = attendeeList.filter((a) => a.status === 'partial').length
+  const pendingCount = attendeeList.filter((a) => a.status === 'pending').length
+
   function exportPDF() {
     if (attendeeList.length === 0) {
       toast.error('No hay camperos para exportar')
@@ -601,64 +659,6 @@ export function AttendeesClient({ userId }: Props) {
       toast.error('Error al generar el PDF')
     }
   }
-
-  // Apply smart filters
-  const filteredAttendees = attendeeList.filter((a) => {
-    // Smart search - searches name, phone, church simultaneously
-    const searchLower = search.toLowerCase()
-    const matchesSearch = !search ||
-      a.name.toLowerCase().includes(searchLower) ||
-      (a.phone && a.phone.includes(search)) ||
-      (a.church && a.church.toLowerCase().includes(searchLower))
-
-    // Status quick filter
-    const matchesStatus = statusFilter === 'all' || a.status === statusFilter
-
-    // Check-in filter
-    const matchesCheckIn =
-      checkInFilter === 'all' ||
-      (checkInFilter === 'checked' && a.checkedIn) ||
-      (checkInFilter === 'unchecked' && !a.checkedIn)
-
-    // Church quick filter
-    const matchesChurch = !churchFilter || a.church === churches.find(c => c.id === parseInt(churchFilter))?.name
-
-    // Team filter
-    const matchesTeam = !teamFilter || a.teamId === parseInt(teamFilter)
-
-    // Room filter
-    const matchesRoom = !roomFilter || a.roomId === parseInt(roomFilter)
-
-    return matchesSearch && matchesStatus && matchesCheckIn && matchesChurch && matchesTeam && matchesRoom
-  })
-
-  const hasActiveFilters =
-    !!search ||
-    statusFilter !== 'all' ||
-    checkInFilter !== 'all' ||
-    !!churchFilter ||
-    !!teamFilter ||
-    !!roomFilter
-
-  // Calculate totals based on ALL attendees (not filtered)
-  const summary = attendeeList.reduce(
-    (acc, a) => {
-      const originalTotal = parseFloat(a.totalAmount as string)
-      const discount = a.discount || 0
-      const total = originalTotal * (1 - discount / 100)
-      acc.expected += total
-      acc.collected += parseFloat(a.amountPaid as string)
-      return acc
-    },
-    { expected: 0, collected: 0 }
-  )
-  const pendingAmount = summary.expected - summary.collected
-  const teamMap = new Map(teams.map((t) => [t.id, t]))
-  const roomMap = new Map(rooms.map((r) => [r.id, r]))
-  const checkedInCount = attendeeList.filter((a) => a.checkedIn).length
-  const paidCount = attendeeList.filter((a) => a.status === 'paid').length
-  const partialCount = attendeeList.filter((a) => a.status === 'partial').length
-  const pendingCount = attendeeList.filter((a) => a.status === 'pending').length
 
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
