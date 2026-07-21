@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Plus, Edit2, Trash2, Gamepad2, Trophy, Minus, Users2 } from 'lucide-react'
+import { Plus, Edit2, Trash2, Gamepad2, Trophy, Minus, Users2, Maximize2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createGame, updateGame, deleteGame, getGames, addGameScore, deleteGameScore, getGameScores, getAllGameScores } from '@/app/actions/games'
 import { getTeams } from '@/app/actions/teams'
@@ -16,6 +16,7 @@ import { Game, GameScore, Team } from '@/lib/db/schema'
 import { cn } from '@/lib/utils'
 import { StatsBar } from '@/components/stats-bar'
 import { PageHeader } from '@/components/page-header'
+import { ScoreboardFullscreen } from '@/components/scoreboard-fullscreen'
 
 interface Props {
   userId: string
@@ -36,6 +37,7 @@ export function GamesClient({ userId }: Props) {
   const [scoringForm, setScoringForm] = useState({ teamId: '', points: '' })
   const [isPending, startTransition] = useTransition()
   const [loading, setLoading] = useState(true)
+  const [fullscreenMode, setFullscreenMode] = useState(false)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -210,10 +212,18 @@ export function GamesClient({ userId }: Props) {
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}
       <PageHeader title="Juegos y Puntaje">
-        <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
-          <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-          <span>Nuevo juego</span>
-        </Button>
+        <div className="flex gap-2">
+          {teams.length > 0 && (
+            <Button onClick={() => setFullscreenMode(true)} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+              <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+              <span>Proyectar</span>
+            </Button>
+          )}
+          <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            <span>Nuevo juego</span>
+          </Button>
+        </div>
       </PageHeader>
 
       {/* Stats Bar */}
@@ -550,6 +560,15 @@ export function GamesClient({ userId }: Props) {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Fullscreen Scoreboard */}
+      {fullscreenMode && (
+        <ScoreboardFullscreen
+          leaderboard={leaderboard}
+          onClose={() => setFullscreenMode(false)}
+          gameList={gameList}
+        />
+      )}
     </div>
   )
 }
