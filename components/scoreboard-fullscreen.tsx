@@ -38,34 +38,38 @@ export function ScoreboardFullscreen({
     <div 
       className="fixed inset-0 z-50 overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #0f0720 0%, #1a0033 25%, #0a0015 50%, #2d1052 75%, #0f0720 100%)',
+        background: 'linear-gradient(180deg, #0d1b2a 0%, #1d2d44 40%, #0d1b2a 100%)',
       }}
     >
-      {/* Animated Background Elements */}
-      <div className="absolute top-10 left-1/4 w-40 h-40 bg-pink-500/15 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 right-1/3 w-56 h-56 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      {/* Stadium Lights */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/3 w-80 h-80 bg-yellow-400/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-400/6 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+      </div>
       
       {/* Close Button */}
       <Button
         onClick={onClose}
         variant="ghost"
         size="icon"
-        className="absolute top-2 right-2 md:top-4 md:right-4 text-white hover:bg-white/10 z-10 w-8 h-8 md:w-10 md:h-10"
+        className="absolute top-2 right-2 md:top-4 md:right-4 text-white hover:bg-white/20 z-20 w-8 h-8 md:w-10 md:h-10"
       >
         <Minimize2 className="w-4 h-4 md:w-5 md:h-5" />
       </Button>
 
-      {/* Main Container - 16:9 Aspect Ratio */}
-      <div className="w-full h-full flex flex-col items-center justify-center p-2 md:p-6 lg:p-8 gap-3 md:gap-5 relative z-10">
-        {/* Title with glow animation */}
+      {/* Main Container */}
+      <div className="w-full h-full flex flex-col items-center justify-center p-2 md:p-6 lg:p-8 gap-2 md:gap-4 relative z-10">
+        {/* Header */}
         <div className="text-center w-full flex-shrink-0">
-          <h2 className="text-base md:text-xl lg:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 tracking-wider mb-1 md:mb-2">
-            CAMPEON PERMANECE
-          </h2>
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-2 md:mb-3 drop-shadow-lg animate-title-glow">
-            RANKING 2026
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-lg mb-1 md:mb-2 animate-bounce-trophy">
+            📊 RANKING EN VIVO 📊
           </h1>
-          <div className="h-0.5 md:h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 rounded-full mx-auto w-3/4 md:w-1/2 animate-glow-pulse" />
+          <h2 className="text-lg md:text-2xl lg:text-3xl font-black text-yellow-300 drop-shadow-lg tracking-widest mb-1 md:mb-2">
+            PERMANECE 2026
+          </h2>
+          <div className="h-1 md:h-1.5 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 rounded-full mx-auto w-3/4" style={{
+            boxShadow: '0 0 20px rgba(251, 191, 36, 0.8), 0 0 40px rgba(249, 115, 22, 0.5)'
+          }} />
         </div>
 
         {/* Leaderboard - Scrollable container */}
@@ -83,27 +87,33 @@ export function ScoreboardFullscreen({
                 }}
               >
                 <div
-                  className="rounded-xl md:rounded-2xl p-2 md:p-4 lg:p-5 cursor-default w-full transition-all duration-300 hover:scale-102 border-2 md:border-3 group overflow-hidden relative"
+                  className="rounded-lg md:rounded-xl p-2 md:p-4 lg:p-5 cursor-default w-full transition-all duration-300 hover:scale-102 border-2 md:border-3 group overflow-hidden relative"
                   style={{
                     borderColor: countryColor,
-                    backgroundColor: `${countryColor}10`,
-                    boxShadow: `0 0 30px ${countryColor}40, inset 0 0 20px ${countryColor}20`,
+                    backgroundColor: `linear-gradient(135deg, ${countryColor}20, ${countryColor}08)`,
+                    boxShadow: `
+                      0 0 40px ${countryColor}50,
+                      0 0 20px ${countryColor}30,
+                      inset 0 0 30px ${countryColor}20,
+                      0 10px 30px rgba(0,0,0,0.5)
+                    `,
                     backdropFilter: 'blur(10px)',
                   }}
                 >
-                  {/* Background shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
                   
                   <div className="flex items-center gap-2 md:gap-3 lg:gap-4 w-full relative z-10">
-                    {/* Rank Badge */}
+                    {/* Rank Badge - Stadium Style */}
                     <div 
-                      className="text-2xl md:text-4xl lg:text-5xl font-black text-white drop-shadow-lg flex-shrink-0 text-center animate-bounce-medal w-12 md:w-16 h-12 md:h-16 rounded-lg md:rounded-xl flex items-center justify-center"
+                      className="text-2xl md:text-4xl lg:text-5xl font-black text-white drop-shadow-lg flex-shrink-0 text-center animate-bounce-medal w-12 md:w-16 h-12 md:h-16 rounded-md md:rounded-lg flex items-center justify-center border-2 md:border-3"
                       style={{
                         background: `linear-gradient(135deg, ${countryColor}30, ${countryColor}10)`,
-                        border: `2px solid ${countryColor}`,
+                        borderColor: countryColor,
+                        boxShadow: `0 0 20px ${countryColor}60, inset 0 0 10px ${countryColor}30`,
                       }}
                     >
-                      {getMedalEmoji(idx) || <span className="text-xl md:text-2xl lg:text-3xl">{idx + 1}</span>}
+                      {getMedalEmoji(idx) || <span className="text-lg md:text-2xl lg:text-3xl">{idx + 1}</span>}
                     </div>
 
                     {/* Team Info */}
@@ -169,16 +179,18 @@ export function ScoreboardFullscreen({
           })}
         </div>
 
-        {/* Live Update Indicator */}
-        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-          <div className="w-2 h-2 md:w-3 md:h-3 bg-cyan-400 rounded-full animate-ping-slow" />
-          <p className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-400 text-xs md:text-sm font-semibold">
-            Actualización en tiempo real
+        {/* Live Indicator */}
+        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0 relative">
+          <div className="w-3 h-3 md:w-4 md:h-4 bg-red-500 rounded-full animate-pulse" style={{
+            boxShadow: '0 0 15px rgba(239, 68, 68, 0.8), 0 0 30px rgba(239, 68, 68, 0.4)'
+          }} />
+          <p className="text-white text-xs md:text-sm font-bold tracking-wide">
+            EN VIVO
           </p>
         </div>
       </div>
 
-      {/* Global Animations */}
+      {/* Animations */}
       <style jsx global>{`
         @keyframes slideInLeft {
           from {
@@ -194,11 +206,11 @@ export function ScoreboardFullscreen({
         @keyframes pointsPulse {
           0%, 100% {
             transform: scale(1);
-            filter: drop-shadow(0 0 10px currentColor);
+            filter: drop-shadow(0 0 8px currentColor);
           }
           50% {
-            transform: scale(1.12);
-            filter: drop-shadow(0 0 25px currentColor);
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 20px currentColor);
           }
         }
 
@@ -213,25 +225,12 @@ export function ScoreboardFullscreen({
           }
         }
 
-        @keyframes glow-pulse {
+        @keyframes bounce-trophy {
           0%, 100% {
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.3),
-                        0 0 40px rgba(168, 85, 247, 0.2);
+            transform: translateY(0);
           }
           50% {
-            box-shadow: 0 0 40px rgba(236, 72, 153, 0.6),
-                        0 0 60px rgba(168, 85, 247, 0.4);
-          }
-        }
-
-        @keyframes title-glow {
-          0%, 100% {
-            filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.3));
-            transform: scale(1);
-          }
-          50% {
-            filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.6));
-            transform: scale(1.03);
+            transform: translateY(-10px);
           }
         }
 
@@ -240,19 +239,7 @@ export function ScoreboardFullscreen({
             transform: translateY(0) scale(1);
           }
           50% {
-            transform: translateY(-8px) scale(1.05);
-          }
-        }
-
-        @keyframes ping-slow {
-          0% {
-            box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
-          }
-          70% {
-            box-shadow: 0 0 0 12px rgba(34, 211, 238, 0);
-          }
-          100% {
-            box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+            transform: translateY(-10px) scale(1.08);
           }
         }
 
@@ -265,12 +252,8 @@ export function ScoreboardFullscreen({
           }
         }
 
-        .animate-title-glow {
-          animation: title-glow 3s ease-in-out infinite;
-        }
-
-        .animate-glow-pulse {
-          animation: glow-pulse 2.5s ease-in-out infinite;
+        .animate-bounce-trophy {
+          animation: bounce-trophy 2s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
         }
 
         .animate-bounce-medal {
@@ -279,10 +262,6 @@ export function ScoreboardFullscreen({
 
         .animate-points-pulse {
           animation: pointsPulse 2s ease-in-out infinite;
-        }
-
-        .animate-ping-slow {
-          animation: ping-slow 2s infinite;
         }
 
         .animate-shimmer {
