@@ -225,7 +225,7 @@ export function GamesClient({ userId }: Props) {
               </Button>
               <Button onClick={() => setFifaMode(true)} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-blue-600 hover:bg-blue-700 text-white">
                 <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                <span>Proyectar FIFA 2026</span>
+                <span>Proyectar PERMANECE 2026</span>
               </Button>
               <Button onClick={() => setFullscreenMode(true)} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
                 <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
