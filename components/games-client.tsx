@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { StatsBar } from '@/components/stats-bar'
 import { PageHeader } from '@/components/page-header'
 import { ScoreboardFullscreen } from '@/components/scoreboard-fullscreen'
+import { ScoreboardFIFA } from '@/components/scoreboard-fifa'
 import { PodiumFullscreen } from '@/components/podium-fullscreen'
 
 interface Props {
@@ -39,6 +40,7 @@ export function GamesClient({ userId }: Props) {
   const [isPending, startTransition] = useTransition()
   const [loading, setLoading] = useState(true)
   const [fullscreenMode, setFullscreenMode] = useState(false)
+  const [fifaMode, setFifaMode] = useState(false)
   const [podiumMode, setPodiumMode] = useState(false)
 
   const router = useRouter()
@@ -221,9 +223,13 @@ export function GamesClient({ userId }: Props) {
                 <Trophy className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                 <span>Proyectar ganador</span>
               </Button>
+              <Button onClick={() => setFifaMode(true)} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-blue-600 hover:bg-blue-700 text-white">
+                <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                <span>Proyectar FIFA 2026</span>
+              </Button>
               <Button onClick={() => setFullscreenMode(true)} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
                 <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                <span>Proyectar</span>
+                <span>Proyectar ranking</span>
               </Button>
             </>
           )}
@@ -569,11 +575,20 @@ export function GamesClient({ userId }: Props) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Fullscreen Scoreboard */}
+      {/* Fullscreen Scoreboard - Standard */}
       {fullscreenMode && (
         <ScoreboardFullscreen
           leaderboard={leaderboard}
           onClose={() => setFullscreenMode(false)}
+          gameList={gameList}
+        />
+      )}
+
+      {/* Fullscreen Scoreboard - FIFA 2026 */}
+      {fifaMode && (
+        <ScoreboardFIFA
+          leaderboard={leaderboard}
+          onClose={() => setFifaMode(false)}
           gameList={gameList}
         />
       )}
