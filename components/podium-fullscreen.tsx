@@ -2,229 +2,135 @@
 
 import { Button } from '@/components/ui/button'
 import { Minimize2 } from 'lucide-react'
-import { getCountryColor } from '@/lib/country-colors'
+import { CountryFlagSvg } from '@/lib/country-flags-svg'
 
 interface Team {
-  id: string
+  id: number
   name: string
   color: string
-  country?: string
+  country?: string | null
 }
 
 interface PodiumProps {
   leaderboard: Array<{
     team: Team
     totalPoints: number
-    pointsPerGame: Record<string, number>
+    pointsPerGame: Record<number, number>
   }>
   onClose: () => void
-  gameList: Array<{ id: string; name: string }>
+  gameList: Array<{ id: number; name: string }>
 }
 
-export function PodiumFullscreen({
-  leaderboard,
-  onClose,
-}: PodiumProps) {
+export function PodiumFullscreen({ leaderboard, onClose }: PodiumProps) {
   const top3 = leaderboard.slice(0, 3)
-
-  // Orden de podio: 2do, 1ro, 3ro (izquierda a derecha)
-  const podiumOrder = [top3[1], top3[0], top3[2]]
-  const positions = ['2º', '1º', '3º']
+  // Orden visual: 2º, 1º, 3º
+  const order = [top3[1], top3[0], top3[2]]
   const medals = ['🥈', '🥇', '🥉']
+  const ranks = ['2º', '1º', '3º']
+  const heights = ['h-44 md:h-64', 'h-60 md:h-96', 'h-36 md:h-52']
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden"
-         style={{
-           background: 'linear-gradient(180deg, #0d1b2a 0%, #1d2d44 40%, #0d1b2a 100%)',
-         }}>
-      {/* Spotlight Effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-yellow-400/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-400/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+    <div className="fixed inset-0 z-50 overflow-hidden pitch-bg">
+      {/* Luces de estadio */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-24 left-1/3 w-[500px] h-[500px] bg-yellow-300/12 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -top-24 right-1/3 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
       </div>
 
-      {/* Close Button */}
+      {/* Cerrar */}
       <Button
         onClick={onClose}
         variant="ghost"
         size="icon"
-        className="absolute top-2 right-2 md:top-4 md:right-4 text-white hover:bg-white/20 z-20 w-8 h-8 md:w-10 md:h-10"
+        className="absolute top-3 right-3 md:top-5 md:right-5 text-white hover:bg-white/20 z-20 w-9 h-9 md:w-11 md:h-11"
       >
-        <Minimize2 className="w-4 h-4 md:w-5 md:h-5" />
+        <Minimize2 className="w-5 h-5" />
       </Button>
 
-      {/* Main Container */}
-      <div className="w-full h-full flex flex-col items-center justify-center p-4 md:p-8 gap-4 md:gap-8 relative z-10">
-        {/* Header Trophy Section */}
-        <div className="text-center w-full flex-shrink-0">
-          <h2 className="text-xl md:text-3xl lg:text-4xl font-black text-yellow-300 drop-shadow-lg tracking-widest mb-1 animate-bounce-trophy">
-            🏆 CAMPEONES 2026 🏆
-          </h2>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white drop-shadow-2xl animate-trophy-pulse mb-2">
-            PERMANECE
-          </h1>
-          <div className="h-1.5 md:h-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 rounded-full mx-auto w-3/4" style={{
-            boxShadow: '0 0 20px rgba(251, 191, 36, 0.8), 0 0 40px rgba(249, 115, 22, 0.5)'
-          }} />
+      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 md:px-8 py-6 gap-6 md:gap-10">
+        {/* Header */}
+        <div className="text-center flex-shrink-0">
+          <p className="text-yellow-300 text-sm md:text-2xl font-black tracking-[0.25em] mb-1 animate-bounce-soft">🏆 CAMPEONES 🏆</p>
+          <h1 className="text-4xl md:text-7xl font-black text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.6)]">PERMANECE 2026</h1>
+          <div className="h-1.5 md:h-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 rounded-full mx-auto w-2/3 mt-3 shadow-[0_0_20px_rgba(251,191,36,0.8)]" />
         </div>
 
-        {/* Podium Structure */}
-        <div className="flex items-flex-end justify-center gap-0 md:gap-2 w-full max-w-5xl flex-1 relative px-2">
-          {podiumOrder.map((entry, idx) => {
+        {/* Podio */}
+        <div className="flex items-end justify-center gap-2 md:gap-4 w-full max-w-4xl flex-shrink-0">
+          {order.map((entry, idx) => {
             if (!entry) return null
-            const countryColor = getCountryColor(entry.team.country)
-            const heights = ['h-48 md:h-64 lg:h-72', 'h-64 md:h-80 lg:h-96', 'h-40 md:h-56 lg:h-64']
-            const positions_names = ['2º', '1º', '3º']
-
+            const color = entry.team.color
             return (
               <div
                 key={entry.team.id}
-                className="flex flex-col items-center flex-1"
-                style={{
-                  animation: `podiumRise 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${idx * 0.2}s both`,
-                }}
+                className="flex flex-col items-center flex-1 min-w-0"
+                style={{ animation: `podiumRise 0.9s cubic-bezier(0.34,1.56,0.64,1) ${idx * 0.18}s both` }}
               >
-                {/* Medal */}
-                <div className="text-4xl md:text-6xl mb-2 md:mb-3 animate-bounce-medal" style={{ animationDelay: `${idx * 0.15}s` }}>
+                {/* Medalla */}
+                <div className="text-4xl md:text-6xl mb-2 animate-bounce-soft" style={{ animationDelay: `${idx * 0.15}s` }}>
                   {medals[idx]}
                 </div>
 
-                {/* Podium Box - Stadium Style */}
+                {/* Bandera grande */}
                 <div
-                  className={`${heights[idx]} w-full rounded-t-2xl md:rounded-t-3xl p-3 md:p-5 flex flex-col items-center justify-between relative overflow-hidden border-4 md:border-6`}
+                  className="w-16 h-12 md:w-28 md:h-20 rounded-lg overflow-hidden border-4 shadow-2xl mb-2 flex items-center justify-center bg-black/20"
+                  style={{ borderColor: color, boxShadow: `0 0 30px ${color}80` }}
+                >
+                  {entry.team.country ? (
+                    <CountryFlagSvg code={entry.team.country} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full" style={{ backgroundColor: color }} />
+                  )}
+                </div>
+
+                {/* Nombre */}
+                <h2 className="text-sm md:text-xl font-black text-white text-center truncate w-full px-1 drop-shadow-md mb-2">
+                  {entry.team.name.toUpperCase()}
+                </h2>
+
+                {/* Bloque de podio */}
+                <div
+                  className={`${heights[idx]} w-full rounded-t-2xl border-4 border-b-0 flex flex-col items-center justify-start pt-4 md:pt-6 relative overflow-hidden`}
                   style={{
-                    borderColor: countryColor,
-                    backgroundColor: `linear-gradient(135deg, ${countryColor}25, ${countryColor}10)`,
-                    boxShadow: `
-                      0 0 50px ${countryColor}70,
-                      0 0 30px ${countryColor}50,
-                      inset 0 0 40px ${countryColor}30,
-                      0 20px 60px rgba(0,0,0,0.7)
-                    `,
+                    borderColor: color,
+                    background: `linear-gradient(180deg, ${color}40, ${color}10)`,
+                    boxShadow: `0 0 40px ${color}50, inset 0 0 40px ${color}20`,
                   }}
                 >
-                  {/* Shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
-                  
-                  {/* Rank Number */}
-                  <div className="text-2xl md:text-4xl lg:text-5xl font-black text-white drop-shadow-lg">
-                    {positions_names[idx]}
-                  </div>
-
-                  {/* Team Name */}
-                  <h2 className="text-xs md:text-sm lg:text-base font-black text-center text-white drop-shadow-md line-clamp-2 px-1">
-                    {entry.team.name.toUpperCase()}
-                  </h2>
-
-                  {/* Points Large */}
-                  <div className="text-center">
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
+                  <span className="text-3xl md:text-5xl font-black text-white drop-shadow-lg">{ranks[idx]}</span>
+                  <div className="mt-auto mb-4 text-center relative z-10">
                     <div
-                      className="text-3xl md:text-5xl lg:text-6xl font-black tabular-nums drop-shadow-lg animate-bounce-points"
-                      style={{
-                        color: countryColor,
-                        textShadow: `0 0 20px ${countryColor}80, 0 0 10px ${countryColor}`,
-                      }}
+                      className="text-3xl md:text-6xl font-black tabular-nums"
+                      style={{ color: '#fff', textShadow: `0 0 20px ${color}` }}
                     >
                       {entry.totalPoints}
                     </div>
-                    <p className="text-white/80 text-xs md:text-sm font-bold mt-1">PUNTOS</p>
+                    <p className="text-white/80 text-xs md:text-base font-bold tracking-wider">PUNTOS</p>
                   </div>
-                </div>
-
-                {/* Base Label */}
-                <div 
-                  className="w-full px-2 md:px-3 py-2 md:py-3 text-center font-black text-xs md:text-sm lg:text-base border-4 md:border-6 border-t-0"
-                  style={{
-                    borderColor: countryColor,
-                    backgroundColor: countryColor,
-                    color: '#000',
-                    textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                  }}
-                >
-                  CAMPEÓN
                 </div>
               </div>
             )
           })}
         </div>
-
-        {/* Footer */}
-        <div className="text-center flex-shrink-0 relative z-10">
-          <p className="text-2xl md:text-3xl lg:text-4xl font-black text-white drop-shadow-lg mb-1">
-            ¡CAMPEONES!
-          </p>
-          <p className="text-yellow-300 text-xs md:text-sm font-bold tracking-widest">PERMANECE CAMP 2026</p>
-        </div>
       </div>
 
-      {/* Animations */}
       <style jsx global>{`
+        .pitch-bg {
+          background:
+            repeating-linear-gradient(90deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0.10) 60px, rgba(255,255,255,0.05) 60px, rgba(255,255,255,0.05) 120px),
+            radial-gradient(ellipse at top, #2e7d32 0%, #1b5e20 50%, #0d3311 100%);
+        }
         @keyframes podiumRise {
-          from {
-            opacity: 0;
-            transform: translateY(80px) scale(0.6);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
+          from { opacity: 0; transform: translateY(80px) scale(0.7); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
-
-        @keyframes bounce-trophy {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-12px);
-          }
+        @keyframes bounce-soft {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-12px); }
         }
-
-        @keyframes trophy-pulse {
-          0%, 100% {
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
-            transform: scale(1);
-          }
-          50% {
-            filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.6));
-            transform: scale(1.02);
-          }
-        }
-
-        @keyframes bounce-medal {
-          0%, 100% {
-            transform: translateY(0) scale(1) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-20px) scale(1.15) rotate(5deg);
-          }
-        }
-
-        @keyframes bounce-points {
-          0%, 100% {
-            transform: scale(1);
-            filter: drop-shadow(0 0 5px currentColor);
-          }
-          50% {
-            transform: scale(1.1);
-            filter: drop-shadow(0 0 20px currentColor);
-          }
-        }
-
-        .animate-bounce-trophy {
-          animation: bounce-trophy 2s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
-        }
-
-        .animate-trophy-pulse {
-          animation: trophy-pulse 2s ease-in-out infinite;
-        }
-
-        .animate-bounce-medal {
-          animation: bounce-medal 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
-        }
-
-        .animate-bounce-points {
-          animation: bounce-points 2s ease-in-out infinite;
-        }
+        .animate-bounce-soft { animation: bounce-soft 2s cubic-bezier(0.34,1.56,0.64,1) infinite; }
       `}</style>
     </div>
   )
