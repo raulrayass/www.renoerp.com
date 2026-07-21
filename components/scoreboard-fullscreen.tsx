@@ -2,11 +2,13 @@
 
 import { Button } from '@/components/ui/button'
 import { Minimize2 } from 'lucide-react'
+import { getCountryColor } from '@/lib/country-colors'
 
 interface Team {
   id: string
   name: string
   color: string
+  country?: string
 }
 
 interface ScoreboardProps {
@@ -65,11 +67,11 @@ export function ScoreboardFullscreen({
               }}
             >
               <div
-                className="rounded-lg md:rounded-2xl backdrop-blur-md border border-2 p-2 md:p-4 lg:p-6 cursor-default w-full transition-all duration-300 hover:scale-105"
+                className="rounded-lg md:rounded-2xl backdrop-blur-md border border-2 p-2 md:p-4 lg:p-6 cursor-default w-full transition-all duration-300 hover:scale-102"
                 style={{
-                  borderColor: entry.team.color,
-                  backgroundColor: `${entry.team.color}12`,
-                  boxShadow: `0 0 20px md:0 0 30px ${entry.team.color}30`,
+                  borderColor: getCountryColor(entry.team.country),
+                  backgroundColor: `${getCountryColor(entry.team.country)}12`,
+                  boxShadow: `0 0 20px md:0 0 30px ${getCountryColor(entry.team.country)}30`,
                 }}
               >
                 <div className="flex items-center gap-2 md:gap-4 lg:gap-6 w-full">
@@ -114,7 +116,7 @@ export function ScoreboardFullscreen({
                     <div
                       className="text-xl md:text-4xl lg:text-5xl font-black tabular-nums drop-shadow-lg"
                       style={{
-                        color: entry.team.color,
+                        color: getCountryColor(entry.team.country),
                         animation: `pointsPulse 2s ease-in-out ${idx * 0.15}s infinite`,
                       }}
                     >
@@ -130,7 +132,7 @@ export function ScoreboardFullscreen({
                     className="h-full rounded-full transition-all duration-1000 ease-out"
                     style={{
                       width: `${Math.min(100, (entry.totalPoints / (leaderboard[0]?.totalPoints || 1)) * 100)}%`,
-                      backgroundColor: entry.team.color,
+                      backgroundColor: getCountryColor(entry.team.country),
                       animation: `widthPulse 3s ease-in-out ${idx * 0.2}s infinite`,
                     }}
                   />
@@ -254,6 +256,10 @@ export function ScoreboardFullscreen({
 
         .animate-ping-slow {
           animation: ping-slow 2s infinite;
+        }
+
+        .hover\:scale-102:hover {
+          transform: scale(1.02);
         }
 
         .scrollbar-hide {

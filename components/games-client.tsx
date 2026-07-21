@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { StatsBar } from '@/components/stats-bar'
 import { PageHeader } from '@/components/page-header'
 import { ScoreboardFullscreen } from '@/components/scoreboard-fullscreen'
+import { PodiumFullscreen } from '@/components/podium-fullscreen'
 
 interface Props {
   userId: string
@@ -38,6 +39,7 @@ export function GamesClient({ userId }: Props) {
   const [isPending, startTransition] = useTransition()
   const [loading, setLoading] = useState(true)
   const [fullscreenMode, setFullscreenMode] = useState(false)
+  const [podiumMode, setPodiumMode] = useState(false)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -212,12 +214,18 @@ export function GamesClient({ userId }: Props) {
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}
       <PageHeader title="Juegos y Puntaje">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {teams.length > 0 && (
-            <Button onClick={() => setFullscreenMode(true)} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
-              <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-              <span>Proyectar</span>
-            </Button>
+            <>
+              <Button onClick={() => setPodiumMode(true)} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                <span>Proyectar ganador</span>
+              </Button>
+              <Button onClick={() => setFullscreenMode(true)} variant="outline" size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3">
+                <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                <span>Proyectar</span>
+              </Button>
+            </>
           )}
           <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5 text-xs sm:text-sm h-9 sm:h-10 px-2 sm:px-3 bg-green-600 hover:bg-green-700 text-white">
             <Plus className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
@@ -566,6 +574,15 @@ export function GamesClient({ userId }: Props) {
         <ScoreboardFullscreen
           leaderboard={leaderboard}
           onClose={() => setFullscreenMode(false)}
+          gameList={gameList}
+        />
+      )}
+
+      {/* Fullscreen Podium */}
+      {podiumMode && (
+        <PodiumFullscreen
+          leaderboard={leaderboard}
+          onClose={() => setPodiumMode(false)}
           gameList={gameList}
         />
       )}
