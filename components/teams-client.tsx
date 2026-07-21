@@ -17,6 +17,7 @@ import { StatsBar } from '@/components/stats-bar'
 import { PageHeader } from '@/components/page-header'
 import { COUNTRIES } from '@/lib/countries'
 import { CountryFlagSvg } from '@/lib/country-flags-svg'
+import { TeamFlag } from '@/components/team-flag'
 
 interface Props {
   userId: string
@@ -198,16 +199,12 @@ export function TeamsClient({ userId }: Props) {
                       onClick={() => toggleTeamMembers(team.id)}
                       className="flex items-center gap-3 min-w-0 flex-1 text-left hover:opacity-80 transition-opacity"
                     >
-                      {team.country ? (
-                        <div className="w-8 h-8 flex items-center justify-center shrink-0 rounded border border-border">
-                          <CountryFlagSvg code={team.country} className="w-full h-full p-0.5" />
-                        </div>
-                      ) : (
-                        <div
-                          className="w-8 h-8 rounded-full shrink-0 border-2 border-border"
-                          style={{ backgroundColor: team.color || '#4a9d67' }}
-                        />
-                      )}
+                      <TeamFlag
+                        country={team.country}
+                        color={team.color || '#4a9d67'}
+                        shape="rect"
+                        className="w-9 h-7"
+                      />
                       <div className="min-w-0 flex-1">
                         <h3 className="font-semibold text-sm truncate">{team.name}</h3>
                         <p className="text-xs text-muted-foreground flex items-center gap-1">

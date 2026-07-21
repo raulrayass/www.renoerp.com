@@ -16,6 +16,7 @@ import { Game, GameScore, Team } from '@/lib/db/schema'
 import { cn } from '@/lib/utils'
 import { StatsBar } from '@/components/stats-bar'
 import { PageHeader } from '@/components/page-header'
+import { TeamFlag } from '@/components/team-flag'
 import { ScoreboardFullscreen } from '@/components/scoreboard-fullscreen'
 import { ScoreboardFIFA } from '@/components/scoreboard-fifa'
 import { PodiumFullscreen } from '@/components/podium-fullscreen'
@@ -53,7 +54,6 @@ export function GamesClient({ userId }: Props) {
     loadGames()
   }, [userId])
 
-  // Abre el modal de nuevo juego cuando el FAB del dock navega con ?new=1
   useEffect(() => {
     if (searchParams.get('new') === '1') {
       setEditingId(null)
@@ -266,16 +266,22 @@ export function GamesClient({ userId }: Props) {
                   }}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="text-lg font-bold text-muted-foreground w-6 text-center">
+                    <div className="text-lg font-bold text-muted-foreground w-6 text-center shrink-0">
                       {idx === 0 && '🥇'}
                       {idx === 1 && '🥈'}
                       {idx === 2 && '🥉'}
                       {idx > 2 && `${idx + 1}.`}
                     </div>
+                    <TeamFlag
+                      country={entry.team.country}
+                      color={entry.team.color}
+                      shape="rect"
+                      className="w-8 h-6"
+                    />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium">{entry.team.name}</p>
+                      <p className="font-medium truncate">{entry.team.name}</p>
                     </div>
-                    <div className="font-bold text-lg tabular-nums text-primary">
+                    <div className="font-bold text-lg tabular-nums text-primary shrink-0">
                       {entry.totalPoints} pts
                     </div>
                   </div>
@@ -470,10 +476,7 @@ export function GamesClient({ userId }: Props) {
                   {teams.map((team) => (
                     <div key={team.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
                       <div className="flex items-center gap-2">
-                        <div
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: team.color }}
-                        />
+                        <TeamFlag country={team.country} color={team.color} shape="rect" className="w-6 h-4" />
                         <span className="text-sm font-medium">{team.name}</span>
                       </div>
                       <span className="font-bold">{getTeamTotalPoints(team.id)}</span>
@@ -525,9 +528,11 @@ export function GamesClient({ userId }: Props) {
                         <div className="flex items-center gap-2 min-w-0">
                           {teamMap.get(score.teamId) && (
                             <>
-                              <div
-                                className="w-3 h-3 rounded-full shrink-0"
-                                style={{ backgroundColor: teamMap.get(score.teamId)!.color }}
+                              <TeamFlag
+                                country={teamMap.get(score.teamId)!.country}
+                                color={teamMap.get(score.teamId)!.color}
+                                shape="rect"
+                                className="w-5 h-3.5"
                               />
                               <span className="truncate">{teamMap.get(score.teamId)!.name}</span>
                             </>
