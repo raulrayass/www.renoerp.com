@@ -59,6 +59,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} bg-background`}>
+      <head>
+        {/* Banderas nítidas (flag-icons) para los proyectores FIFA */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"
+        />
+      </head>
       <body className="font-sans antialiased">
         <LoadingProvider>
           <LoadingScreen />
