@@ -247,13 +247,13 @@ export function GamesClient({ userId }: Props) {
       {/* Leaderboard */}
       {teams.length > 0 && (
         <Card className="card-vibrant">
-          <CardContent className="p-6">
-            <h2 className="font-semibold text-lg mb-6">Ranking Actual</h2>
-            <div className="space-y-3">
+          <CardContent className="p-4 md:p-6">
+            <h2 className="font-bold text-base md:text-lg mb-3 md:mb-6 text-foreground">Ranking Actual</h2>
+            <div className="space-y-2 md:space-y-3">
               {leaderboard.map((entry, idx) => (
                 <div
                   key={entry.team.id}
-                  className="rounded-lg border p-4 transition-all hover:shadow-lg"
+                  className="rounded-lg border p-2.5 md:p-4 transition-all hover:shadow-lg"
                   style={{
                     background: `linear-gradient(135deg, color-mix(in srgb, ${entry.team.color} 8%, var(--card)) 0%, var(--card) 100%)`,
                     borderColor: entry.team.color,
@@ -261,8 +261,8 @@ export function GamesClient({ userId }: Props) {
                     boxShadow: `0 8px 24px -4px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 40px -12px ${entry.team.color}40`,
                   }}
                 >
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="text-2xl font-black w-10 text-center shrink-0" style={{ color: entry.team.color }}>
+                  <div className="flex items-center gap-2 md:gap-4">
+                    <div className="text-lg md:text-2xl font-black w-8 md:w-10 text-center shrink-0 leading-none" style={{ color: entry.team.color }}>
                       {idx === 0 && '🥇'}
                       {idx === 1 && '🥈'}
                       {idx === 2 && '🥉'}
@@ -272,36 +272,41 @@ export function GamesClient({ userId }: Props) {
                       country={entry.team.country}
                       color={entry.team.color}
                       shape="rect"
-                      className="w-10 h-7 rounded border border-white/30"
+                      className="w-7 h-5 md:w-10 md:h-7 rounded border border-white/30 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-base sm:text-lg truncate">{entry.team.name}</p>
+                      <p className="font-bold text-xs md:text-base truncate leading-tight">{entry.team.name}</p>
                       {Object.keys(entry.pointsPerGame).length > 0 && (
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {Object.keys(entry.pointsPerGame).length} juego{Object.keys(entry.pointsPerGame).length !== 1 ? 's' : ''}
+                          {Object.keys(entry.pointsPerGame).length}J
                         </p>
                       )}
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="text-2xl font-black tabular-nums" style={{ color: entry.team.color }}>
+                      <div className="text-lg md:text-2xl font-black tabular-nums leading-none" style={{ color: entry.team.color }}>
                         {entry.totalPoints}
                       </div>
-                      <p className="text-xs text-muted-foreground">puntos</p>
+                      <p className="text-xs text-muted-foreground">pts</p>
                     </div>
                   </div>
                   {Object.keys(entry.pointsPerGame).length > 0 && (
-                    <div className="ml-14 pt-2 border-t border-border/50 space-y-1">
-                      <div className="flex flex-wrap gap-2">
+                    <div className="mt-2 pt-2 border-t border-border/50">
+                      <div className="flex flex-wrap gap-1">
                         {gameList
                           .filter((g) => entry.pointsPerGame[g.id])
+                          .slice(0, 3)
                           .map((game) => (
-                            <div key={game.id} className="text-xs px-2 py-1 rounded-md bg-muted/50">
-                              <span className="text-muted-foreground">{game.name}:</span>
-                              <span className="font-semibold ml-1 tabular-nums" style={{ color: entry.team.color }}>
+                            <div key={game.id} className="text-xs px-1.5 py-0.5 rounded bg-muted/60">
+                              <span className="font-semibold tabular-nums" style={{ color: entry.team.color }}>
                                 {entry.pointsPerGame[game.id]}
                               </span>
                             </div>
                           ))}
+                        {Object.keys(entry.pointsPerGame).length > 3 && (
+                          <div className="text-xs px-1.5 py-0.5 rounded bg-muted/60 text-muted-foreground">
+                            +{Object.keys(entry.pointsPerGame).length - 3}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -334,44 +339,40 @@ export function GamesClient({ userId }: Props) {
           </div>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           {gameList.map((game, index) => (
-            <Card key={game.id} className="card-vibrant overflow-hidden" style={{ animationDelay: `${index * 0.05}s` }}>
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between gap-4">
+            <Card key={game.id} className="card-vibrant overflow-hidden border-2 md:border" style={{ animationDelay: `${index * 0.05}s` }}>
+              <CardContent className="p-3 md:p-5">
+                <div className="flex items-center justify-between gap-2 md:gap-4">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-start gap-3 mb-2">
-                      <div className="text-2xl font-black text-primary">
+                    <div className="flex items-start gap-2 md:gap-3">
+                      <div className="text-lg md:text-2xl font-black text-primary shrink-0">
                         🎮
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-bold text-base sm:text-lg truncate text-foreground">{game.name}</h3>
+                        <h3 className="font-bold text-sm md:text-lg truncate text-foreground leading-tight">{game.name}</h3>
                         {game.description && (
-                          <p className="text-sm text-muted-foreground truncate mt-1">{game.description}</p>
+                          <p className="text-xs md:text-sm text-muted-foreground truncate mt-0.5">{game.description}</p>
+                        )}
+                        {game.gameDate && (
+                          <p className="text-xs text-muted-foreground mt-1 font-medium">
+                            {new Date(game.gameDate + 'T00:00:00').toLocaleDateString('es-MX', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}
+                          </p>
                         )}
                       </div>
                     </div>
-                    {game.gameDate && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--primary)' }} />
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {new Date(game.gameDate + 'T00:00:00').toLocaleDateString('es-MX', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </p>
-                      </div>
-                    )}
                   </div>
-                  <div className="flex gap-2 shrink-0">
+                  <div className="flex gap-1 md:gap-2 shrink-0">
                     <Button
                       onClick={() => openScoring(game.id)}
                       size="sm"
-                      className="h-9 px-3 gap-1.5 text-sm font-medium bg-primary hover:bg-primary/90"
+                      className="h-8 md:h-9 px-2 md:px-3 gap-1 md:gap-1.5 text-xs md:text-sm font-medium bg-primary hover:bg-primary/90"
                       title="Registrar puntos"
                     >
-                      <Trophy className="w-4 h-4" />
+                      <Trophy className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       <span className="hidden sm:inline">Puntos</span>
                     </Button>
                     <Button
@@ -386,10 +387,10 @@ export function GamesClient({ userId }: Props) {
                       }}
                       size="sm"
                       variant="ghost"
-                      className="h-9 w-9 p-0 hover:bg-blue-100 dark:hover:bg-blue-950"
-                      title="Editar juego"
+                      className="h-8 md:h-9 w-8 md:w-9 p-0 hover:bg-blue-100 dark:hover:bg-blue-950"
+                      title="Editar"
                     >
-                      <Edit2 className="w-4 h-4 text-blue-600" />
+                      <Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-600" />
                     </Button>
                     <Button
                       onClick={() => {
@@ -398,10 +399,10 @@ export function GamesClient({ userId }: Props) {
                       }}
                       size="sm"
                       variant="ghost"
-                      className="h-9 w-9 p-0 hover:bg-red-100 dark:hover:bg-red-950"
-                      title="Eliminar juego"
+                      className="h-8 md:h-9 w-8 md:w-9 p-0 hover:bg-red-100 dark:hover:bg-red-950"
+                      title="Eliminar"
                     >
-                      <Trash2 className="w-4 h-4 text-red-600" />
+                      <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-600" />
                     </Button>
                   </div>
                 </div>
