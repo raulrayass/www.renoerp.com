@@ -62,12 +62,6 @@ export function DashboardClient({ userId }: { userId: string }) {
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-3 flex flex-col gap-3 max-w-7xl mx-auto w-full overflow-x-hidden">
 
-      {/* ===== HEADER DEL EVENTO ===== */}
-      <div className="mb-2 pt-2">
-        <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Permanece 2026</h1>
-        <p className="text-sm text-muted-foreground mt-1">Dashboard del evento - Estadísticas en vivo</p>
-      </div>
-
       {/* ===== 1. Balance Total (héroe) — claymorphism ===== */}
       <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
         <div className="flex justify-between items-start mb-4">
