@@ -1,66 +1,61 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
-import useSWR from 'swr'
+import { useCallback, useEffect, useState } from 'react'
+import { getAllGameScores } from '@/app/actions/games'
+import { useSession } from '@/lib/auth-client'
 
-interface GameScore {
-  gameId: string
-  teamId: string
+export interface GameScore {
+  id: number
+  gameId: number
+  teamId: number
   points: number
+  userId: string
+  createdAt?: Date
 }
 
 interface GameScoresState {
   scores: GameScore[]
   isLoading: boolean
   error: Error | null
-  refetch: () => void
-  updateScore: (gameId: string, teamId: string, points: number) => Promise<void>
-  invalidateCache: () => void
+  refetch: () => Promise<void>
 }
 
-const CACHE_KEY = '/api/games/scores'
-
 export function useGameScores(): GameScoresState {
-  const cacheInvalidateRef = useRef<() => void>()
+  const session = useSession()
+  const [scores, setScores] = useState<GameScore[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  const { data, error, isLoading, mutate } = useSWR(CACHE_KEY, async (url) => {
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('Failed to fetch game scores')
-    return res.json()
-  })
+  const userId = session?.data?.user?.id
 
-  cacheInvalidateRef.current = mutate
+  const loadScores = useCallback(async () => {
+    if (!userId) {
+      setScores([])
+      setIsLoading(false)
+      return
+    }
 
-  const updateScore = useCallback(
-    async (gameId: string, teamId: string, points: number) => {
-      try {
-        const response = await fetch(`/api/games/${gameId}/scores`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ teamId, points }),
-        })
+    try {
+      setIsLoading(true)
+      const data = await getAllGameScores(userId)
+      setScores(data || [])
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch game scores'))
+      setScores([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [userId])
 
-        if (!response.ok) throw new Error('Failed to update score')
-
-        await mutate()
-      } catch (err) {
-        console.error('Error updating score:', err)
-        throw err
-      }
-    },
-    [mutate]
-  )
-
-  const invalidateCache = useCallback(() => {
-    mutate()
-  }, [mutate])
+  useEffect(() => {
+    loadScores()
+  }, [loadScores])
 
   return {
-    scores: data?.scores || [],
+    scores,
     isLoading,
-    error: error || null,
-    refetch: mutate,
-    updateScore,
-    invalidateCache,
+    error,
+    refetch: loadScores,
   }
 }

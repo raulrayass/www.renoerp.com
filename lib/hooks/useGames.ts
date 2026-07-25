@@ -1,81 +1,61 @@
 'use client'
 
-import { useCallback } from 'react'
-import useSWR from 'swr'
+import { useCallback, useEffect, useState } from 'react'
+import { getGames } from '@/app/actions/games'
+import { useSession } from '@/lib/auth-client'
 
 export interface Game {
-  id: string
+  id: number
   name: string
-  description?: string
-  gameDate?: string
+  description?: string | null
+  gameDate?: string | null
+  userId: string
+  createdAt?: Date
 }
 
 interface UseGamesState {
   games: Game[]
   isLoading: boolean
   error: Error | null
-  refetch: () => void
-  addGame: (game: Omit<Game, 'id'>) => Promise<Game>
-  updateGame: (id: string, game: Partial<Game>) => Promise<void>
-  deleteGame: (id: string) => Promise<void>
+  refetch: () => Promise<void>
 }
 
 export function useGames(): UseGamesState {
-  const { data, error, isLoading, mutate } = useSWR('/api/games', async (url) => {
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('Failed to fetch games')
-    return res.json()
-  })
+  const session = useSession()
+  const [games, setGames] = useState<Game[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  const addGame = useCallback(
-    async (game: Omit<Game, 'id'>) => {
-      const response = await fetch('/api/games', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(game),
-      })
+  const userId = session?.data?.user?.id
 
-      if (!response.ok) throw new Error('Failed to add game')
-      const newGame = await response.json()
-      await mutate()
-      return newGame
-    },
-    [mutate]
-  )
+  const loadGames = useCallback(async () => {
+    if (!userId) {
+      setGames([])
+      setIsLoading(false)
+      return
+    }
 
-  const updateGame = useCallback(
-    async (id: string, updates: Partial<Game>) => {
-      const response = await fetch(`/api/games/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      })
+    try {
+      setIsLoading(true)
+      const data = await getGames(userId)
+      setGames(data || [])
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch games'))
+      setGames([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [userId])
 
-      if (!response.ok) throw new Error('Failed to update game')
-      await mutate()
-    },
-    [mutate]
-  )
-
-  const deleteGame = useCallback(
-    async (id: string) => {
-      const response = await fetch(`/api/games/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) throw new Error('Failed to delete game')
-      await mutate()
-    },
-    [mutate]
-  )
+  useEffect(() => {
+    loadGames()
+  }, [loadGames])
 
   return {
-    games: data?.games || [],
+    games,
     isLoading,
-    error: error || null,
-    refetch: mutate,
-    addGame,
-    updateGame,
-    deleteGame,
+    error,
+    refetch: loadGames,
   }
 }

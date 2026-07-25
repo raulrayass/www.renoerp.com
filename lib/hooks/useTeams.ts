@@ -1,82 +1,62 @@
 'use client'
 
-import { useCallback } from 'react'
-import useSWR from 'swr'
+import { useCallback, useEffect, useState } from 'react'
+import { getTeams } from '@/app/actions/teams'
+import { useSession } from '@/lib/auth-client'
 
 export interface Team {
-  id: string
+  id: number
   name: string
-  country?: string
-  color?: string
-  totalPoints?: number
+  color: string
+  country?: string | null
+  useCountry?: boolean
+  userId: string
+  createdAt?: Date
 }
 
 interface UseTeamsState {
   teams: Team[]
   isLoading: boolean
   error: Error | null
-  refetch: () => void
-  addTeam: (team: Omit<Team, 'id'>) => Promise<Team>
-  updateTeam: (id: string, team: Partial<Team>) => Promise<void>
-  deleteTeam: (id: string) => Promise<void>
+  refetch: () => Promise<void>
 }
 
 export function useTeams(): UseTeamsState {
-  const { data, error, isLoading, mutate } = useSWR('/api/teams', async (url) => {
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('Failed to fetch teams')
-    return res.json()
-  })
+  const session = useSession()
+  const [teams, setTeams] = useState<Team[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  const addTeam = useCallback(
-    async (team: Omit<Team, 'id'>) => {
-      const response = await fetch('/api/teams', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(team),
-      })
+  const userId = session?.data?.user?.id
 
-      if (!response.ok) throw new Error('Failed to add team')
-      const newTeam = await response.json()
-      await mutate()
-      return newTeam
-    },
-    [mutate]
-  )
+  const loadTeams = useCallback(async () => {
+    if (!userId) {
+      setTeams([])
+      setIsLoading(false)
+      return
+    }
 
-  const updateTeam = useCallback(
-    async (id: string, updates: Partial<Team>) => {
-      const response = await fetch(`/api/teams/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      })
+    try {
+      setIsLoading(true)
+      const data = await getTeams(userId)
+      setTeams(data || [])
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch teams'))
+      setTeams([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [userId])
 
-      if (!response.ok) throw new Error('Failed to update team')
-      await mutate()
-    },
-    [mutate]
-  )
-
-  const deleteTeam = useCallback(
-    async (id: string) => {
-      const response = await fetch(`/api/teams/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) throw new Error('Failed to delete team')
-      await mutate()
-    },
-    [mutate]
-  )
+  useEffect(() => {
+    loadTeams()
+  }, [loadTeams])
 
   return {
-    teams: data?.teams || [],
+    teams,
     isLoading,
-    error: error || null,
-    refetch: mutate,
-    addTeam,
-    updateTeam,
-    deleteTeam,
+    error,
+    refetch: loadTeams,
   }
 }
