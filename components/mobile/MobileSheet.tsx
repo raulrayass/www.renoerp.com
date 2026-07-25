@@ -1,6 +1,6 @@
 'use client'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 import { useMediaQuery } from '@/lib/hooks/useMediaQuery'
 import { ReactNode } from 'react'
@@ -11,17 +11,32 @@ interface MobileSheetProps {
   title: string
   children: ReactNode
   description?: string
+  size?: 'sm' | 'md' | 'lg'
 }
 
-export function MobileSheet({ open, onOpenChange, title, children, description }: MobileSheetProps) {
+const sizeMap = {
+  sm: 'sm:max-w-[400px]',
+  md: 'sm:max-w-[500px]',
+  lg: 'sm:max-w-[600px]',
+}
+
+export function MobileSheet({ 
+  open, 
+  onOpenChange, 
+  title, 
+  children, 
+  description,
+  size = 'md'
+}: MobileSheetProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className={`${sizeMap[size]} max-h-[90vh] overflow-y-auto`}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
+            {description && <DialogDescription>{description}</DialogDescription>}
           </DialogHeader>
           {children}
         </DialogContent>
@@ -31,11 +46,11 @@ export function MobileSheet({ open, onOpenChange, title, children, description }
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader>
+      <DrawerContent className="max-h-[95vh]">
+        <DrawerHeader className="border-b">
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
-        <div className="px-4 pb-4">{children}</div>
+        <div className="overflow-y-auto px-4 py-4 pb-safe">{children}</div>
       </DrawerContent>
     </Drawer>
   )
