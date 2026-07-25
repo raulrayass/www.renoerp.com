@@ -300,117 +300,118 @@ input:focus, textarea:focus, select:focus {
     box-shadow: 0 0 20px -6px color-mix(in srgb, var(--primary) 30%, transparent);
   }
 
-  /* ===== CLAYMORPHISM + AURORA DESIGN ===== */
+  /* ===== CLAYMORPHISM + AURORA DESIGN (Refinado) ===== */
 
-  /* Tarjeta claymorphism base */
+  /* Tarjeta claymorphism refinada */
   .clay-card {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--primary) 8%, var(--card)) 0%,
-      var(--card) 40%,
-      color-mix(in srgb, var(--card) 95%, var(--background)) 100%
-    );
-    border: 1.5px solid color-mix(in srgb, var(--primary) 15%, var(--border));
+    background: var(--card);
+    border: 1px solid hsl(from var(--primary) h s calc(l - 15%));
     box-shadow:
-      /* Light from top-left */
-      inset -1px -1px 3px rgba(0, 0, 0, 0.04),
-      inset 1px 1px 3px rgba(255, 255, 255, 0.5),
-      /* Depth shadow */
-      0 8px 24px rgba(0, 0, 0, 0.06),
-      /* Glow accent */
-      0 0 40px color-mix(in srgb, var(--primary) 15%, transparent);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      0 8px 32px -4px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 32px -8px hsl(from var(--primary) h s calc(l - 10%));
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .clay-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
+    border-color: hsl(from var(--primary) h s calc(l - 10%));
     box-shadow:
-      inset -1px -1px 3px rgba(0, 0, 0, 0.04),
-      inset 1px 1px 3px rgba(255, 255, 255, 0.6),
-      0 12px 32px rgba(0, 0, 0, 0.10),
-      0 0 60px color-mix(in srgb, var(--primary) 25%, transparent);
+      0 12px 48px -6px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 40px -4px hsl(from var(--primary) h s calc(l - 10%));
   }
 
-  /* Dark mode clay-card */
   .dark .clay-card {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--primary) 12%, var(--card)) 0%,
-      var(--card) 40%,
-      color-mix(in srgb, var(--card) 90%, var(--background)) 100%
-    );
-    box-shadow:
-      inset -1px -1px 3px rgba(255, 255, 255, 0.02),
-      inset 1px 1px 3px rgba(255, 255, 255, 0.08),
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      0 0 40px color-mix(in srgb, var(--primary) 20%, transparent);
+    border: 1px solid hsl(from var(--primary) h s calc(l - 5%));
   }
 
   .dark .clay-card:hover {
+    border-color: hsl(from var(--primary) h s calc(l + 5%));
     box-shadow:
-      inset -1px -1px 3px rgba(255, 255, 255, 0.02),
-      inset 1px 1px 3px rgba(255, 255, 255, 0.12),
-      0 12px 40px rgba(0, 0, 0, 0.4),
-      0 0 60px color-mix(in srgb, var(--primary) 30%, transparent);
+      0 12px 48px -6px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 40px -2px hsl(from var(--primary) h s calc(l + 5%));
   }
 
-  /* Aurora card - con degradado suave tipo aurora boreal */
+  /* Aurora card - gradiente sutil tipo aurora boreal */
   .aurora-card {
     background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--primary) 6% transparent 0%),
-      color-mix(in srgb, var(--primary) 3% transparent 40%),
-      var(--card) 100%
+      to bottom right,
+      hsl(from var(--primary) h calc(s + 5%) calc(l + 1.5%)),
+      var(--card)
     );
-    border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border));
+    border: 1px solid hsl(from var(--primary) h s calc(l - 12%));
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.04),
-      0 0 50px color-mix(in srgb, var(--primary) 12%, transparent);
+      0 8px 28px -4px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 40px -12px hsl(from var(--primary) h s calc(l - 5%));
     position: relative;
     overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .aurora-card::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      45deg,
-      transparent 0%,
-      color-mix(in srgb, var(--primary) 3%, transparent) 50%,
-      transparent 100%
+    background: radial-gradient(
+      circle at top left,
+      hsl(from var(--primary) h calc(s + 10%) calc(l + 4%)) 0%,
+      transparent 60%
     );
+    opacity: 0.12;
     pointer-events: none;
   }
 
-  /* Stat card - para números destacados */
+  .aurora-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 40px -4px rgba(0, 0, 0, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 0 50px -8px hsl(from var(--primary) h s calc(l - 5%));
+  }
+
+  /* Stat card - para números con estilo moderno */
   .stat-card {
     background: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--primary) 10%, var(--card)) 0%,
-      var(--card) 50%,
-      color-mix(in srgb, var(--card) 92%, var(--background)) 100%
+      hsl(from var(--primary) h calc(s + 3%) calc(l + 1%)) 0%,
+      var(--card) 100%
     );
-    border: 1.5px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+    border: 1px solid hsl(from var(--primary) h s calc(l - 10%));
     box-shadow:
-      inset -1px -1px 2px rgba(0, 0, 0, 0.03),
-      inset 1px 1px 2px rgba(255, 255, 255, 0.6),
-      0 10px 30px rgba(0, 0, 0, 0.07),
-      0 0 50px color-mix(in srgb, var(--primary) 18%, transparent);
+      0 8px 28px -4px rgba(0, 0, 0, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 36px -8px hsl(from var(--primary) h s calc(l - 8%));
     position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .stat-card::after {
     content: '';
     position: absolute;
-    inset: 0;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
     background: radial-gradient(
-      circle at top right,
-      color-mix(in srgb, var(--primary) 5%, transparent),
+      circle,
+      hsl(from var(--primary) h calc(s + 15%) calc(l + 10%)) 0%,
       transparent 70%
     );
+    opacity: 0.06;
     pointer-events: none;
-    border-radius: inherit;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: hsl(from var(--primary) h s calc(l - 5%));
+    box-shadow:
+      0 12px 40px -4px rgba(0, 0, 0, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 0 48px -4px hsl(from var(--primary) h s calc(l - 8%));
   }
 
   /* Animación sutil para stat cards */
@@ -419,32 +420,27 @@ input:focus, textarea:focus, select:focus {
       transform: translateY(0px);
     }
     50% {
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
   }
 
   .stat-card {
-    animation: float-subtle 3s ease-in-out infinite;
+    animation: float-subtle 4s ease-in-out infinite;
   }
 
-  /* Ícono con glow */
+  /* Ícono con glow suave */
   .icon-glow {
-    filter: drop-shadow(0 0 8px color-mix(in srgb, currentColor 40%, transparent));
+    filter: drop-shadow(0 0 6px color-mix(in srgb, currentColor 35%, transparent));
     transition: filter 0.3s ease;
   }
 
   .icon-glow:hover {
-    filter: drop-shadow(0 0 16px color-mix(in srgb, currentColor 60%, transparent));
+    filter: drop-shadow(0 0 12px color-mix(in srgb, currentColor 55%, transparent));
   }
 
-  /* Progress bar con glow */
+  /* Progress bar */
   .progress-glow {
-    box-shadow: 0 0 12px color-mix(in srgb, var(--primary) 50%, transparent);
-    transition: box-shadow 0.3s ease;
-  }
-
-  .progress-glow:hover {
-    box-shadow: 0 0 20px color-mix(in srgb, var(--primary) 70%, transparent);
+    transition: all 0.3s ease;
   }
 }
 
