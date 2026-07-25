@@ -299,6 +299,153 @@ input:focus, textarea:focus, select:focus {
     border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent) !important;
     box-shadow: 0 0 20px -6px color-mix(in srgb, var(--primary) 30%, transparent);
   }
+
+  /* ===== CLAYMORPHISM + AURORA DESIGN ===== */
+
+  /* Tarjeta claymorphism base */
+  .clay-card {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 8%, var(--card)) 0%,
+      var(--card) 40%,
+      color-mix(in srgb, var(--card) 95%, var(--background)) 100%
+    );
+    border: 1.5px solid color-mix(in srgb, var(--primary) 15%, var(--border));
+    box-shadow:
+      /* Light from top-left */
+      inset -1px -1px 3px rgba(0, 0, 0, 0.04),
+      inset 1px 1px 3px rgba(255, 255, 255, 0.5),
+      /* Depth shadow */
+      0 8px 24px rgba(0, 0, 0, 0.06),
+      /* Glow accent */
+      0 0 40px color-mix(in srgb, var(--primary) 15%, transparent);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .clay-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      inset -1px -1px 3px rgba(0, 0, 0, 0.04),
+      inset 1px 1px 3px rgba(255, 255, 255, 0.6),
+      0 12px 32px rgba(0, 0, 0, 0.10),
+      0 0 60px color-mix(in srgb, var(--primary) 25%, transparent);
+  }
+
+  /* Dark mode clay-card */
+  .dark .clay-card {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 12%, var(--card)) 0%,
+      var(--card) 40%,
+      color-mix(in srgb, var(--card) 90%, var(--background)) 100%
+    );
+    box-shadow:
+      inset -1px -1px 3px rgba(255, 255, 255, 0.02),
+      inset 1px 1px 3px rgba(255, 255, 255, 0.08),
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 40px color-mix(in srgb, var(--primary) 20%, transparent);
+  }
+
+  .dark .clay-card:hover {
+    box-shadow:
+      inset -1px -1px 3px rgba(255, 255, 255, 0.02),
+      inset 1px 1px 3px rgba(255, 255, 255, 0.12),
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      0 0 60px color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+
+  /* Aurora card - con degradado suave tipo aurora boreal */
+  .aurora-card {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 6% transparent 0%),
+      color-mix(in srgb, var(--primary) 3% transparent 40%),
+      var(--card) 100%
+    );
+    border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border));
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.04),
+      0 0 50px color-mix(in srgb, var(--primary) 12%, transparent);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .aurora-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      45deg,
+      transparent 0%,
+      color-mix(in srgb, var(--primary) 3%, transparent) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Stat card - para números destacados */
+  .stat-card {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 10%, var(--card)) 0%,
+      var(--card) 50%,
+      color-mix(in srgb, var(--card) 92%, var(--background)) 100%
+    );
+    border: 1.5px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+    box-shadow:
+      inset -1px -1px 2px rgba(0, 0, 0, 0.03),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.6),
+      0 10px 30px rgba(0, 0, 0, 0.07),
+      0 0 50px color-mix(in srgb, var(--primary) 18%, transparent);
+    position: relative;
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--primary) 5%, transparent),
+      transparent 70%
+    );
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* Animación sutil para stat cards */
+  @keyframes float-subtle {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-2px);
+    }
+  }
+
+  .stat-card {
+    animation: float-subtle 3s ease-in-out infinite;
+  }
+
+  /* Ícono con glow */
+  .icon-glow {
+    filter: drop-shadow(0 0 8px color-mix(in srgb, currentColor 40%, transparent));
+    transition: filter 0.3s ease;
+  }
+
+  .icon-glow:hover {
+    filter: drop-shadow(0 0 16px color-mix(in srgb, currentColor 60%, transparent));
+  }
+
+  /* Progress bar con glow */
+  .progress-glow {
+    box-shadow: 0 0 12px color-mix(in srgb, var(--primary) 50%, transparent);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .progress-glow:hover {
+    box-shadow: 0 0 20px color-mix(in srgb, var(--primary) 70%, transparent);
+  }
 }
 
 
