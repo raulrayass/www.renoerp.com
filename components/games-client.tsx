@@ -246,21 +246,23 @@ export function GamesClient({ userId }: Props) {
 
       {/* Leaderboard */}
       {teams.length > 0 && (
-        <Card>
+        <Card className="card-vibrant">
           <CardContent className="p-6">
-            <h2 className="font-semibold text-lg mb-4">Puntaje General</h2>
+            <h2 className="font-semibold text-lg mb-6">Ranking Actual</h2>
             <div className="space-y-3">
               {leaderboard.map((entry, idx) => (
                 <div
                   key={entry.team.id}
-                  className="rounded-lg border bg-card p-3"
+                  className="rounded-lg border p-4 transition-all hover:shadow-lg"
                   style={{
-                    borderLeftWidth: '4px',
-                    borderLeftColor: entry.team.color,
+                    background: `linear-gradient(135deg, color-mix(in srgb, ${entry.team.color} 8%, var(--card)) 0%, var(--card) 100%)`,
+                    borderColor: entry.team.color,
+                    borderWidth: '2px',
+                    boxShadow: `0 8px 24px -4px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 40px -12px ${entry.team.color}40`,
                   }}
                 >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="text-lg font-bold text-muted-foreground w-6 text-center shrink-0">
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="text-2xl font-black w-10 text-center shrink-0" style={{ color: entry.team.color }}>
                       {idx === 0 && '🥇'}
                       {idx === 1 && '🥈'}
                       {idx === 2 && '🥉'}
@@ -270,27 +272,37 @@ export function GamesClient({ userId }: Props) {
                       country={entry.team.country}
                       color={entry.team.color}
                       shape="rect"
-                      className="w-8 h-6"
+                      className="w-10 h-7 rounded border border-white/30"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{entry.team.name}</p>
+                      <p className="font-bold text-base sm:text-lg truncate">{entry.team.name}</p>
+                      {Object.keys(entry.pointsPerGame).length > 0 && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {Object.keys(entry.pointsPerGame).length} juego{Object.keys(entry.pointsPerGame).length !== 1 ? 's' : ''}
+                        </p>
+                      )}
                     </div>
-                    <div className="font-bold text-lg tabular-nums text-primary shrink-0">
-                      {entry.totalPoints} pts
+                    <div className="text-right shrink-0">
+                      <div className="text-2xl font-black tabular-nums" style={{ color: entry.team.color }}>
+                        {entry.totalPoints}
+                      </div>
+                      <p className="text-xs text-muted-foreground">puntos</p>
                     </div>
                   </div>
                   {Object.keys(entry.pointsPerGame).length > 0 && (
-                    <div className="ml-9 text-xs text-muted-foreground space-y-1">
-                      {gameList
-                        .filter((g) => entry.pointsPerGame[g.id])
-                        .map((game) => (
-                          <div key={game.id} className="flex justify-between gap-2">
-                            <span className="truncate">{game.name}:</span>
-                            <span className="font-semibold text-foreground tabular-nums">
-                              {entry.pointsPerGame[game.id]}
-                            </span>
-                          </div>
-                        ))}
+                    <div className="ml-14 pt-2 border-t border-border/50 space-y-1">
+                      <div className="flex flex-wrap gap-2">
+                        {gameList
+                          .filter((g) => entry.pointsPerGame[g.id])
+                          .map((game) => (
+                            <div key={game.id} className="text-xs px-2 py-1 rounded-md bg-muted/50">
+                              <span className="text-muted-foreground">{game.name}:</span>
+                              <span className="font-semibold ml-1 tabular-nums" style={{ color: entry.team.color }}>
+                                {entry.pointsPerGame[game.id]}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -323,35 +335,44 @@ export function GamesClient({ userId }: Props) {
         </Card>
       ) : (
         <div className="space-y-3">
-          {gameList.map((game) => (
-            <Card key={game.id} className="overflow-hidden hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-3">
+          {gameList.map((game, index) => (
+            <Card key={game.id} className="card-vibrant overflow-hidden" style={{ animationDelay: `${index * 0.05}s` }}>
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-sm sm:text-base truncate">{game.name}</h3>
-                    {game.description && (
-                      <p className="text-xs text-muted-foreground truncate">{game.description}</p>
-                    )}
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="text-2xl font-black text-primary">
+                        🎮
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-base sm:text-lg truncate text-foreground">{game.name}</h3>
+                        {game.description && (
+                          <p className="text-sm text-muted-foreground truncate mt-1">{game.description}</p>
+                        )}
+                      </div>
+                    </div>
                     {game.gameDate && (
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(game.gameDate + 'T00:00:00').toLocaleDateString('es-MX', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--primary)' }} />
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {new Date(game.gameDate + 'T00:00:00').toLocaleDateString('es-MX', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </p>
+                      </div>
                     )}
                   </div>
-                  <div className="flex gap-1 shrink-0">
+                  <div className="flex gap-2 shrink-0">
                     <Button
                       onClick={() => openScoring(game.id)}
                       size="sm"
-                      variant="default"
-                      className="h-8 px-2 gap-1 text-xs"
+                      className="h-9 px-3 gap-1.5 text-sm font-medium bg-primary hover:bg-primary/90"
                       title="Registrar puntos"
                     >
-                      <Trophy className="w-3 h-3" />
-                      Puntos
+                      <Trophy className="w-4 h-4" />
+                      <span className="hidden sm:inline">Puntos</span>
                     </Button>
                     <Button
                       onClick={() => {
@@ -365,7 +386,7 @@ export function GamesClient({ userId }: Props) {
                       }}
                       size="sm"
                       variant="ghost"
-                      className="h-8 w-8 p-0 hover:bg-blue-100"
+                      className="h-9 w-9 p-0 hover:bg-blue-100 dark:hover:bg-blue-950"
                       title="Editar juego"
                     >
                       <Edit2 className="w-4 h-4 text-blue-600" />
@@ -377,7 +398,7 @@ export function GamesClient({ userId }: Props) {
                       }}
                       size="sm"
                       variant="ghost"
-                      className="h-8 w-8 p-0 hover:bg-red-100"
+                      className="h-9 w-9 p-0 hover:bg-red-100 dark:hover:bg-red-950"
                       title="Eliminar juego"
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />

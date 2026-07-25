@@ -442,6 +442,200 @@ input:focus, textarea:focus, select:focus {
   .progress-glow {
     transition: all 0.3s ease;
   }
+
+  /* ===== TARJETAS CON PROFUNDIDAD Y GRADIENTES ===== */
+
+  /* Card vibrante - para juegos y equipos */
+  .card-vibrant {
+    background: linear-gradient(
+      135deg,
+      hsl(from var(--primary) h calc(s + 8%) calc(l + 3%)) 0%,
+      var(--card) 50%,
+      hsl(from var(--primary) h calc(s - 5%) calc(l - 1%)) 100%
+    );
+    border: 1.5px solid hsl(from var(--primary) h s calc(l - 12%));
+    box-shadow:
+      0 12px 40px -6px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 60px -12px hsl(from var(--primary) h s calc(l - 8%));
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card-vibrant::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at 20% 50%,
+      hsl(from var(--primary) h calc(s + 15%) calc(l + 8%)) 0%,
+      transparent 50%
+    );
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  .card-vibrant:hover {
+    transform: translateY(-6px);
+    border-color: hsl(from var(--primary) h s calc(l - 5%));
+    box-shadow:
+      0 20px 60px -4px rgba(0, 0, 0, 0.20),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 0 80px -6px hsl(from var(--primary) h s calc(l - 8%));
+  }
+
+  /* Destacado en tarjeta */
+  .card-accent {
+    background: linear-gradient(
+      to right,
+      hsl(from var(--primary) h calc(s + 12%) calc(l + 2%)),
+      hsl(from var(--primary) h calc(s + 5%) calc(l + 1%))
+    );
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid hsl(from var(--primary) h calc(s + 10%) calc(l - 5%));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 8px 24px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Badge con glow */
+  .badge-glow {
+    background: linear-gradient(
+      135deg,
+      hsl(from var(--primary) h s calc(l - 5%)),
+      hsl(from var(--primary) h s calc(l - 12%))
+    );
+    color: white;
+    box-shadow:
+      0 4px 16px -2px rgba(0, 0, 0, 0.15),
+      0 0 24px -6px hsl(from var(--primary) h s calc(l - 10%));
+    transition: all 0.3s ease;
+  }
+
+  .badge-glow:hover {
+    transform: scale(1.05);
+    box-shadow:
+      0 6px 24px -2px rgba(0, 0, 0, 0.20),
+      0 0 32px -2px hsl(from var(--primary) h s calc(l - 10%));
+  }
+
+  /* ===== TIMELINE ===== */
+
+  @keyframes timeline-entry {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .timeline-container {
+    position: relative;
+    padding: 2rem 0;
+  }
+
+  .timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      hsl(from var(--primary) h s calc(l - 10%)),
+      hsl(from var(--primary) h s calc(l - 20%)),
+      transparent
+    );
+    transform: translateX(-50%);
+  }
+
+  @media (max-width: 768px) {
+    .timeline-container::before {
+      left: 2rem;
+    }
+  }
+
+  .timeline-item {
+    margin-bottom: 3rem;
+    animation: timeline-entry 0.6s ease-out forwards;
+  }
+
+  .timeline-item:nth-child(1) { animation-delay: 0s; }
+  .timeline-item:nth-child(2) { animation-delay: 0.1s; }
+  .timeline-item:nth-child(3) { animation-delay: 0.2s; }
+  .timeline-item:nth-child(4) { animation-delay: 0.3s; }
+  .timeline-item:nth-child(5) { animation-delay: 0.4s; }
+  .timeline-item:nth-child(n+6) { animation-delay: 0.5s; }
+
+  .timeline-dot {
+    position: absolute;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: var(--card);
+    border: 3px solid hsl(from var(--primary) h s calc(l - 8%));
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 0 8px var(--background), 0 0 20px hsl(from var(--primary) h s calc(l - 10%));
+    transition: all 0.3s ease;
+  }
+
+  .timeline-item:hover .timeline-dot {
+    width: 28px;
+    height: 28px;
+    box-shadow: 0 0 0 12px var(--background), 0 0 30px hsl(from var(--primary) h s calc(l - 5%));
+  }
+
+  .timeline-content {
+    margin-left: auto;
+    margin-right: 0;
+    width: calc(50% - 60px);
+  }
+
+  @media (max-width: 768px) {
+    .timeline-container::before {
+      left: 2rem;
+    }
+
+    .timeline-dot {
+      left: 2rem;
+    }
+
+    .timeline-content {
+      margin-left: 0;
+      width: calc(100% - 100px);
+    }
+  }
+
+  .timeline-card {
+    background: linear-gradient(
+      135deg,
+      hsl(from var(--primary) h calc(s + 5%) calc(l + 2%)) 0%,
+      var(--card) 100%
+    );
+    border: 1px solid hsl(from var(--primary) h s calc(l - 10%));
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow:
+      0 8px 32px -4px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 40px -12px hsl(from var(--primary) h s calc(l - 8%));
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .timeline-card:hover {
+    transform: translateX(8px);
+    box-shadow:
+      0 12px 40px -2px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 0 50px -8px hsl(from var(--primary) h s calc(l - 8%));
+  }
 }
 
 
