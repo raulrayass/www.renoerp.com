@@ -20,6 +20,7 @@ import { TeamFlag } from '@/components/team-flag'
 import { ScoreboardFullscreen } from '@/components/scoreboard-fullscreen'
 import { PodiumFullscreen } from '@/components/podium-fullscreen'
 import { useGames, useTeams, useGameScores } from '@/lib/hooks'
+import { MobileSheet } from '@/components/mobile'
 
 interface Props {
   userId: string
@@ -401,168 +402,165 @@ export function GamesClient({ userId }: Props) {
         </div>
       )}
 
-      {/* Game Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => {
-        setDialogOpen(open)
-        if (!open) {
-          setForm({ ...emptyForm })
-          setEditingId(null)
-          clearNewParam()
-        }
-      }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar juego' : 'Crear juego'}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Nombre *</Label>
-              <Input
-                id="name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Ej: Rally, Volley"
-              />
-            </div>
-            <div>
-              <Label htmlFor="description">Descripción</Label>
-              <Input
-                id="description"
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Ej: reto"
-              />
-            </div>
-            <div>
-              <Label htmlFor="gameDate">Fecha</Label>
-              <Input
-                id="gameDate"
-                type="date"
-                value={form.gameDate}
-                onChange={(e) => setForm({ ...form, gameDate: e.target.value })}
-              />
-            </div>
-            <div className="flex gap-2 justify-end pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => { setDialogOpen(false); clearNewParam() }}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {editingId ? 'Guardar cambios' : 'Crear juego'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Game Modal - MobileSheet (adaptive: Dialog on desktop, Drawer on mobile) */}
+      <MobileSheet 
+        open={dialogOpen} 
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (!open) {
+            setForm({ ...emptyForm })
+            setEditingId(null)
+            clearNewParam()
+          }
+        }}
+        title={editingId ? 'Editar juego' : 'Crear juego'}
+        size="md"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="name">Nombre *</Label>
+            <Input
+              id="name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Ej: Rally, Volley"
+            />
+          </div>
+          <div>
+            <Label htmlFor="description">Descripción</Label>
+            <Input
+              id="description"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Ej: reto"
+            />
+          </div>
+          <div>
+            <Label htmlFor="gameDate">Fecha</Label>
+            <Input
+              id="gameDate"
+              type="date"
+              value={form.gameDate}
+              onChange={(e) => setForm({ ...form, gameDate: e.target.value })}
+            />
+          </div>
+          <div className="flex gap-2 justify-end pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => { setDialogOpen(false); clearNewParam() }}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isPending}>
+              {editingId ? 'Guardar cambios' : 'Crear juego'}
+            </Button>
+          </div>
+        </form>
+      </MobileSheet>
 
-      {/* Scoring Dialog */}
-      <Dialog open={scoringDialogOpen} onOpenChange={setScoringDialogOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Registrar puntos</DialogTitle>
-            <DialogDescription>
-              {selectedGameId && gameList.find((g) => g.id === selectedGameId)?.name}
-            </DialogDescription>
-          </DialogHeader>
+      {/* Scoring Modal - MobileSheet (adaptive: Dialog on desktop, Drawer on mobile) */}
+      <MobileSheet 
+        open={scoringDialogOpen} 
+        onOpenChange={setScoringDialogOpen}
+        title="Registrar puntos"
+        description={selectedGameId && gameList.find((g) => g.id === selectedGameId)?.name}
+        size="md"
+      >
+        {teams.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            Crea equipos primero para registrar puntos
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {/* Current Scores */}
+            <div>
+              <Label className="font-semibold">Puntuación actual</Label>
+              <div className="space-y-2 mt-2">
+                {teams.map((team) => (
+                  <div key={team.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <TeamFlag country={team.country} color={team.color} shape="rect" className="w-6 h-4" />
+                      <span className="text-sm font-medium">{team.name}</span>
+                    </div>
+                    <span className="font-bold">{getTeamTotalPoints(team.id)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          {teams.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Crea equipos primero para registrar puntos
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {/* Current Scores */}
+            {/* Add Score Form */}
+            <form onSubmit={handleAddScore} className="space-y-3 border-t pt-4">
               <div>
-                <Label className="font-semibold">Puntuación actual</Label>
-                <div className="space-y-2 mt-2">
+                <Label htmlFor="teamId">Equipo</Label>
+                <select
+                  id="teamId"
+                  value={scoringForm.teamId}
+                  onChange={(e) => setScoringForm({ ...scoringForm, teamId: e.target.value })}
+                  className="w-full px-3 py-2 border border-input rounded-md text-sm bg-background h-10"
+                >
+                  <option value="">Selecciona un equipo</option>
                   {teams.map((team) => (
-                    <div key={team.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
-                      <div className="flex items-center gap-2">
-                        <TeamFlag country={team.country} color={team.color} shape="rect" className="w-6 h-4" />
-                        <span className="text-sm font-medium">{team.name}</span>
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="points">Puntos</Label>
+                <Input
+                  id="points"
+                  type="number"
+                  value={scoringForm.points}
+                  onChange={(e) => setScoringForm({ ...scoringForm, points: e.target.value })}
+                  placeholder="10"
+                />
+              </div>
+              <Button type="submit" disabled={isPending} className="w-full">
+                Registrar puntos
+              </Button>
+            </form>
+
+            {/* Score History */}
+            {gameScores.length > 0 && (
+              <div className="border-t pt-4">
+                <Label className="font-semibold">Registro</Label>
+                <div className="space-y-1 mt-2 max-h-40 overflow-y-auto">
+                  {gameScores.map((score) => (
+                    <div key={score.id} className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {teamMap.get(score.teamId) && (
+                          <>
+                            <TeamFlag
+                              country={teamMap.get(score.teamId)!.country}
+                              color={teamMap.get(score.teamId)!.color}
+                              shape="rect"
+                              className="w-5 h-3.5"
+                            />
+                            <span className="truncate">{teamMap.get(score.teamId)!.name}</span>
+                          </>
+                        )}
                       </div>
-                      <span className="font-bold">{getTeamTotalPoints(team.id)}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-bold">+{score.points}</span>
+                        <Button
+                          onClick={() => handleDeleteScore(score.id, score.gameId)}
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 hover:bg-red-100"
+                        >
+                          <Minus className="w-3 h-3 text-red-600" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Add Score Form */}
-              <form onSubmit={handleAddScore} className="space-y-3 border-t pt-4">
-                <div>
-                  <Label htmlFor="teamId">Equipo</Label>
-                  <select
-                    id="teamId"
-                    value={scoringForm.teamId}
-                    onChange={(e) => setScoringForm({ ...scoringForm, teamId: e.target.value })}
-                    className="w-full px-3 py-2 border border-input rounded-md text-sm bg-background h-10"
-                  >
-                    <option value="">Selecciona un equipo</option>
-                    {teams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="points">Puntos</Label>
-                  <Input
-                    id="points"
-                    type="number"
-                    value={scoringForm.points}
-                    onChange={(e) => setScoringForm({ ...scoringForm, points: e.target.value })}
-                    placeholder="10"
-                  />
-                </div>
-                <Button type="submit" disabled={isPending} className="w-full">
-                  Registrar puntos
-                </Button>
-              </form>
-
-              {/* Score History */}
-              {gameScores.length > 0 && (
-                <div className="border-t pt-4">
-                  <Label className="font-semibold">Registro</Label>
-                  <div className="space-y-1 mt-2 max-h-40 overflow-y-auto">
-                    {gameScores.map((score) => (
-                      <div key={score.id} className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50">
-                        <div className="flex items-center gap-2 min-w-0">
-                          {teamMap.get(score.teamId) && (
-                            <>
-                              <TeamFlag
-                                country={teamMap.get(score.teamId)!.country}
-                                color={teamMap.get(score.teamId)!.color}
-                                shape="rect"
-                                className="w-5 h-3.5"
-                              />
-                              <span className="truncate">{teamMap.get(score.teamId)!.name}</span>
-                            </>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="font-bold">+{score.points}</span>
-                          <Button
-                            onClick={() => handleDeleteScore(score.id, score.gameId)}
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 w-6 p-0 hover:bg-red-100"
-                          >
-                            <Minus className="w-3 h-3 text-red-600" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            )}
+          </div>
+        )}
+      </MobileSheet>
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
