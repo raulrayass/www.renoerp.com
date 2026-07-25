@@ -18,13 +18,18 @@ import { PageHeader } from '@/components/page-header'
 import { COUNTRIES } from '@/lib/countries'
 import { CountryFlagSvg } from '@/lib/country-flags-svg'
 import { TeamFlag } from '@/components/team-flag'
+import { useTeams, useGameScores } from '@/lib/hooks'
 
 interface Props {
   userId: string
 }
 
 export function TeamsClient({ userId }: Props) {
-  const [teamList, setTeamList] = useState<Team[]>([])
+  // Hooks centralizados para sincronización
+  const { teams: teamList, isLoading: teamsLoading } = useTeams()
+  const { scores: allGameScores } = useGameScores()
+
+  // Local UI state
   const [memberCounts, setMemberCounts] = useState<Record<number, number>>({})
   const [expandedTeamId, setExpandedTeamId] = useState<number | null>(null)
   const [expandedMembers, setExpandedMembers] = useState<Record<number, Attendee[]>>({})
@@ -34,13 +39,13 @@ export function TeamsClient({ userId }: Props) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [form, setForm] = useState({ name: '', color: '#4a9d67', country: null as string | null, useCountry: false })
   const [isPending, startTransition] = useTransition()
-  const [loading, setLoading] = useState(true)
 
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
   const emptyForm = { name: '', color: '#4a9d67', country: null as string | null, useCountry: false }
+  const loading = teamsLoading
 
   const PRESET_COLORS = [
     { name: 'Verde', value: '#4a9d67' },
@@ -53,9 +58,18 @@ export function TeamsClient({ userId }: Props) {
     { name: 'Cian', value: '#06b6d4' },
   ]
 
+  // Cargar conteos de miembros al montar
   useEffect(() => {
-    loadTeams()
-  }, [userId])
+    async function loadMemberCounts() {
+      try {
+        const counts = await getTeamMemberCounts(userId)
+        setMemberCounts(counts)
+      } catch (error) {
+        console.error('Error loading member counts:', error)
+      }
+    }
+    loadMemberCounts()
+  }, [userId, teamList.length]) // Refetch si cambia cantidad de equipos
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -69,21 +83,6 @@ export function TeamsClient({ userId }: Props) {
   function clearNewParam() {
     if (searchParams.get('new') === '1') {
       router.replace(pathname, { scroll: false })
-    }
-  }
-
-  async function loadTeams() {
-    setLoading(true)
-    try {
-      const data = await getTeams(userId)
-      const counts = await getTeamMemberCounts(userId)
-      setTeamList(data)
-      setMemberCounts(counts)
-    } catch (error) {
-      toast.error('Error al cargar equipos')
-      console.error(error)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -123,7 +122,7 @@ export function TeamsClient({ userId }: Props) {
         setForm({ ...emptyForm })
         setEditingId(null)
         clearNewParam()
-        await loadTeams()
+        // Los hooks SWR se actualizan automáticamente
       } catch (error) {
         toast.error('Error al guardar el equipo')
         console.error(error)
@@ -137,7 +136,7 @@ export function TeamsClient({ userId }: Props) {
         await deleteTeam(userId, id)
         toast.success('Equipo eliminado')
         setDeleteDialogOpen(false)
-        await loadTeams()
+        // Los hooks SWR se actualizan automáticamente
       } catch (error) {
         toast.error('Error al eliminar el equipo')
         console.error(error)

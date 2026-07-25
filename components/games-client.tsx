@@ -19,15 +19,19 @@ import { PageHeader } from '@/components/page-header'
 import { TeamFlag } from '@/components/team-flag'
 import { ScoreboardFullscreen } from '@/components/scoreboard-fullscreen'
 import { PodiumFullscreen } from '@/components/podium-fullscreen'
+import { useGames, useTeams, useGameScores } from '@/lib/hooks'
 
 interface Props {
   userId: string
 }
 
 export function GamesClient({ userId }: Props) {
-  const [gameList, setGameList] = useState<Game[]>([])
-  const [teams, setTeams] = useState<Team[]>([])
-  const [allGameScores, setAllGameScores] = useState<GameScore[]>([])
+  // Hooks centralizados para sincronización cross-module
+  const { games: gameList, isLoading: gamesLoading, error: gamesError } = useGames()
+  const { teams, isLoading: teamsLoading, error: teamsError } = useTeams()
+  const { scores: allGameScores, isLoading: scoresLoading } = useGameScores()
+
+  // Local UI state
   const [gameScores, setGameScores] = useState<GameScore[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -38,7 +42,6 @@ export function GamesClient({ userId }: Props) {
   const [form, setForm] = useState({ name: '', description: '', gameDate: '' })
   const [scoringForm, setScoringForm] = useState({ teamId: '', points: '' })
   const [isPending, startTransition] = useTransition()
-  const [loading, setLoading] = useState(true)
   const [fullscreenMode, setFullscreenMode] = useState(false)
   const [podiumMode, setPodiumMode] = useState(false)
 
@@ -47,10 +50,7 @@ export function GamesClient({ userId }: Props) {
   const searchParams = useSearchParams()
 
   const emptyForm = { name: '', description: '', gameDate: '' }
-
-  useEffect(() => {
-    loadGames()
-  }, [userId])
+  const loading = gamesLoading || teamsLoading || scoresLoading
 
   useEffect(() => {
     if (searchParams.get('new') === '1') {
@@ -66,24 +66,13 @@ export function GamesClient({ userId }: Props) {
     }
   }
 
-  async function loadGames() {
-    setLoading(true)
-    try {
-      const [gamesData, teamsData, allScoresData] = await Promise.all([
-        getGames(userId),
-        getTeams(userId),
-        getAllGameScores(userId),
-      ])
-      setGameList(gamesData)
-      setTeams(teamsData)
-      setAllGameScores(allScoresData)
-    } catch (error) {
-      toast.error('Error al cargar datos')
-      console.error(error)
-    } finally {
-      setLoading(false)
+  // Effect para sincronizar game scores cuando cambian los datos
+  useEffect(() => {
+    if (selectedGameId && allGameScores.length > 0) {
+      const selected = allGameScores.filter(score => score.gameId === selectedGameId)
+      setGameScores(selected)
     }
-  }
+  }, [selectedGameId, allGameScores])
 
   async function loadScoresForGame(gameId: number) {
     try {
@@ -118,7 +107,7 @@ export function GamesClient({ userId }: Props) {
         setForm({ ...emptyForm })
         setEditingId(null)
         clearNewParam()
-        await loadGames()
+        // Los hooks SWR se actualizan automáticamente via mutate()
       } catch (error) {
         toast.error('Error al guardar el juego')
         console.error(error)
