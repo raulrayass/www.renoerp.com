@@ -21,6 +21,7 @@ import { ScoreboardFullscreen } from '@/components/scoreboard-fullscreen'
 import { PodiumFullscreen } from '@/components/podium-fullscreen'
 import { useGames, useTeams, useGameScores } from '@/lib/hooks'
 import { MobileSheet } from '@/components/mobile'
+import { ListSkeleton } from '@/components/list-skeleton'
 
 interface Props {
   userId: string
@@ -199,6 +200,15 @@ export function GamesClient({ userId }: Props) {
       pointsPerGame: getTeamPointsPerGame(team.id),
     }))
     .sort((a, b) => b.totalPoints - a.totalPoints)
+
+  // Show skeleton while loading
+  if (gamesLoading || teamsLoading || scoresLoading) {
+    return (
+      <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
+        <ListSkeleton count={5} variant="card" />
+      </div>
+    )
+  }
 
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">

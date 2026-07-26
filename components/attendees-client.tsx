@@ -39,6 +39,7 @@ import { SectionHeader } from '@/components/section-header'
 import { StatCard } from '@/components/stat-card'
 import { PageHeader } from '@/components/page-header'
 import { StatsBar } from '@/components/stats-bar'
+import { ListSkeleton } from '@/components/list-skeleton'
 
 interface Props {
   userId: string
