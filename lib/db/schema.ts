@@ -75,6 +75,7 @@ export const attendees = pgTable('attendees', {
   emergencyContactPhone2: text('emergencyContactPhone2'),
   allergies: text('allergies'),
   checkedIn: boolean('checkedIn').notNull().default(false),
+  checkInTime: timestamp('checkInTime'), // Timestamp del primer check-in
   roomId: integer('roomId'),
   teamId: integer('teamId'),
   totalAmount: numeric('totalAmount', { precision: 12, scale: 2 }).notNull().default('0'),
@@ -183,6 +184,43 @@ export const staffPayments = pgTable('staff_payments', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
+// Check-ins - Registro de asistencia con timestamp
+export const checkIns = pgTable('check_ins', {
+  id: serial('id').primaryKey(),
+  eventId: integer('eventId').notNull(),
+  attendeeId: integer('attendeeId').notNull(),
+  userId: text('userId').notNull(), // Admin que hizo check-in
+  checkInTime: timestamp('checkInTime').notNull().defaultNow(),
+  checkInType: text('checkInType').notNull().default('arrival'), // 'arrival' | 'departure'
+  notes: text('notes'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
+// Invitation Links - Enlaces públicos para registro
+export const invitationLinks = pgTable('invitation_links', {
+  id: serial('id').primaryKey(),
+  eventId: integer('eventId').notNull(),
+  code: text('code').notNull().unique(), // Token único para el link
+  createdBy: text('createdBy').notNull(), // userId del admin que lo creó
+  expiresAt: timestamp('expiresAt'), // null = no expira
+  status: text('status').notNull().default('active'), // 'active' | 'expired' | 'disabled'
+  maxUses: integer('maxUses'), // null = unlimited
+  currentUses: integer('currentUses').notNull().default(0),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+// Event QR Codes - Códigos QR únicos por evento
+export const eventQRCodes = pgTable('event_qr_codes', {
+  id: serial('id').primaryKey(),
+  eventId: integer('eventId').notNull(),
+  code: text('code').notNull().unique(), // Token único del QR
+  qrUrl: text('qrUrl'), // URL donde está almacenado el QR (Vercel Blob)
+  type: text('type').notNull().default('checkin'), // 'checkin' | 'registration'
+  status: text('status').notNull().default('active'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
 export type AppUser = typeof appUsers.$inferSelect
 export type Event = typeof events.$inferSelect
 export type NewEvent = typeof events.$inferInsert
@@ -198,6 +236,12 @@ export type AttendeePayment = typeof attendeePayments.$inferSelect
 export type NewAttendeePayment = typeof attendeePayments.$inferInsert
 export type Church = typeof churches.$inferSelect
 export type NewChurch = typeof churches.$inferInsert
+export type CheckIn = typeof checkIns.$inferSelect
+export type NewCheckIn = typeof checkIns.$inferInsert
+export type InvitationLink = typeof invitationLinks.$inferSelect
+export type NewInvitationLink = typeof invitationLinks.$inferInsert
+export type EventQRCode = typeof eventQRCodes.$inferSelect
+export type NewEventQRCode = typeof eventQRCodes.$inferInsert
 export type Team = typeof teams.$inferSelect
 export type NewTeam = typeof teams.$inferInsert
 export type Room = typeof rooms.$inferSelect

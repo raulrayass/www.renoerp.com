@@ -1,20 +1,26 @@
-import { db } from '@/lib/db'
-import { appUsers, events, eventMembers, categories, transactions, attendees, attendeePayments, churches, teams, rooms, games, gameScores, staff, staffPayments } from '@/lib/db/schema'
+import { db } from '../lib/db/index'
+import { appUsers, events, eventMembers, categories, transactions, attendees, attendeePayments, churches, teams, rooms, games, gameScores, staff, staffPayments } from '../lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 /**
  * Migration Script: Single-Event → Multi-Event Architecture
  * 
  * Preserves ALL existing data by:
- * 1. Creating a "Default" event for each existing user
- * 2. Assigning user as admin of their Default event
- * 3. Linking ALL existing data to the Default event
+ * 1. Creating a "Campamento 2026" event for each existing user
+ * 2. Assigning user as admin of their Campamento 2026 event
+ * 3. Linking ALL existing data to the Campamento 2026 event
+ * 
+ * This is the main/current campamento with all modules and data
  * 
  * Run with: npx ts-node scripts/migrate-to-multi-event.ts
  */
 
+const CURRENT_YEAR = new Date().getFullYear()
+const DEFAULT_EVENT_NAME = `Campamento ${CURRENT_YEAR}`
+
 async function migrate() {
   console.log('🚀 Starting migration to multi-event architecture...\n')
+  console.log(`📅 Creating event: "${DEFAULT_EVENT_NAME}"\n`)
 
   try {
     // Step 1: Get all users
@@ -25,22 +31,22 @@ async function migrate() {
     let eventsCreated = 0
     let dataLinked = 0
 
-    // Step 2: For each user, create Default event and link data
+    // Step 2: For each user, create Campamento event and link data
     for (const user of users) {
       console.log(`\n👤 Processing user: ${user.email}`)
 
-      // Check if Default event already exists
+      // Check if Campamento event already exists
       const existingEvent = await db.select().from(events).where(eq(events.adminId, user.id))
       
       if (existingEvent.length === 0) {
-        // Create Default event for this user
+        // Create Campamento event for this user
         const [newEvent] = await db.insert(events).values({
-          name: 'Campamento Default',
+          name: DEFAULT_EVENT_NAME,
           adminId: user.id,
           status: 'active',
         }).returning()
 
-        console.log(`  ✓ Created Default event (ID: ${newEvent.id})`)
+        console.log(`  ✓ Created event "${DEFAULT_EVENT_NAME}" (ID: ${newEvent.id})`)
         eventsCreated++
 
         // Create event_member record (user as admin)
@@ -50,9 +56,11 @@ async function migrate() {
           role: 'admin',
           status: 'active',
         })
-        console.log(`  ✓ Added user as admin to event`)
+        console.log(`  ✓ Added user as admin to "${DEFAULT_EVENT_NAME}"`)
 
         // Link all existing data to this event
+        // This ensures ALL current data (teams, attendees, games, etc) 
+        // is preserved and belongs to the Campamento 2026 event
         const eventId = newEvent.id
 
         // Link categories

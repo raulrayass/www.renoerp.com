@@ -8,44 +8,45 @@ import { desc } from 'drizzle-orm'
 const ATTENDEES_PER_PAGE = 20
 
 // Get ALL attendees for reports and metrics (no pagination)
-export async function getAllAttendees(userId: string) {
+export async function getAllAttendees(userId: string, eventId: number) {
   return db
     .select()
     .from(attendees)
-    .where(eq(attendees.userId, userId))
+    .where(and(eq(attendees.userId, userId), eq(attendees.eventId, eventId)))
     .orderBy(desc(attendees.createdAt))
 }
 
 // Get paginated attendees for UI display
-export async function getAttendees(userId: string, page: number = 1) {
+export async function getAttendees(userId: string, eventId: number, page: number = 1) {
   const offset = (page - 1) * ATTENDEES_PER_PAGE
   return db
     .select()
     .from(attendees)
-    .where(eq(attendees.userId, userId))
+    .where(and(eq(attendees.userId, userId), eq(attendees.eventId, eventId)))
     .orderBy(desc(attendees.createdAt))
     .limit(ATTENDEES_PER_PAGE)
     .offset(offset)
 }
 
-export async function getAttendeesCount(userId: string) {
+export async function getAttendeesCount(userId: string, eventId: number) {
   const result = await db
     .select({ count: db.sql`count(*)` })
     .from(attendees)
-    .where(eq(attendees.userId, userId))
+    .where(and(eq(attendees.userId, userId), eq(attendees.eventId, eventId)))
   return parseInt(result[0].count as string, 10)
 }
 
-export async function getAttendeePayments(userId: string, attendeeId: number) {
+export async function getAttendeePayments(userId: string, eventId: number, attendeeId: number) {
   return db
     .select()
     .from(attendeePayments)
-    .where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, attendeeId)))
+    .where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.eventId, eventId), eq(attendeePayments.attendeeId, attendeeId)))
     .orderBy(desc(attendeePayments.createdAt))
 }
 
 export async function createAttendee(
   userId: string,
+  eventId: number,
   data: {
     name: string
     age?: number | null
@@ -67,6 +68,7 @@ export async function createAttendee(
 ) {
   await db.insert(attendees).values({
     userId,
+    eventId,
     name: data.name,
     age: data.age ?? null,
     shirtSize: data.shirtSize || null,
