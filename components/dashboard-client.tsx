@@ -45,10 +45,16 @@ export function DashboardClient({ userId }: { userId: string }) {
   }
 
   const {
-    totalIncome, totalExpense, balance,
-    monthlyData, expenseByCategory, incomeByCategory,
-    categoryComparison, recentTransactions, paymentMethodBreakdown,
-  } = data
+    totalIncome = 0, 
+    totalExpense = 0, 
+    balance = 0,
+    monthlyData = [], 
+    expenseByCategory = [], 
+    incomeByCategory = [],
+    categoryComparison = [], 
+    recentTransactions = [], 
+    paymentMethodBreakdown = {},
+  } = data || {}
 
   const hasAnyData = totalIncome > 0 || totalExpense > 0
 
