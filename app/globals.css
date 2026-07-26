@@ -713,17 +713,17 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
-/* Pulse animation - smooth and refined */
+/* Pulse animation - extra smooth for skeletons */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.6;
+    opacity: 0.65;
   }
 }
 
-/* Skeleton shimmer - elegant loading effect */
+/* Skeleton shimmer - elegant, smooth loading effect */
 @keyframes shimmer {
   -100% {
     background-position: calc(-468px) 0;
@@ -733,17 +733,29 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
-/* Neumorphic skeleton pulse */
+/* Smooth fade-in when content loads */
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Neumorphic skeleton pulse - subtle elevation change */
 @keyframes skeletonPulse {
   0%, 100% {
     box-shadow:
-      -8px -8px 16px rgba(255, 255, 255, 0.7),
-      8px 8px 16px rgba(22, 163, 74, 0.08);
+      -6px -6px 12px rgba(255, 255, 255, 0.6),
+      6px 6px 12px rgba(22, 163, 74, 0.08);
   }
   50% {
     box-shadow:
       -8px -8px 16px rgba(255, 255, 255, 0.5),
-      8px 8px 16px rgba(22, 163, 74, 0.12);
+      8px 8px 16px rgba(22, 163, 74, 0.1);
   }
 }
 
@@ -793,9 +805,9 @@ input:focus, textarea:focus, select:focus {
   animation: bounce 2s ease-in-out infinite;
 }
 
-/* Skeleton animations */
+/* Skeleton animations - smooth loading experience */
 .animate-skeleton {
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .animate-skeleton-shimmer {
@@ -803,16 +815,21 @@ input:focus, textarea:focus, select:focus {
     90deg,
     var(--muted) 0%,
     var(--muted) calc(100% - 468px),
-    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.15) 50%,
     var(--muted) calc(100% + 468px),
     var(--muted) 100%
   );
   background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+  animation: shimmer 2.5s ease-in-out infinite;
 }
 
 .animate-skeleton-neumorphic {
-  animation: skeletonPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: skeletonPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth entrance animation for content */
+.animate-fade-in-content {
+  animation: fadeInContent 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Smooth hover effects */

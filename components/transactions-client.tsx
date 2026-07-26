@@ -25,6 +25,7 @@ import { jsPDF } from 'jspdf'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { PageHeader } from '@/components/page-header'
+import { ListSkeleton } from '@/components/list-skeleton'
 
 type TransactionRow = Awaited<ReturnType<typeof getTransactions>>[number]
 
@@ -378,8 +379,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center flex-1 min-h-64">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
+        <ListSkeleton count={8} variant="row" />
       </div>
     )
   }
