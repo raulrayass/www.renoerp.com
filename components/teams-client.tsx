@@ -20,6 +20,7 @@ import { CountryFlagSvg } from '@/lib/country-flags-svg'
 import { TeamFlag } from '@/components/team-flag'
 import { useTeams, useGameScores } from '@/lib/hooks'
 import { MobileSheet } from '@/components/mobile'
+import { ListSkeleton } from '@/components/list-skeleton'
 
 interface Props {
   userId: string
@@ -168,15 +169,7 @@ export function TeamsClient({ userId }: Props) {
       )}
 
       {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="overflow-hidden">
-              <CardContent className="p-4 animate-pulse">
-                <div className="h-4 w-40 bg-muted rounded" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <ListSkeleton count={4} variant="row" />
       ) : teamList.length === 0 ? (
         <Card className="p-12 text-center">
           <div className="flex flex-col items-center gap-3">

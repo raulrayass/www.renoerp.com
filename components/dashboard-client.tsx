@@ -10,6 +10,7 @@ import {
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Banknote, Smartphone } from 'lucide-react'
 import { DonutChart } from '@/components/donut-chart'
 import { GameStatsCard } from '@/components/dashboard/game-stats-card'
+import { DashboardSkeleton } from '@/components/dashboard-skeleton'
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
 
@@ -35,11 +36,7 @@ export function DashboardClient({ userId }: { userId: string }) {
   }, [userId])
 
   if (!data) {
-    return (
-      <div className="flex items-center justify-center flex-1 min-h-64">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   const {
