@@ -50,54 +50,54 @@
 
 :root {
   color-scheme: light;
-  --background: #f8f9fa;
-  --foreground: #0d1117;
+  --background: #fafbfc;
+  --foreground: #0a0e27;
   --card: #ffffff;
-  --card-foreground: #0d1117;
+  --card-foreground: #0a0e27;
   --popover: #ffffff;
-  --popover-foreground: #0d1117;
-  --primary: #1db854;
+  --popover-foreground: #0a0e27;
+  --primary: #6366f1;
   --primary-foreground: #ffffff;
-  --secondary: #f0f2f5;
-  --secondary-foreground: #0d1117;
-  --muted: #d0d7de;
-  --muted-foreground: #57606a;
-  --accent: #1db854;
+  --secondary: #ec4899;
+  --secondary-foreground: #ffffff;
+  --muted: #e5e7eb;
+  --muted-foreground: #6b7280;
+  --accent: #f59e0b;
   --accent-foreground: #ffffff;
-  --destructive: #da3633;
-  --border: #e1e4e8;
-  --input: #f0f2f5;
-  --ring: #1db854;
-  --chart-1: #1db854;
-  --chart-2: #2ea043;
-  --chart-3: #3fb36f;
-  --chart-4: #0e8037;
-  --chart-5: #5bd98e;
-  --radius: 1.5rem;
-  --income: #1db854;
-  --expense: #da3633;
+  --destructive: #ef4444;
+  --border: #e5e7eb;
+  --input: #f3f4f6;
+  --ring: #6366f1;
+  --chart-1: #6366f1;
+  --chart-2: #8b5cf6;
+  --chart-3: #ec4899;
+  --chart-4: #f59e0b;
+  --chart-5: #10b981;
+  --radius: 0.75rem;
+  --income: #10b981;
+  --expense: #ef4444;
   --sidebar: #ffffff;
-  --sidebar-foreground: #0d1117;
-  --sidebar-primary: #1db854;
+  --sidebar-foreground: #0a0e27;
+  --sidebar-primary: #6366f1;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0f2f5;
-  --sidebar-accent-foreground: #0d1117;
-  --sidebar-border: #e1e4e8;
-  --sidebar-ring: #1db854;
+  --sidebar-accent: #f3f4f6;
+  --sidebar-accent-foreground: #0a0e27;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #6366f1;
 }
 
 .dark {
   color-scheme: dark;
-  --background: #000000;
-  --foreground: #e6edf3;
-  --card: #0a0a0a;
-  --card-foreground: #e6edf3;
-  --popover: #0a0a0a;
-  --popover-foreground: #e6edf3;
-  --primary: #2ea043;
-  --primary-foreground: #ffffff;
-  --secondary: #121212;
-  --secondary-foreground: #e6edf3;
+  --background: #0f0f1e;
+  --foreground: #f3f4f6;
+  --card: #1a1a2e;
+  --card-foreground: #f3f4f6;
+  --popover: #1a1a2e;
+  --popover-foreground: #f3f4f6;
+  --primary: #818cf8;
+  --primary-foreground: #0a0e27;
+  --secondary: #ec4899;
+  --secondary-foreground: #ffffff;
   --muted: #1a1a1a;
   --muted-foreground: #8b949e;
   --accent: #2ea043;
@@ -662,6 +662,129 @@ input:focus, textarea:focus, select:focus {
       0 12px 40px -2px rgba(0, 0, 0, 0.12),
       inset 0 1px 0 rgba(255, 255, 255, 0.15),
       0 0 50px -8px hsl(from var(--primary) h s calc(l - 8%));
+  }
+
+  /* ===== SMOOTH ANIMATIONS & TRANSITIONS ===== */
+  
+  /* Fade in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Slide up animation */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Slide down animation */
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Scale pop animation */
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Pulse animation */
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* Bounce animation */
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  /* Global transition utility */
+  * {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  /* Disable transitions for specific cases */
+  .no-transition {
+    @apply transition-none;
+  }
+
+  /* Animation utility classes */
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slideUp {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-slideDown {
+    animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  /* Smooth hover effects */
+  button, a, [role="button"] {
+    @apply hover:scale-105 active:scale-95;
+  }
+
+  /* Input focus ring smooth */
+  input:focus, textarea:focus, select:focus {
+    @apply ring-2 ring-primary/30 ring-offset-2;
+  }
+
+  /* Card animations */
+  .card {
+    @apply animate-fadeIn;
+  }
+
+  /* Modal animations */
+  [role="dialog"] {
+    @apply animate-scaleIn;
   }
 }
 
