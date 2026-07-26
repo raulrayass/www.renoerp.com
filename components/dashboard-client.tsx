@@ -244,10 +244,11 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* ===== 6. Ingresos vs Egresos por mes ===== */}
       <h2 className="section-title">Ingresos vs Egresos por mes</h2>
-      <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden min-h-96">
-        {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
-          <ResponsiveContainer width="100%" height={280} minHeight={200}>
-            <BarChart data={monthlyData} barGap={6}>
+      <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden">
+        {monthlyData && monthlyData.length > 0 && monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
+          <div style={{ width: '100%', height: '320px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyData ?? []} barGap={6}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.5} />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
               <YAxis
@@ -266,20 +267,22 @@ export function DashboardClient({ userId }: { userId: string }) {
               <Bar dataKey="income" name="Ingresos" fill={INCOME_COLOR} radius={[8, 8, 0, 0]} />
               <Bar dataKey="expense" name="Egresos" fill={EXPENSE_COLOR} radius={[8, 8, 0, 0]} />
             </BarChart>
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          </div>
         ) : (
           <EmptyChart text="No hay datos aun. Agrega transacciones para ver la grafica." />
         )}
       </Card>
 
       {/* ===== 7. Comparativo por categoría ===== */}
-      <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden min-h-80">
+      <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden">
         <h2 className="font-semibold text-lg text-foreground mb-1">Ingreso y Egreso por categoría</h2>
         <p className="text-xs text-muted-foreground mb-4">Comparativo de cada categoría del campamento</p>
-        {hasAnyData && categoryComparison.length > 0 ? (
-          <ResponsiveContainer width="100%" height={Math.max(240, categoryComparison.length * 56)} minHeight={200}>
-            <BarChart
-              data={categoryComparison}
+        {hasAnyData && categoryComparison && categoryComparison.length > 0 ? (
+          <div style={{ width: '100%', height: `${Math.max(240, categoryComparison.length * 56)}px` }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={categoryComparison ?? []}
               layout="vertical"
               margin={{ left: 20, right: 8 }}
               barGap={4}
@@ -309,7 +312,8 @@ export function DashboardClient({ userId }: { userId: string }) {
               <Bar dataKey="income" name="Ingresos" fill={INCOME_COLOR} radius={[0, 8, 8, 0]} barSize={16} />
               <Bar dataKey="expense" name="Egresos" fill={EXPENSE_COLOR} radius={[0, 8, 8, 0]} barSize={16} />
             </BarChart>
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          </div>
         ) : (
           <EmptyChart text="Agrega transacciones para ver el comparativo por categoria." />
         )}
