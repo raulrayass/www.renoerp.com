@@ -773,4 +773,3 @@ input:focus, textarea:focus, select:focus {
 [role="dialog"] {
   animation: scaleIn 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-// Force redeploy - fixing dashboard loading issue
