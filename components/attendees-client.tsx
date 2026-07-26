@@ -662,6 +662,14 @@ export function AttendeesClient({ userId }: Props) {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
+        <ListSkeleton count={8} variant="row" />
+      </div>
+    )
+  }
+
   return (
     <div className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex flex-col gap-2 sm:gap-3 max-w-7xl mx-auto w-full">
       {/* Header */}

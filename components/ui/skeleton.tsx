@@ -36,19 +36,21 @@ export function Skeleton({ className, variant = 'default', ...props }: SkeletonP
  */
 export function CardSkeleton() {
   return (
-    <div className="space-y-4 p-4 sm:p-6">
-      <div className="flex items-center justify-between">
-        <Skeleton variant="text" className="h-6 w-40" />
-        <Skeleton variant="avatar" className="h-8 w-8" />
-      </div>
-      <div className="space-y-3">
-        <Skeleton variant="text" className="h-4 w-full" />
-        <Skeleton variant="text" className="h-4 w-5/6" />
-        <Skeleton variant="text" className="h-4 w-4/6" />
-      </div>
-      <div className="flex gap-2">
-        <Skeleton variant="button" className="h-9 w-20" />
-        <Skeleton variant="button" className="h-9 w-20" />
+    <div className="clay-card p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton variant="text" className="h-6 w-40" />
+          <Skeleton variant="avatar" className="h-8 w-8" />
+        </div>
+        <div className="space-y-3">
+          <Skeleton variant="text" className="h-4 w-full" />
+          <Skeleton variant="text" className="h-4 w-5/6" />
+          <Skeleton variant="text" className="h-4 w-4/6" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton variant="button" className="h-9 w-20" />
+          <Skeleton variant="button" className="h-9 w-20" />
+        </div>
       </div>
     </div>
   )
@@ -59,25 +61,27 @@ export function CardSkeleton() {
  */
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="space-y-3">
-      {/* Header */}
-      <div className="flex gap-4 p-4 border-b border-border">
-        <Skeleton variant="text" className="h-4 w-20" />
-        <Skeleton variant="text" className="h-4 w-24" />
-        <Skeleton variant="text" className="h-4 w-20" />
-      </div>
-      
-      {/* Rows */}
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex gap-4 p-4 border-b border-border/50">
-          <Skeleton variant="avatar" className="h-10 w-10 shrink-0" />
-          <div className="flex-1 space-y-2">
-            <Skeleton variant="text" className="h-4 w-1/2" />
-            <Skeleton variant="text" className="h-3 w-1/3" />
-          </div>
-          <Skeleton variant="text" className="h-4 w-16" />
+    <div className="clay-card rounded-xl sm:rounded-2xl overflow-hidden">
+      <div className="space-y-0">
+        {/* Header */}
+        <div className="flex gap-4 p-4 border-b border-border">
+          <Skeleton variant="text" className="h-4 w-20" />
+          <Skeleton variant="text" className="h-4 w-24" />
+          <Skeleton variant="text" className="h-4 w-20" />
         </div>
-      ))}
+        
+        {/* Rows */}
+        {Array.from({ length: rows }).map((_, i) => (
+          <div key={i} className="flex gap-4 p-4 border-b border-border/50">
+            <Skeleton variant="avatar" className="h-10 w-10 shrink-0" />
+            <div className="flex-1 space-y-2">
+              <Skeleton variant="text" className="h-4 w-1/2" />
+              <Skeleton variant="text" className="h-3 w-1/3" />
+            </div>
+            <Skeleton variant="text" className="h-4 w-16" />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -106,15 +110,17 @@ export function ListSkeleton({ items = 3 }: { items?: number }) {
  */
 export function StatCardSkeleton() {
   return (
-    <div className="space-y-3 p-5 sm:p-6">
-      <div className="flex items-start justify-between">
-        <div className="flex-1 space-y-2">
-          <Skeleton variant="text" className="h-3 w-24" />
-          <Skeleton variant="text" className="h-6 w-32" />
+    <div className="stat-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-2">
+            <Skeleton variant="text" className="h-3 w-24" />
+            <Skeleton variant="text" className="h-6 w-32" />
+          </div>
+          <Skeleton variant="avatar" className="h-12 w-12" />
         </div>
-        <Skeleton variant="avatar" className="h-12 w-12" />
+        <Skeleton variant="text" className="h-2 w-20" />
       </div>
-      <Skeleton variant="text" className="h-2 w-20" />
     </div>
   )
 }
@@ -124,15 +130,17 @@ export function StatCardSkeleton() {
  */
 export function ChartSkeleton() {
   return (
-    <div className="space-y-3 p-5 sm:p-6">
-      <Skeleton variant="text" className="h-4 w-40 mb-4" />
-      <div className="space-y-2">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <Skeleton variant="text" className="h-3 w-12" />
-            <Skeleton variant="text" className="h-6 w-full" />
-          </div>
-        ))}
+    <div className="aurora-card p-5 sm:p-6 rounded-xl sm:rounded-2xl min-h-80">
+      <div className="space-y-3">
+        <Skeleton variant="text" className="h-4 w-40 mb-4" />
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <Skeleton variant="text" className="h-3 w-12" />
+              <Skeleton variant="text" className="h-6 w-full" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -168,11 +176,11 @@ export function GridSkeleton({ cols = 2, rows = 3 }: { cols?: number; rows?: num
  */
 export function MobileListSkeleton() {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="flex gap-2 p-3 rounded-lg bg-muted/30">
+        <div key={i} className="clay-card flex gap-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl">
           <Skeleton variant="avatar" className="h-10 w-10 shrink-0" />
-          <div className="flex-1 space-y-1">
+          <div className="flex-1 space-y-2">
             <Skeleton variant="text" className="h-3 w-3/4" />
             <Skeleton variant="text" className="h-2 w-1/2" />
           </div>
