@@ -16,14 +16,13 @@ interface DonutChartProps {
 }
 
 export function DonutChart({
-  data = [],
+  data,
   formatValue = (v) => String(v),
   centerLabel = 'Total',
   height = 200,
 }: DonutChartProps) {
-  const validData = data && Array.isArray(data) ? data : []
-  const total = validData.reduce((sum, d) => sum + d.value, 0)
-  const sorted = [...validData].sort((a, b) => b.value - a.value)
+  const total = data.reduce((sum, d) => sum + d.value, 0)
+  const sorted = [...data].sort((a, b) => b.value - a.value)
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
