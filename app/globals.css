@@ -713,13 +713,37 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
-/* Pulse animation */
+/* Pulse animation - smooth and refined */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.6;
+  }
+}
+
+/* Skeleton shimmer - elegant loading effect */
+@keyframes shimmer {
+  -100% {
+    background-position: calc(-468px) 0;
+  }
+  100% {
+    background-position: calc(468px) 0;
+  }
+}
+
+/* Neumorphic skeleton pulse */
+@keyframes skeletonPulse {
+  0%, 100% {
+    box-shadow:
+      -8px -8px 16px rgba(255, 255, 255, 0.7),
+      8px 8px 16px rgba(22, 163, 74, 0.08);
+  }
+  50% {
+    box-shadow:
+      -8px -8px 16px rgba(255, 255, 255, 0.5),
+      8px 8px 16px rgba(22, 163, 74, 0.12);
   }
 }
 
@@ -767,6 +791,28 @@ input:focus, textarea:focus, select:focus {
 
 .animate-bounce-subtle {
   animation: bounce 2s ease-in-out infinite;
+}
+
+/* Skeleton animations */
+.animate-skeleton {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    var(--muted) calc(100% - 468px),
+    rgba(255, 255, 255, 0.2) 50%,
+    var(--muted) calc(100% + 468px),
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-skeleton-neumorphic {
+  animation: skeletonPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* Smooth hover effects */
