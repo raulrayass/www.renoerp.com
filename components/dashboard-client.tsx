@@ -86,9 +86,6 @@ export function DashboardClient({ userId }: { userId: string }) {
         </div>
       </Card>
 
-      {/* ===== 1B. Game Stats Cards ===== */}
-      <GameStatsCard />
-
       {/* ===== 2. Ingresos + Egresos — stat cards mejoradas ===== */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <Card className="stat-card p-4 sm:p-5 rounded-xl sm:rounded-2xl">
@@ -158,6 +155,12 @@ export function DashboardClient({ userId }: { userId: string }) {
           </div>
         </Card>
       )}
+
+      {/* ===== 3B. Game Stats Cards ===== */}
+      <div>
+        <h2 className="font-semibold text-lg text-foreground mb-4 px-0.5">Actividad en Juegos</h2>
+        <GameStatsCard />
+      </div>
 
       {/* ===== 4. Movimientos recientes ===== */}
       <Card className="aurora-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
