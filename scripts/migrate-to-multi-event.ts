@@ -1,5 +1,5 @@
-import { db } from '@/lib/db'
-import { appUsers, events, eventMembers, categories, transactions, attendees, attendeePayments, churches, teams, rooms, games, gameScores, staff, staffPayments } from '@/lib/db/schema'
+import { db } from '../lib/db/index'
+import { appUsers, events, eventMembers, categories, transactions, attendees, attendeePayments, churches, teams, rooms, games, gameScores, staff, staffPayments } from '../lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 /**
