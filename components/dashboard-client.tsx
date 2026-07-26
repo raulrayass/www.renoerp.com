@@ -121,41 +121,41 @@ export function DashboardClient({ userId }: { userId: string }) {
         <>
           <h2 className="section-title">Disponible por método</h2>
           <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
-          <div className="space-y-4">
-            {methodBars.map((m) => {
-              const Icon = m.icon
-              const pctValue = pct(m.value)
-              return (
-                <div key={m.label}>
-                  <div className="flex items-center justify-between mb-2.5">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 icon-glow"
-                        style={{ backgroundColor: m.color + '15' }}
-                      >
-                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: m.color }} />
+            <div className="space-y-4">
+              {methodBars.map((m) => {
+                const Icon = m.icon
+                const pctValue = pct(m.value)
+                return (
+                  <div key={m.label}>
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 icon-glow"
+                          style={{ backgroundColor: m.color + '15' }}
+                        >
+                          <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: m.color }} />
+                        </div>
+                        <span className="text-sm sm:text-base font-medium text-foreground">{m.label}</span>
                       </div>
-                      <span className="text-sm sm:text-base font-medium text-foreground">{m.label}</span>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="text-sm sm:text-base font-bold text-foreground tabular-nums">
+                          {formatCurrency(m.value)}
+                        </span>
+                        <span className="text-xs text-muted-foreground w-10 text-right font-medium tabular-nums">
+                          {pctValue}%
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <span className="text-sm sm:text-base font-bold text-foreground tabular-nums">
-                        {formatCurrency(m.value)}
-                      </span>
-                      <span className="text-xs text-muted-foreground w-10 text-right font-medium tabular-nums">
-                        {pctValue}%
-                      </span>
+                    <div className="h-2.5 sm:h-3 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500 progress-glow"
+                        style={{ width: `${pctValue}%`, backgroundColor: m.color }}
+                      />
                     </div>
                   </div>
-                  <div className="h-2.5 sm:h-3 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500 progress-glow"
-                      style={{ width: `${pctValue}%`, backgroundColor: m.color }}
-                    />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
           </Card>
         </>
       )}

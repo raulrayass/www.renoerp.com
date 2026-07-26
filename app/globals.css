@@ -717,29 +717,31 @@ input:focus, textarea:focus, select:focus {
   transition: none;
 }
 
-/* Animation utility classes */
-.animate-fadeIn {
-  animation: fadeIn 300ms ease-out;
-}
+/* Animation utility classes - Custom animations */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 300ms ease-out;
+  }
 
-.animate-slideUp {
-  animation: slideUp 400ms cubic-bezier(0.16, 1, 0.3, 1);
-}
+  .animate-slide-up {
+    animation: slideUp 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-.animate-slideDown {
-  animation: slideDown 400ms cubic-bezier(0.16, 1, 0.3, 1);
-}
+  .animate-slide-down {
+    animation: slideDown 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-.animate-scaleIn {
-  animation: scaleIn 300ms cubic-bezier(0.16, 1, 0.3, 1);
-}
+  .animate-scale-in {
+    animation: scaleIn 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-.animate-pulse-slow {
-  animation: pulse 2s ease-in-out infinite;
-}
+  .animate-pulse-slow {
+    animation: pulse 2s ease-in-out infinite;
+  }
 
-.animate-bounce-subtle {
-  animation: bounce 2s ease-in-out infinite;
+  .animate-bounce-subtle {
+    animation: bounce 2s ease-in-out infinite;
+  }
 }
 
 /* Smooth hover effects */
