@@ -118,8 +118,9 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* ===== 3. Disponible por método ===== */}
       {totalAvailable > 0 && (
-        <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
-          <h2 className="font-semibold text-lg text-foreground mb-5">Disponible por método</h2>
+        <>
+          <h2 className="section-title">Disponible por método</h2>
+          <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
           <div className="space-y-4">
             {methodBars.map((m) => {
               const Icon = m.icon
@@ -155,7 +156,8 @@ export function DashboardClient({ userId }: { userId: string }) {
               )
             })}
           </div>
-        </Card>
+          </Card>
+        </>
       )}
 
       {/* ===== 3B. Game Stats Cards ===== */}
@@ -165,8 +167,8 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* ===== 4. Movimientos recientes ===== */}
+      <h2 className="section-title">Movimientos recientes</h2>
       <Card className="aurora-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
-        <h2 className="font-semibold text-lg text-foreground mb-4">Movimientos recientes</h2>
         {recentTransactions.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">
             No hay transacciones aun. Ve a Finanzas para agregar.
@@ -205,9 +207,10 @@ export function DashboardClient({ userId }: { userId: string }) {
       </Card>
 
       {/* ===== 5. Donuts: Ingresos y Egresos por categoría ===== */}
+      <h2 className="section-title">Análisis por categoría</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
-          <h2 className="font-semibold text-lg text-foreground mb-4">Ingresos por categoría</h2>
+          <h3 className="font-medium text-sm text-muted-foreground mb-4">Ingresos</h3>
           {incomeByCategory.length > 0 ? (
             <DonutChart
               data={incomeByCategory.map((c) => ({ name: c.name, value: c.total, color: c.color }))}
@@ -220,7 +223,7 @@ export function DashboardClient({ userId }: { userId: string }) {
         </Card>
 
         <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
-          <h2 className="font-semibold text-lg text-foreground mb-4">Egresos por categoría</h2>
+          <h3 className="font-medium text-sm text-muted-foreground mb-4">Egresos</h3>
           {expenseByCategory.length > 0 ? (
             <DonutChart
               data={expenseByCategory.map((c) => ({ name: c.name, value: c.total, color: c.color }))}
@@ -234,8 +237,8 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* ===== 6. Ingresos vs Egresos por mes ===== */}
+      <h2 className="section-title">Ingresos vs Egresos por mes</h2>
       <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden">
-        <h2 className="font-semibold text-lg text-foreground mb-4">Ingresos vs Egresos por mes</h2>
         {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={monthlyData} barGap={6}>
@@ -307,8 +310,8 @@ export function DashboardClient({ userId }: { userId: string }) {
       </Card>
 
       {/* ===== 8. Camperos por Iglesia ===== */}
+      <h2 className="section-title">Camperos por Iglesia</h2>
       <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
-        <h2 className="font-semibold text-lg text-foreground mb-4">Camperos por Iglesia</h2>
         {churchData && churchData.length > 0 ? (
           <DonutChart
             data={churchData.map((c) => ({ name: c.name, value: c.value, color: c.color }))}
