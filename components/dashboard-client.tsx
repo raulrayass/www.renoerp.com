@@ -9,6 +9,7 @@ import {
 } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Banknote, Smartphone } from 'lucide-react'
 import { DonutChart } from '@/components/donut-chart'
+import { GameStatsCard } from '@/components/dashboard/game-stats-card'
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
 
@@ -84,6 +85,9 @@ export function DashboardClient({ userId }: { userId: string }) {
           </div>
         </div>
       </Card>
+
+      {/* ===== 1B. Game Stats Cards ===== */}
+      <GameStatsCard />
 
       {/* ===== 2. Ingresos + Egresos — stat cards mejoradas ===== */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
