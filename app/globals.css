@@ -805,9 +805,9 @@ input:focus, textarea:focus, select:focus {
   animation: bounce 2s ease-in-out infinite;
 }
 
-/* Skeleton animations - smooth but snappy loading experience */
+/* Skeleton animations - smooth and gentle loading experience */
 .animate-skeleton {
-  animation: pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .animate-skeleton-shimmer {
@@ -820,11 +820,11 @@ input:focus, textarea:focus, select:focus {
     var(--muted) 100%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
+  animation: shimmer 2s ease-in-out infinite;
 }
 
 .animate-skeleton-neumorphic {
-  animation: skeletonPulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: skeletonPulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* Smooth entrance animation for content */
