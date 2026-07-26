@@ -25,60 +25,68 @@ export function EventSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/* Trigger Button - Clean Card Style */}
         <Button
           variant="ghost"
-          size="sm"
-          className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg hover:bg-muted/50 transition-all duration-200 group h-9"
+          className="flex items-center justify-between gap-2.5 px-3 sm:px-4 py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary/5 to-transparent hover:from-primary/10 hover:to-transparent transition-all duration-300 border border-primary/20 h-10 sm:h-11 shadow-sm hover:shadow-md group"
         >
-          <Calendar className="w-4 h-4 text-primary shrink-0" />
-          <span className="hidden sm:inline truncate text-sm font-medium text-foreground max-w-[140px]">
-            {currentEvent.name}
-          </span>
-          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
+            </div>
+            <span className="hidden xs:inline truncate text-xs sm:text-sm font-semibold text-foreground">
+              {currentEvent.name}
+            </span>
+          </div>
+          <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56 mt-2">
+
+      {/* Dropdown Menu */}
+      <DropdownMenuContent align="start" className="w-60 mt-3 rounded-2xl shadow-lg">
+        {/* Header */}
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="font-normal px-2 py-2 bg-muted/30 rounded-t-lg">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Campamentos</p>
+          <DropdownMenuLabel className="font-normal px-4 py-3 bg-primary/5 rounded-t-xl border-b border-primary/10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest">Tus Campamentos</p>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
 
-        <div className="max-h-64 overflow-y-auto">
+        {/* Events List */}
+        <div className="max-h-72 overflow-y-auto">
           {events.map((event) => (
             <DropdownMenuItem
               key={event.id}
               onClick={() => selectEvent(event.id)}
-              className={`gap-2.5 cursor-pointer py-2.5 px-3 transition-all duration-200 ${
+              className={`gap-3 cursor-pointer py-3 px-4 transition-all duration-200 rounded-none ${
                 currentEvent.id === event.id
-                  ? 'bg-primary/10 text-primary focus:bg-primary/10 focus:text-primary'
-                  : 'hover:bg-muted/50'
+                  ? 'bg-primary/15 text-primary'
+                  : 'hover:bg-secondary/50'
               }`}
             >
-              <Calendar className="w-4 h-4 shrink-0" />
+              <div className={`w-3 h-3 rounded-full flex-shrink-0 ${currentEvent.id === event.id ? 'bg-primary' : 'bg-muted'}`} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{event.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {event.status === 'active' ? 'Activo' : 'Inactivo'}
+                <p className="text-sm font-semibold text-foreground truncate">{event.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {event.status === 'active' ? '✓ Activo' : '○ Inactivo'}
                 </p>
               </div>
-              {currentEvent.id === event.id && (
-                <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-              )}
             </DropdownMenuItem>
           ))}
         </div>
 
+        {/* Divider */}
         <DropdownMenuSeparator className="my-2" />
+
+        {/* Create Button */}
         <DropdownMenuGroup>
           <DropdownMenuItem
             onClick={() => router.push('/events/create')}
-            className="gap-2.5 cursor-pointer py-2.5 px-3 transition-all duration-200 hover:bg-primary/5 text-primary focus:text-primary focus:bg-primary/5 group"
+            className="gap-3 cursor-pointer py-3 px-4 transition-all duration-200 hover:bg-orange-50 group rounded-b-xl"
           >
-            <div className="w-4 h-4 rounded-md bg-primary/10 flex items-center justify-center group-hover:bg-primary/20">
-              <Plus className="w-3 h-3" />
+            <div className="w-5 h-5 rounded-lg bg-[--action]/20 flex items-center justify-center group-hover:bg-[--action]/30 transition-colors flex-shrink-0">
+              <Plus className="w-3 h-3 text-[--action]" />
             </div>
-            <span className="text-sm font-medium">Crear campamento</span>
+            <span className="text-sm font-semibold text-[--action] group-hover:text-[--action]">Crear Campamento</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
