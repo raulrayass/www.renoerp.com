@@ -45,16 +45,10 @@ export function DashboardClient({ userId }: { userId: string }) {
   }
 
   const {
-    totalIncome = 0, 
-    totalExpense = 0, 
-    balance = 0,
-    monthlyData = [], 
-    expenseByCategory = [], 
-    incomeByCategory = [],
-    categoryComparison = [], 
-    recentTransactions = [], 
-    paymentMethodBreakdown = {},
-  } = data || {}
+    totalIncome, totalExpense, balance,
+    monthlyData, expenseByCategory, incomeByCategory,
+    categoryComparison, recentTransactions, paymentMethodBreakdown,
+  } = data
 
   const hasAnyData = totalIncome > 0 || totalExpense > 0
 
@@ -124,46 +118,44 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* ===== 3. Disponible por método ===== */}
       {totalAvailable > 0 && (
-        <>
-          <h2 className="section-title">Disponible por método</h2>
-          <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
-            <div className="space-y-4">
-              {methodBars.map((m) => {
-                const Icon = m.icon
-                const pctValue = pct(m.value)
-                return (
-                  <div key={m.label}>
-                    <div className="flex items-center justify-between mb-2.5">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 icon-glow"
-                          style={{ backgroundColor: m.color + '15' }}
-                        >
-                          <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: m.color }} />
-                        </div>
-                        <span className="text-sm sm:text-base font-medium text-foreground">{m.label}</span>
-                      </div>
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="text-sm sm:text-base font-bold text-foreground tabular-nums">
-                          {formatCurrency(m.value)}
-                        </span>
-                        <span className="text-xs text-muted-foreground w-10 text-right font-medium tabular-nums">
-                          {pctValue}%
-                        </span>
-                      </div>
-                    </div>
-                    <div className="h-2.5 sm:h-3 rounded-full bg-muted overflow-hidden">
+        <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
+          <h2 className="font-semibold text-lg text-foreground mb-5">Disponible por método</h2>
+          <div className="space-y-4">
+            {methodBars.map((m) => {
+              const Icon = m.icon
+              const pctValue = pct(m.value)
+              return (
+                <div key={m.label}>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-3">
                       <div
-                        className="h-full rounded-full transition-all duration-500 progress-glow"
-                        style={{ width: `${pctValue}%`, backgroundColor: m.color }}
-                      />
+                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 icon-glow"
+                        style={{ backgroundColor: m.color + '15' }}
+                      >
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: m.color }} />
+                      </div>
+                      <span className="text-sm sm:text-base font-medium text-foreground">{m.label}</span>
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className="text-sm sm:text-base font-bold text-foreground tabular-nums">
+                        {formatCurrency(m.value)}
+                      </span>
+                      <span className="text-xs text-muted-foreground w-10 text-right font-medium tabular-nums">
+                        {pctValue}%
+                      </span>
                     </div>
                   </div>
-                )
-              })}
-            </div>
-          </Card>
-        </>
+                  <div className="h-2.5 sm:h-3 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500 progress-glow"
+                      style={{ width: `${pctValue}%`, backgroundColor: m.color }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
       )}
 
       {/* ===== 3B. Game Stats Cards ===== */}
@@ -173,8 +165,8 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* ===== 4. Movimientos recientes ===== */}
-      <h2 className="section-title">Movimientos recientes</h2>
       <Card className="aurora-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
+        <h2 className="font-semibold text-lg text-foreground mb-4">Movimientos recientes</h2>
         {recentTransactions.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">
             No hay transacciones aun. Ve a Finanzas para agregar.
@@ -213,10 +205,9 @@ export function DashboardClient({ userId }: { userId: string }) {
       </Card>
 
       {/* ===== 5. Donuts: Ingresos y Egresos por categoría ===== */}
-      <h2 className="section-title">Análisis por categoría</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
-          <h3 className="font-medium text-sm text-muted-foreground mb-4">Ingresos</h3>
+          <h2 className="font-semibold text-lg text-foreground mb-4">Ingresos por categoría</h2>
           {incomeByCategory.length > 0 ? (
             <DonutChart
               data={incomeByCategory.map((c) => ({ name: c.name, value: c.total, color: c.color }))}
@@ -229,7 +220,7 @@ export function DashboardClient({ userId }: { userId: string }) {
         </Card>
 
         <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
-          <h3 className="font-medium text-sm text-muted-foreground mb-4">Egresos</h3>
+          <h2 className="font-semibold text-lg text-foreground mb-4">Egresos por categoría</h2>
           {expenseByCategory.length > 0 ? (
             <DonutChart
               data={expenseByCategory.map((c) => ({ name: c.name, value: c.total, color: c.color }))}
@@ -243,12 +234,11 @@ export function DashboardClient({ userId }: { userId: string }) {
       </div>
 
       {/* ===== 6. Ingresos vs Egresos por mes ===== */}
-      <h2 className="section-title">Ingresos vs Egresos por mes</h2>
       <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden">
-        {monthlyData && monthlyData.length > 0 && monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
-          <div style={{ width: '100%', height: '320px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData ?? []} barGap={6}>
+        <h2 className="font-semibold text-lg text-foreground mb-4">Ingresos vs Egresos por mes</h2>
+        {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={monthlyData} barGap={6}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.5} />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
               <YAxis
@@ -267,8 +257,7 @@ export function DashboardClient({ userId }: { userId: string }) {
               <Bar dataKey="income" name="Ingresos" fill={INCOME_COLOR} radius={[8, 8, 0, 0]} />
               <Bar dataKey="expense" name="Egresos" fill={EXPENSE_COLOR} radius={[8, 8, 0, 0]} />
             </BarChart>
-            </ResponsiveContainer>
-          </div>
+          </ResponsiveContainer>
         ) : (
           <EmptyChart text="No hay datos aun. Agrega transacciones para ver la grafica." />
         )}
@@ -278,11 +267,10 @@ export function DashboardClient({ userId }: { userId: string }) {
       <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden">
         <h2 className="font-semibold text-lg text-foreground mb-1">Ingreso y Egreso por categoría</h2>
         <p className="text-xs text-muted-foreground mb-4">Comparativo de cada categoría del campamento</p>
-        {hasAnyData && categoryComparison && categoryComparison.length > 0 ? (
-          <div style={{ width: '100%', height: `${Math.max(240, categoryComparison.length * 56)}px` }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={categoryComparison ?? []}
+        {hasAnyData && categoryComparison.length > 0 ? (
+          <ResponsiveContainer width="100%" height={Math.max(240, categoryComparison.length * 56)}>
+            <BarChart
+              data={categoryComparison}
               layout="vertical"
               margin={{ left: 20, right: 8 }}
               barGap={4}
@@ -312,16 +300,15 @@ export function DashboardClient({ userId }: { userId: string }) {
               <Bar dataKey="income" name="Ingresos" fill={INCOME_COLOR} radius={[0, 8, 8, 0]} barSize={16} />
               <Bar dataKey="expense" name="Egresos" fill={EXPENSE_COLOR} radius={[0, 8, 8, 0]} barSize={16} />
             </BarChart>
-            </ResponsiveContainer>
-          </div>
+          </ResponsiveContainer>
         ) : (
           <EmptyChart text="Agrega transacciones para ver el comparativo por categoria." />
         )}
       </Card>
 
       {/* ===== 8. Camperos por Iglesia ===== */}
-      <h2 className="section-title">Camperos por Iglesia</h2>
       <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl">
+        <h2 className="font-semibold text-lg text-foreground mb-4">Camperos por Iglesia</h2>
         {churchData && churchData.length > 0 ? (
           <DonutChart
             data={churchData.map((c) => ({ name: c.name, value: c.value, color: c.color }))}
