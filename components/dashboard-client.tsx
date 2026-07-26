@@ -244,9 +244,9 @@ export function DashboardClient({ userId }: { userId: string }) {
 
       {/* ===== 6. Ingresos vs Egresos por mes ===== */}
       <h2 className="section-title">Ingresos vs Egresos por mes</h2>
-      <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden">
+      <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden min-h-96">
         {monthlyData.some(m => m.income > 0 || m.expense > 0) ? (
-          <ResponsiveContainer width="100%" height={280}>
+          <ResponsiveContainer width="100%" height={280} minHeight={200}>
             <BarChart data={monthlyData} barGap={6}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.5} />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
@@ -273,11 +273,11 @@ export function DashboardClient({ userId }: { userId: string }) {
       </Card>
 
       {/* ===== 7. Comparativo por categoría ===== */}
-      <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden">
+      <Card className="clay-card p-5 sm:p-6 rounded-xl sm:rounded-2xl overflow-hidden min-h-80">
         <h2 className="font-semibold text-lg text-foreground mb-1">Ingreso y Egreso por categoría</h2>
         <p className="text-xs text-muted-foreground mb-4">Comparativo de cada categoría del campamento</p>
         {hasAnyData && categoryComparison.length > 0 ? (
-          <ResponsiveContainer width="100%" height={Math.max(240, categoryComparison.length * 56)}>
+          <ResponsiveContainer width="100%" height={Math.max(240, categoryComparison.length * 56)} minHeight={200}>
             <BarChart
               data={categoryComparison}
               layout="vertical"
