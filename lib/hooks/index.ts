@@ -1,4 +1,5 @@
 export { useGameScores } from './useGameScores'
 export { useGames, type Game } from './useGames'
 export { useTeams, type Team } from './useTeams'
+export { useAttendees, type Attendee } from './useAttendees'
 export { useMediaQuery } from './useMediaQuery'

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Plus, Edit2, Trash2, ChevronDown, Users } from 'lucide-react'
 import { toast } from 'sonner'
@@ -19,6 +19,7 @@ import { COUNTRIES } from '@/lib/countries'
 import { CountryFlagSvg } from '@/lib/country-flags-svg'
 import { TeamFlag } from '@/components/team-flag'
 import { useTeams, useGameScores } from '@/lib/hooks'
+import { MobileSheet } from '@/components/mobile'
 
 interface Props {
   userId: string
@@ -282,119 +283,119 @@ export function TeamsClient({ userId }: Props) {
         </div>
       )}
 
-      {/* Team Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => {
-        setDialogOpen(open)
-        if (!open) {
-          setForm({ ...emptyForm })
-          setEditingId(null)
-          clearNewParam()
-        }
-      }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar equipo' : 'Agregar equipo'}</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Nombre *</Label>
-              <Input
-                id="name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Ej: Nombre del equipo"
+      {/* Team Modal - MobileSheet (adaptive: Dialog on desktop, Drawer on mobile) */}
+      <MobileSheet 
+        open={dialogOpen} 
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (!open) {
+            setForm({ ...emptyForm })
+            setEditingId(null)
+            clearNewParam()
+          }
+        }}
+        title={editingId ? 'Editar equipo' : 'Agregar equipo'}
+        size="md"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="name">Nombre *</Label>
+            <Input
+              id="name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Ej: Nombre del equipo"
+            />
+          </div>
+
+          <div>
+            <Label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.useCountry}
+                onChange={(e) => setForm({ ...form, useCountry: e.target.checked, country: e.target.checked ? form.country || 'MX' : null })}
+                className="w-4 h-4 rounded"
               />
-            </div>
+              Usar bandera de país en lugar de color
+            </Label>
+          </div>
 
+          {form.useCountry ? (
             <div>
-              <Label className="flex items-center gap-2 cursor-pointer">
+              <Label>País *</Label>
+              <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg bg-muted/20">
+                {COUNTRIES.map((country) => (
+                  <button
+                    key={country.code}
+                    type="button"
+                    onClick={() => setForm({ ...form, country: country.code })}
+                    className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all ${
+                      form.country === country.code
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20'
+                        : 'border-muted hover:border-emerald-300'
+                    }`}
+                  >
+                    <div className="w-8 h-6">
+                      <CountryFlagSvg code={country.code} className="w-full h-full" />
+                    </div>
+                    <span className="truncate text-xs font-medium">{country.code}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <Label>Color *</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {PRESET_COLORS.map((preset) => (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => setForm({ ...form, color: preset.value })}
+                    className="relative flex items-center justify-center h-10 rounded-lg border-2 transition-all hover:scale-105"
+                    style={{
+                      backgroundColor: preset.value,
+                      borderColor: form.color === preset.value ? '#000' : 'transparent',
+                    }}
+                    title={preset.name}
+                  >
+                    {form.color === preset.value && (
+                      <span className="text-white font-bold text-lg">✓</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2 flex items-center gap-2">
                 <input
-                  type="checkbox"
-                  checked={form.useCountry}
-                  onChange={(e) => setForm({ ...form, useCountry: e.target.checked, country: e.target.checked ? form.country || 'MX' : null })}
-                  className="w-4 h-4 rounded"
+                  type="color"
+                  value={form.color}
+                  onChange={(e) => setForm({ ...form, color: e.target.value })}
+                  className="w-10 h-10 rounded cursor-pointer"
                 />
-                Usar bandera de país en lugar de color
-              </Label>
-            </div>
-
-            {form.useCountry ? (
-              <div>
-                <Label>País *</Label>
-                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg bg-muted/20">
-                  {COUNTRIES.map((country) => (
-                    <button
-                      key={country.code}
-                      type="button"
-                      onClick={() => setForm({ ...form, country: country.code })}
-                      className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all ${
-                        form.country === country.code
-                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20'
-                          : 'border-muted hover:border-emerald-300'
-                      }`}
-                    >
-                      <div className="w-8 h-6">
-                        <CountryFlagSvg code={country.code} className="w-full h-full" />
-                      </div>
-                      <span className="truncate text-xs font-medium">{country.code}</span>
-                    </button>
-                  ))}
-                </div>
+                <Input
+                  value={form.color}
+                  onChange={(e) => setForm({ ...form, color: e.target.value })}
+                  placeholder="Código hex"
+                  className="text-xs"
+                />
               </div>
-            ) : (
-              <div>
-                <Label>Color *</Label>
-                <div className="grid grid-cols-4 gap-2">
-                  {PRESET_COLORS.map((preset) => (
-                    <button
-                      key={preset.value}
-                      type="button"
-                      onClick={() => setForm({ ...form, color: preset.value })}
-                      className="relative flex items-center justify-center h-10 rounded-lg border-2 transition-all hover:scale-105"
-                      style={{
-                        backgroundColor: preset.value,
-                        borderColor: form.color === preset.value ? '#000' : 'transparent',
-                      }}
-                      title={preset.name}
-                    >
-                      {form.color === preset.value && (
-                        <span className="text-white font-bold text-lg">✓</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-2 flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={form.color}
-                    onChange={(e) => setForm({ ...form, color: e.target.value })}
-                    className="w-10 h-10 rounded cursor-pointer"
-                  />
-                  <Input
-                    value={form.color}
-                    onChange={(e) => setForm({ ...form, color: e.target.value })}
-                    placeholder="Código hex"
-                    className="text-xs"
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="flex gap-2 justify-end pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => { setDialogOpen(false); clearNewParam() }}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {editingId ? 'Guardar cambios' : 'Crear equipo'}
-              </Button>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          )}
+
+          <div className="flex gap-2 justify-end pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => { setDialogOpen(false); clearNewParam() }}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isPending}>
+              {editingId ? 'Guardar cambios' : 'Crear equipo'}
+            </Button>
+          </div>
+        </form>
+      </MobileSheet>
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

@@ -1,5 +1,6 @@
 import { Topbar } from '@/components/topbar'
 import { FloatingDock } from '@/components/floating-dock'
+import { BottomNavigation } from '@/components/mobile'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <FloatingDock />
+      <BottomNavigation />
     </div>
   )
 }
