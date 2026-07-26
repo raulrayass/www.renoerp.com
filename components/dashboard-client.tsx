@@ -10,8 +10,6 @@ import {
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Banknote, Smartphone } from 'lucide-react'
 import { DonutChart } from '@/components/donut-chart'
 import { GameStatsCard } from '@/components/dashboard/game-stats-card'
-import { ReportsBuilder } from '@/components/dashboard/reports-builder'
-import { ActivityTimeline } from '@/components/dashboard/activity-timeline'
 
 type DashboardData = Awaited<ReturnType<typeof getDashboardData>>
 
@@ -321,12 +319,6 @@ export function DashboardClient({ userId }: { userId: string }) {
           </div>
         )}
       </Card>
-
-      {/* ===== 9. Línea de Tiempo de Actividades ===== */}
-      <ActivityTimeline />
-
-      {/* ===== 10. Generador de Reportes ===== */}
-      <ReportsBuilder />
     </div>
   )
 }
