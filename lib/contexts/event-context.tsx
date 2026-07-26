@@ -15,18 +15,21 @@
  * 
  * PRIORIDAD DE AUTO-CARGA AL LOGIN:
  * 1. Evento en localStorage (último que usó el usuario)
- * 2. "Campamento Default" (tiene todos los datos migrados actuales)
+ * 2. "Campamento 2026" (tiene todos los módulos y datos migrados actuales)
  * 3. Primer evento disponible
  * 
  * FLUJO:
  * Login → getUserEvents() → buscar en localStorage → 
- * si no existe → buscar "Campamento Default" → setCurrentEventId → 
+ * si no existe → buscar "Campamento 2026" → setCurrentEventId → 
  * localStorage.setItem('lastEventId', id)
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useSession } from '@/lib/auth-client'
 import { getUserEvents } from '@/app/actions/events'
+
+// Nombre del evento principal que contiene todos los módulos y datos del campamento actual
+const CURRENT_EVENT_NAME = `Campamento ${new Date().getFullYear()}`
 
 export interface EventContextType {
   currentEventId: number | null
@@ -74,10 +77,10 @@ export function EventProvider({ children }: { children: ReactNode }) {
         if (savedId && userEvents.some(e => e.id === savedId)) {
           eventToSelect = savedId
         } 
-        // Prioridad 2: Buscar "Campamento Default" (evento con datos migrados)
+        // Prioridad 2: Buscar "Campamento 2026" (evento con todos los módulos y datos)
         else {
-          const defaultEvent = userEvents.find(e => e.name === 'Campamento Default')
-          eventToSelect = defaultEvent?.id || userEvents[0]?.id
+          const mainEvent = userEvents.find(e => e.name === CURRENT_EVENT_NAME)
+          eventToSelect = mainEvent?.id || userEvents[0]?.id
         }
         
         if (eventToSelect) {
