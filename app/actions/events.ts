@@ -4,9 +4,10 @@ import { db } from '@/lib/db'
 import { events, eventMembers } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
-// Obtener todos los eventos donde el usuario es miembro
+// Obtener todos los eventos donde el usuario es miembro O admin
 export async function getUserEvents(userId: string) {
-  const result = await db
+  // Buscar eventos donde el usuario está en eventMembers
+  const memberEvents = await db
     .select({
       id: events.id,
       name: events.name,
@@ -20,7 +21,24 @@ export async function getUserEvents(userId: string) {
     ))
     .orderBy(events.createdAt)
 
-  return result || []
+  // Buscar eventos donde el usuario es el admin
+  const adminEvents = await db
+    .select({
+      id: events.id,
+      name: events.name,
+      role: db.literal('admin'),
+    })
+    .from(events)
+    .where(eq(events.adminId, userId))
+    .orderBy(events.createdAt)
+
+  // Combinar y eliminar duplicados
+  const allEvents = [...memberEvents, ...adminEvents]
+  const uniqueEvents = Array.from(
+    new Map(allEvents.map(e => [e.id, e])).values()
+  )
+  
+  return uniqueEvents
 }
 
 // Crear nuevo evento
