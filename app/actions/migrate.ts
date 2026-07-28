@@ -18,136 +18,152 @@ import {
   staffPayments,
 } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { auth } from '@/lib/auth'
 
 const CURRENT_YEAR = new Date().getFullYear()
-const DEFAULT_EVENT_NAME = `Campamento ${CURRENT_YEAR}`
+const DEFAULT_EVENT_NAME = `Permanece ${CURRENT_YEAR}`
 
 export async function runMigration() {
   console.log('[v0] 🚀 Starting migration to multi-event architecture...\n')
   console.log(`[v0] 📅 Creating event: "${DEFAULT_EVENT_NAME}"\n`)
 
   try {
-    // Step 1: Get all users
-    console.log('[v0] 📋 Step 1: Fetching all users...')
-    const users = await db.select().from(appUsers)
-    console.log(`[v0] ✓ Found ${users.length} users\n`)
+    // Step 0: Get current authenticated user
+    const session = await auth.api.getSession()
+    if (!session?.user?.id) {
+      throw new Error('No user authenticated. Please log in first.')
+    }
+
+    const userId = session.user.id
+    console.log(`[v0] 👤 Migrating for user: ${session.user.email}`)
+
+    // Step 1: Get the current user
+    const users = await db
+      .select()
+      .from(appUsers)
+      .where(eq(appUsers.id, userId))
+    
+    if (users.length === 0) {
+      throw new Error(`User not found in database: ${userId}`)
+    }
+
+    const user = users[0]
+    console.log(`[v0] ✓ Found user: ${user.email}\n`)
 
     let eventsCreated = 0
     let dataLinked = 0
 
-    // Step 2: For each user, create Campamento event and link data
-    for (const user of users) {
-      console.log(`[v0] 👤 Processing user: ${user.email}`)
+    // Step 2: Create Permanece event and link data
+    console.log(`[v0] 👤 Processing user: ${user.email}`)
 
-      // Check if Campamento event already exists
-      const existingEvent = await db
-        .select()
-        .from(events)
-        .where(eq(events.adminId, user.id))
+    // Check if Permanece event already exists
+    const existingEvent = await db
+      .select()
+      .from(events)
+      .where(eq(events.adminId, userId))
 
-      if (existingEvent.length === 0) {
-        // Create Campamento event for this user
-        const [newEvent] = await db
-          .insert(events)
-          .values({
-            name: DEFAULT_EVENT_NAME,
-            adminId: user.id,
-            status: 'active',
-          })
-          .returning()
+    if (existingEvent.length === 0) {
+      // Create Permanece event for this user
+      const [newEvent] = await db
+        .insert(events)
+        .values({
+          name: DEFAULT_EVENT_NAME,
+          adminId: userId,
+          status: 'active',
+        })
+        .returning()
 
-        console.log(
-          `[v0]   ✓ Created event "${DEFAULT_EVENT_NAME}" (ID: ${newEvent.id})`
-        )
-        eventsCreated++
+      console.log(
+        `[v0] ✓ Created event "${DEFAULT_EVENT_NAME}" (ID: ${newEvent.id})`
+      )
+      eventsCreated++
 
-        // Assign user as admin
-        await db
-          .insert(eventMembers)
-          .values({
-            eventId: newEvent.id,
-            userId: user.id,
-            role: 'admin',
-            status: 'active',
-          })
-          .onConflictDoNothing()
+      // Assign user as admin
+      await db
+        .insert(eventMembers)
+        .values({
+          eventId: newEvent.id,
+          userId: userId,
+          role: 'admin',
+          status: 'active',
+        })
+        .onConflictDoNothing()
 
-        console.log(`[v0]   ✓ Added user as admin`)
+      console.log(`[v0] ✓ Added user as admin`)
 
-        // Link all existing data to this event
-        const eventId = newEvent.id
+      // Link all existing data to this event
+      const eventId = newEvent.id
 
-        // Link categories
-        const categoryCount = await db
-          .update(categories)
-          .set({ eventId })
-          .where(eq(categories.userId, user.id))
+      // Link categories
+      await db
+        .update(categories)
+        .set({ eventId })
+        .where(eq(categories.userId, userId))
 
-        // Link transactions
-        await db
-          .update(transactions)
-          .set({ eventId })
-          .where(eq(transactions.userId, user.id))
+      // Link transactions
+      await db
+        .update(transactions)
+        .set({ eventId })
+        .where(eq(transactions.userId, userId))
 
-        // Link attendees
-        await db
-          .update(attendees)
-          .set({ eventId })
-          .where(eq(attendees.userId, user.id))
+      // Link attendees
+      await db
+        .update(attendees)
+        .set({ eventId })
+        .where(eq(attendees.userId, userId))
 
-        // Link attendee payments
-        await db
-          .update(attendeePayments)
-          .set({ eventId })
-          .where(eq(attendeePayments.userId, user.id))
+      // Link attendee payments
+      await db
+        .update(attendeePayments)
+        .set({ eventId })
+        .where(eq(attendeePayments.userId, userId))
 
-        // Link churches
-        await db
-          .update(churches)
-          .set({ eventId })
-          .where(eq(churches.userId, user.id))
+      // Link churches
+      await db
+        .update(churches)
+        .set({ eventId })
+        .where(eq(churches.userId, userId))
 
-        // Link teams
-        await db
-          .update(teams)
-          .set({ eventId })
-          .where(eq(teams.userId, user.id))
+      // Link teams
+      await db
+        .update(teams)
+        .set({ eventId })
+        .where(eq(teams.userId, userId))
 
-        // Link rooms
-        await db
-          .update(rooms)
-          .set({ eventId })
-          .where(eq(rooms.userId, user.id))
+      // Link rooms
+      await db
+        .update(rooms)
+        .set({ eventId })
+        .where(eq(rooms.userId, userId))
 
-        // Link games
-        await db
-          .update(games)
-          .set({ eventId })
-          .where(eq(games.userId, user.id))
+      // Link games
+      await db
+        .update(games)
+        .set({ eventId })
+        .where(eq(games.userId, userId))
 
-        // Link game scores
-        await db
-          .update(gameScores)
-          .set({ eventId })
-          .where(eq(gameScores.userId, user.id))
+      // Link game scores
+      await db
+        .update(gameScores)
+        .set({ eventId })
+        .where(eq(gameScores.userId, userId))
 
-        // Link staff
-        await db
-          .update(staff)
-          .set({ eventId })
-          .where(eq(staff.userId, user.id))
+      // Link staff
+      await db
+        .update(staff)
+        .set({ eventId })
+        .where(eq(staff.userId, userId))
 
-        // Link staff payments
-        await db
-          .update(staffPayments)
-          .set({ eventId })
-          .where(eq(staffPayments.userId, user.id))
+      // Link staff payments
+      await db
+        .update(staffPayments)
+        .set({ eventId })
+        .where(eq(staffPayments.userId, userId))
 
-        console.log(`[v0]   ✓ Linked all data to event`)
-        dataLinked++
-      } else {
-        console.log(`[v0]   ℹ Event already exists, skipping...`)
-      }
+      console.log(`[v0] ✓ Linked all data to event`)
+      dataLinked++
+    } else {
+      console.log(`[v0] ℹ Event already exists, skipping...`)
     }
 
     // Final Summary

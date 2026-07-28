@@ -29,7 +29,7 @@ import { useSession } from '@/lib/auth-client'
 import { getUserEvents } from '@/app/actions/events'
 
 // Nombre del evento principal que contiene todos los módulos y datos del campamento actual
-const CURRENT_EVENT_NAME = `Campamento ${new Date().getFullYear()}`
+const CURRENT_EVENT_NAME = `Permanece ${new Date().getFullYear()}`
 
 export interface EventContextType {
   currentEventId: number | null
@@ -52,7 +52,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
   // Cargar eventos del usuario
   // Prioridad de selección:
   // 1. Evento guardado en localStorage (último seleccionado)
-  // 2. Evento "Campamento Default" (tiene todos los datos actuales)
+  // 2. Evento "Permanece 2026" (tiene todos los datos actuales)
   // 3. Primer evento disponible
   const refetchEvents = React.useCallback(async () => {
     if (!userId) {
