@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { getDashboardData } from '@/app/actions/transactions'
 import { getChurchDistribution } from '@/app/actions/attendees'
-import { useEventContext } from '@/lib/contexts/event-context'
 import { Card } from '@/components/ui/card'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -28,16 +27,13 @@ const INCOME_COLOR = '#22c55e'
 const EXPENSE_COLOR = '#f97316'
 
 export function DashboardClient({ userId }: { userId: string }) {
-  const { currentEventId, isInitialized } = useEventContext()
   const [data, setData] = useState<DashboardData | null>(null)
   const [churchData, setChurchData] = useState<any[]>([])
 
   useEffect(() => {
-    if (!currentEventId || !isInitialized) return
-    
-    getDashboardData(userId, currentEventId).then(setData)
-    getChurchDistribution(userId, currentEventId).then(setChurchData)
-  }, [userId, currentEventId, isInitialized])
+    getDashboardData(userId).then(setData)
+    getChurchDistribution(userId).then(setChurchData)
+  }, [userId])
 
   if (!data) {
     return <DashboardSkeleton />

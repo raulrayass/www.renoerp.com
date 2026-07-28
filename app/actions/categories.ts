@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { categories } from '@/lib/db/schema'
-import { and, eq, asc, count } from 'drizzle-orm'
+import { and, eq, asc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 
 const CATEGORIES_PER_PAGE = 25
@@ -29,10 +29,10 @@ export async function getCategories(userId: string, eventId: number, page: numbe
 
 export async function getCategoriesCount(userId: string, eventId: number) {
   const result = await db
-    .select({ count: count() })
+    .select({ count: db.sql`count(*)` })
     .from(categories)
     .where(and(eq(categories.userId, userId), eq(categories.eventId, eventId)))
-  return result[0].count
+  return parseInt(result[0].count as string, 10)
 }
 
 export async function createCategory(

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEventContext } from '@/lib/contexts/event-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,6 +20,7 @@ import { TeamFlag } from '@/components/team-flag'
 import { ScoreboardFullscreen } from '@/components/scoreboard-fullscreen'
 import { PodiumFullscreen } from '@/components/podium-fullscreen'
 import { useGames, useTeams, useGameScores } from '@/lib/hooks'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { MobileSheet } from '@/components/mobile'
 import { ListSkeleton } from '@/components/list-skeleton'
 
@@ -29,11 +29,11 @@ interface Props {
 }
 
 export function GamesClient({ userId }: Props) {
-  const { currentEventId, isInitialized } = useEventContext()
   // Hooks centralizados para sincronización cross-module
   const { games: gameList, isLoading: gamesLoading, error: gamesError } = useGames()
   const { teams, isLoading: teamsLoading, error: teamsError } = useTeams()
   const { scores: allGameScores, isLoading: scoresLoading } = useGameScores()
+  const { currentEventId } = useEventContext()
 
   // Local UI state
   const [gameScores, setGameScores] = useState<GameScore[]>([])
@@ -54,7 +54,7 @@ export function GamesClient({ userId }: Props) {
   const searchParams = useSearchParams()
 
   const emptyForm = { name: '', description: '', gameDate: '' }
-  const loading = gamesLoading || teamsLoading || scoresLoading || !isInitialized
+  const loading = gamesLoading || teamsLoading || scoresLoading
 
   useEffect(() => {
     if (searchParams.get('new') === '1') {
@@ -81,8 +81,8 @@ export function GamesClient({ userId }: Props) {
   async function loadScoresForGame(gameId: number) {
     try {
       const [gameScoresData, allScoresData] = await Promise.all([
-        getGameScores(userId, gameId),
-        getAllGameScores(userId),
+        getGameScores(userId, currentEventId, gameId),
+        getAllGameScores(userId, currentEventId),
       ])
       setGameScores(gameScoresData)
       setAllGameScores(allScoresData)
@@ -99,12 +99,16 @@ export function GamesClient({ userId }: Props) {
       return
     }
     startTransition(async () => {
+      if (!currentEventId) {
+        toast.error('Selecciona un evento primero')
+        return
+      }
       try {
         if (editingId) {
-          await updateGame(userId, editingId, form)
+          await updateGame(userId, currentEventId, editingId, form)
           toast.success('Juego actualizado')
         } else {
-          await createGame(userId, form)
+          await createGame(userId, currentEventId, form)
           toast.success('Juego creado')
         }
         setDialogOpen(false)
@@ -147,7 +151,24 @@ export function GamesClient({ userId }: Props) {
 
     startTransition(async () => {
       try {
-        await addGameScore(userId, selectedGameId, parseInt(scoringForm.teamId, 10), parseInt(scoringForm.points, 10))
+        await deleteGame(userId, currentEventId, id)
+        toast.success('Juego eliminado')
+        clearNewParam()
+      } catch (error) {
+        toast.error('Error al eliminar juego')
+        console.error(error)
+      }
+    })
+  }
+
+  async function handleAddScore() {
+    if (!selectedGameId || !scoringForm.teamId || !scoringForm.points) {
+      toast.error('Por favor completa todos los campos')
+      return
+    }
+    startTransition(async () => {
+      try {
+        await addGameScore(userId, currentEventId, selectedGameId, parseInt(scoringForm.teamId, 10), parseInt(scoringForm.points, 10))
         toast.success('Puntos registrados')
         setScoringForm({ teamId: '', points: '' })
         await loadScoresForGame(selectedGameId)
@@ -161,7 +182,7 @@ export function GamesClient({ userId }: Props) {
   async function handleDeleteScore(scoreId: number, gameId: number) {
     startTransition(async () => {
       try {
-        await deleteGameScore(userId, scoreId)
+        await deleteGameScore(userId, currentEventId, scoreId)
         toast.success('Puntos eliminados')
         await loadScoresForGame(gameId)
       } catch (error) {

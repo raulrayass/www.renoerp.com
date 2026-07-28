@@ -29,7 +29,6 @@ export async function getTransactions(
     .select({
       id: transactions.id,
       userId: transactions.userId,
-      eventId: transactions.eventId,
       categoryId: transactions.categoryId,
       type: transactions.type,
       amount: transactions.amount,
@@ -289,7 +288,7 @@ export async function updateTransaction(
   await db
     .update(transactions)
     .set({ ...data, paymentMethod: data.paymentMethod || 'cash', updatedAt: new Date() })
-    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+    .where(and(eq(transactions.id, id), eq(transactions.userId, userId), eq(transactions.eventId, eventId)))
 
   revalidatePath('/')
   revalidatePath('/transactions')
@@ -382,7 +381,7 @@ export async function deleteTransaction(userId: string, eventId: number, id: num
   // Delete the transaction
   await db
     .delete(transactions)
-    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+    .where(and(eq(transactions.id, id), eq(transactions.userId, userId), eq(transactions.eventId, eventId)))
   
   revalidatePath('/')
   revalidatePath('/transactions')

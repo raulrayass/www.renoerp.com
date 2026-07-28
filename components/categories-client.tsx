@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, FINANZAS_TABS } from '@/components/group-tabs'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -55,7 +54,6 @@ interface Props {
 }
 
 export function CategoriesClient({ userId }: Props) {
-  const { currentEventId, isInitialized } = useEventContext()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -68,9 +66,8 @@ export function CategoriesClient({ userId }: Props) {
   const [form, setForm] = useState(defaultForm)
 
   useEffect(() => {
-    if (!currentEventId || !isInitialized) return
-    getCategories(userId, currentEventId).then(setCategories)
-  }, [userId, currentEventId, isInitialized])
+    getCategories(userId).then(setCategories)
+  }, [userId])
 
   // Abre el modal de nueva categoría cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -108,22 +105,18 @@ export function CategoriesClient({ userId }: Props) {
       toast.error('El nombre de la categoría es obligatorio')
       return
     }
-    if (!currentEventId) {
-      toast.error('No hay evento seleccionado')
-      return
-    }
     startTransition(async () => {
       try {
         if (editingId) {
-          await updateCategory(userId, currentEventId, editingId, form)
+          await updateCategory(userId, editingId, form)
           toast.success('Categoría actualizada')
         } else {
-          await createCategory(userId, currentEventId, form)
+          await createCategory(userId, form)
           toast.success('Categoría creada')
         }
         setDialogOpen(false)
         clearNewParam()
-        const updated = await getCategories(userId, currentEventId)
+        const updated = await getCategories(userId)
         setCategories(updated)
       } catch (error) {
         toast.error('Error al guardar la categoría')
@@ -133,13 +126,13 @@ export function CategoriesClient({ userId }: Props) {
   }
 
   async function handleDelete() {
-    if (!deletingId || !currentEventId) return
+    if (!deletingId) return
     startTransition(async () => {
       try {
-        await deleteCategory(userId, currentEventId, deletingId)
+        await deleteCategory(userId, deletingId)
         toast.success('Categoría eliminada')
         setDeleteDialogOpen(false)
-        const updated = await getCategories(userId, currentEventId)
+        const updated = await getCategories(userId)
         setCategories(updated)
       } catch (error) {
         toast.error('Error al eliminar la categoría')

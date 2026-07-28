@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import {
   getAllStaff,
@@ -69,7 +68,6 @@ const emptyForm = {
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export function StaffClient({ userId }: Props) {
-  const { currentEventId, isInitialized } = useEventContext()
   const [staffList, setStaffList] = useState<Staff[]>([])
   const [churches, setChurches] = useState<Church[]>([])
   const [teams, setTeams] = useState<Team[]>([])
@@ -104,9 +102,8 @@ export function StaffClient({ userId }: Props) {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    if (!currentEventId || !isInitialized) return
     initializeDefaults()
-  }, [userId, currentEventId, isInitialized])
+  }, [userId])
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -124,7 +121,6 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function initializeDefaults() {
-    if (!currentEventId) return
     setLoading(true)
     try {
       await loadStaff()
@@ -138,26 +134,22 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function loadStaff() {
-    if (!currentEventId) return
-    const allData = await getAllStaff(userId, currentEventId)
+    const allData = await getAllStaff(userId)
     setStaffList(allData)
   }
 
   async function loadChurches() {
-    if (!currentEventId) return
-    const data = await getChurches(userId, currentEventId)
+    const data = await getChurches(userId)
     setChurches(data)
   }
 
   async function loadTeams() {
-    if (!currentEventId) return
-    const data = await getTeams(userId, currentEventId)
+    const data = await getTeams(userId)
     setTeams(data)
   }
 
   async function loadRooms() {
-    if (!currentEventId) return
-    const data = await getRooms(userId, currentEventId)
+    const data = await getRooms(userId)
     setRooms(data)
   }
 

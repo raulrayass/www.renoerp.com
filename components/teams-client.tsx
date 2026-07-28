@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +19,7 @@ import { COUNTRIES } from '@/lib/countries'
 import { CountryFlagSvg } from '@/lib/country-flags-svg'
 import { TeamFlag } from '@/components/team-flag'
 import { useTeams, useGameScores } from '@/lib/hooks'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { MobileSheet } from '@/components/mobile'
 import { ListSkeleton } from '@/components/list-skeleton'
 
@@ -28,10 +28,10 @@ interface Props {
 }
 
 export function TeamsClient({ userId }: Props) {
-  const { currentEventId, isInitialized } = useEventContext()
   // Hooks centralizados para sincronización
   const { teams: teamList, isLoading: teamsLoading } = useTeams()
   const { scores: allGameScores } = useGameScores()
+  const { currentEventId } = useEventContext()
 
   // Local UI state
   const [memberCounts, setMemberCounts] = useState<Record<number, number>>({})
@@ -49,7 +49,7 @@ export function TeamsClient({ userId }: Props) {
   const searchParams = useSearchParams()
 
   const emptyForm = { name: '', color: '#4a9d67', country: null as string | null, useCountry: false }
-  const loading = teamsLoading || !isInitialized
+  const loading = teamsLoading
 
   const PRESET_COLORS = [
     { name: 'Verde', value: '#4a9d67' },
@@ -74,7 +74,7 @@ export function TeamsClient({ userId }: Props) {
       }
     }
     loadMemberCounts()
-  }, [userId, teamList.length, currentEventId]) // Refetch si cambia cantidad de equipos o evento
+  }, [userId, currentEventId, teamList.length]) // Refetch si cambia cantidad de equipos
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -98,7 +98,7 @@ export function TeamsClient({ userId }: Props) {
       setExpandedTeamId(teamId)
       if (!expandedMembers[teamId]) {
         try {
-          const members = await getTeamMembers(userId, teamId)
+          const members = await getTeamMembers(userId, currentEventId, teamId)
           setExpandedMembers({ ...expandedMembers, [teamId]: members })
         } catch (error) {
           toast.error('Error al cargar integrantes del equipo')
@@ -114,13 +114,17 @@ export function TeamsClient({ userId }: Props) {
       toast.error('El nombre del equipo es obligatorio')
       return
     }
+    if (!currentEventId) {
+      toast.error('Selecciona un evento primero')
+      return
+    }
     startTransition(async () => {
       try {
         if (editingId) {
-          await updateTeam(userId, editingId, form)
+          await updateTeam(userId, currentEventId, editingId, form)
           toast.success('Equipo actualizado')
         } else {
-          await createTeam(userId, form)
+          await createTeam(userId, currentEventId, form)
           toast.success('Equipo creado')
         }
         setDialogOpen(false)
@@ -136,14 +140,15 @@ export function TeamsClient({ userId }: Props) {
   }
 
   async function handleDelete(id: number) {
+    setDeleteDialogOpen(false)
+    setDeletingId(null)
     startTransition(async () => {
       try {
-        await deleteTeam(userId, id)
+        await deleteTeam(userId, currentEventId, id)
         toast.success('Equipo eliminado')
-        setDeleteDialogOpen(false)
-        // Los hooks SWR se actualizan automáticamente
+        clearNewParam()
       } catch (error) {
-        toast.error('Error al eliminar el equipo')
+        toast.error('Error al eliminar equipo')
         console.error(error)
       }
     })

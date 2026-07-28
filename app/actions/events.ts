@@ -2,319 +2,215 @@
 
 import { db } from '@/lib/db'
 import { events, eventMembers } from '@/lib/db/schema'
-import { eq, and, sql } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 
-// Obtener todos los eventos donde el usuario es miembro O admin
+const EVENTS_PER_PAGE = 10
+
+// Get all events for a user (both owned and member of)
 export async function getUserEvents(userId: string) {
-  // Buscar eventos donde el usuario está en eventMembers
+  const ownedEvents = await db
+    .select()
+    .from(events)
+    .where(eq(events.userId, userId))
+    .orderBy((events) => events.startDate)
+
   const memberEvents = await db
     .select({
       id: events.id,
+      userId: events.userId,
       name: events.name,
-      role: eventMembers.role,
+      description: events.description,
+      startDate: events.startDate,
+      endDate: events.endDate,
+      location: events.location,
+      createdAt: events.createdAt,
+      updatedAt: events.updatedAt,
     })
     .from(events)
-    .innerJoin(eventMembers, and(
-      eq(events.id, eventMembers.eventId),
-      eq(eventMembers.userId, userId),
-      eq(eventMembers.status, 'active')
-    ))
-    .orderBy(events.createdAt)
+    .innerJoin(eventMembers, eq(events.id, eventMembers.eventId))
+    .where(and(eq(eventMembers.userId, userId), eq(eventMembers.role, 'member')))
+    .orderBy((events) => events.startDate)
 
-  // Buscar eventos donde el usuario es el admin
-  const adminEvents = await db
-    .select({
-      id: events.id,
-      name: events.name,
-      role: sql<string>`'admin'`,
-    })
-    .from(events)
-    .where(eq(events.adminId, userId))
-    .orderBy(events.createdAt)
-
-  // Combinar y eliminar duplicados
-  const allEvents = [...memberEvents, ...adminEvents]
-  const uniqueEvents = Array.from(
-    new Map(allEvents.map(e => [e.id, e])).values()
-  )
-  
-  return uniqueEvents
+  // Combine and deduplicate
+  const allEvents = [...ownedEvents, ...memberEvents]
+  const uniqueEvents = Array.from(new Map(allEvents.map((e) => [e.id, e])).values())
+  return uniqueEvents.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
 }
 
-// Crear nuevo evento
+// Get a single event
+export async function getEvent(userId: string, eventId: number) {
+  const [event] = await db
+    .select()
+    .from(events)
+    .where(and(eq(events.id, eventId)))
+
+  if (!event) {
+    throw new Error('Evento no encontrado')
+  }
+
+  // Verify user has access (is owner or member)
+  if (event.userId !== userId) {
+    const membership = await db
+      .select()
+      .from(eventMembers)
+      .where(and(eq(eventMembers.eventId, eventId), eq(eventMembers.userId, userId)))
+      .limit(1)
+
+    if (membership.length === 0) {
+      throw new Error('No tienes acceso a este evento')
+    }
+  }
+
+  return event
+}
+
+// Create a new event
 export async function createEvent(
   userId: string,
   data: {
     name: string
-    startDate?: string
-    endDate?: string
-    country?: string
-    city?: string
+    description?: string
+    startDate: string
+    endDate: string
+    location?: string
   }
 ) {
-  try {
-    // Crear evento
-    const eventResult = await db
-      .insert(events)
-      .values({
-        name: data.name,
-        adminId: userId,
-        status: 'active',
-        startDate: data.startDate ? new Date(data.startDate) : undefined,
-        endDate: data.endDate ? new Date(data.endDate) : undefined,
-        country: data.country,
-        city: data.city,
-      })
-      .returning({ id: events.id })
-
-    const eventId = eventResult[0]?.id
-
-    if (!eventId) {
-      throw new Error('Failed to create event')
-    }
-
-    // Crear event_member para el admin
-    await db
-      .insert(eventMembers)
-      .values({
-        eventId,
-        userId,
-        role: 'admin',
-        status: 'active',
-      })
-
-    return { id: eventId, name: data.name }
-  } catch (error) {
-    console.error('[Events] Error creating event:', error)
-    throw error
+  if (!data.name.trim()) {
+    throw new Error('El nombre del evento es requerido')
   }
+
+  const [newEvent] = await db
+    .insert(events)
+    .values({
+      userId,
+      name: data.name.trim(),
+      description: data.description || null,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      location: data.location || null,
+    })
+    .returning()
+
+  // Create event member for the creator (admin)
+  await db.insert(eventMembers).values({
+    eventId: newEvent.id,
+    userId,
+    role: 'admin',
+  })
+
+  return newEvent
 }
 
-// Invitar persona a evento
-export async function inviteToEvent(
-  userId: string,
-  eventId: number,
-  inviteeEmail: string,
-  role: 'leader' | 'coordinator' | 'viewer' = 'viewer'
-) {
-  try {
-    // Verificar que el usuario es admin del evento
-    const membership = await db
-      .select()
-      .from(eventMembers)
-      .where(and(
-        eq(eventMembers.eventId, eventId),
-        eq(eventMembers.userId, userId),
-        eq(eventMembers.role, 'admin')
-      ))
-
-    if (!membership || membership.length === 0) {
-      throw new Error('Only event admin can invite members')
-    }
-
-    // Crear invitación (el invitado usará su userId real cuando se registre)
-    // Por ahora, guardamos con email como identificador temporal
-    await db
-      .insert(eventMembers)
-      .values({
-        eventId,
-        userId: inviteeEmail, // Será reemplazado cuando el usuario se registre
-        role,
-        status: 'pending',
-      })
-
-    return { success: true, message: `Invitation sent to ${inviteeEmail}` }
-  } catch (error) {
-    console.error('[Events] Error inviting member:', error)
-    throw error
-  }
-}
-
-// Actualizar rol de miembro
-export async function updateMemberRole(
-  userId: string,
-  eventId: number,
-  memberId: string,
-  newRole: string
-) {
-  try {
-    // Verificar que el usuario es admin
-    const isAdmin = await db
-      .select()
-      .from(eventMembers)
-      .where(and(
-        eq(eventMembers.eventId, eventId),
-        eq(eventMembers.userId, userId),
-        eq(eventMembers.role, 'admin')
-      ))
-
-    if (!isAdmin || isAdmin.length === 0) {
-      throw new Error('Only event admin can update roles')
-    }
-
-    // Actualizar rol
-    await db
-      .update(eventMembers)
-      .set({ role: newRole })
-      .where(and(
-        eq(eventMembers.eventId, eventId),
-        eq(eventMembers.userId, memberId)
-      ))
-
-    return { success: true }
-  } catch (error) {
-    console.error('[Events] Error updating member role:', error)
-    throw error
-  }
-}
-
-// Obtener miembros del evento
-export async function getEventMembers(userId: string, eventId: number) {
-  try {
-    // Verificar que el usuario es miembro del evento
-    const access = await db
-      .select()
-      .from(eventMembers)
-      .where(and(
-        eq(eventMembers.eventId, eventId),
-        eq(eventMembers.userId, userId)
-      ))
-
-    if (!access || access.length === 0) {
-      throw new Error('Access denied')
-    }
-
-    // Obtener todos los miembros
-    const members = await db
-      .select()
-      .from(eventMembers)
-      .where(eq(eventMembers.eventId, eventId))
-
-    return members || []
-  } catch (error) {
-    console.error('[Events] Error fetching members:', error)
-    throw error
-  }
-}
-
-// Actualizar evento
+// Update an event
 export async function updateEvent(
   userId: string,
   eventId: number,
   data: {
-    name?: string
-    startDate?: string | null
-    endDate?: string | null
-    country?: string
-    city?: string
-    status?: 'active' | 'draft' | 'completed'
+    name: string
+    description?: string
+    startDate: string
+    endDate: string
+    location?: string
   }
 ) {
-  try {
-    // Verificar que el usuario es admin del evento
-    const eventRecord = await db
-      .select()
-      .from(events)
-      .where(eq(events.id, eventId))
-      .then(r => r[0])
+  // Verify user is owner
+  const [event] = await db.select().from(events).where(eq(events.id, eventId))
 
-    if (!eventRecord) {
-      throw new Error('Event not found')
-    }
+  if (!event) {
+    throw new Error('Evento no encontrado')
+  }
 
-    if (eventRecord.adminId !== userId) {
-      throw new Error('Only event admin can update event')
-    }
+  if (event.userId !== userId) {
+    throw new Error('Solo el propietario puede editar este evento')
+  }
 
-    // Preparar datos a actualizar
-    const updateData: any = {
+  if (!data.name.trim()) {
+    throw new Error('El nombre del evento es requerido')
+  }
+
+  await db
+    .update(events)
+    .set({
+      name: data.name.trim(),
+      description: data.description || null,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      location: data.location || null,
       updatedAt: new Date(),
-    }
-    if (data.name !== undefined) updateData.name = data.name
-    if (data.country !== undefined) updateData.country = data.country
-    if (data.city !== undefined) updateData.city = data.city
-    if (data.status !== undefined) updateData.status = data.status
-    if (data.startDate !== undefined) updateData.startDate = data.startDate ? new Date(data.startDate) : null
-    if (data.endDate !== undefined) updateData.endDate = data.endDate ? new Date(data.endDate) : null
-
-    // Actualizar evento
-    await db
-      .update(events)
-      .set(updateData)
-      .where(eq(events.id, eventId))
-
-    return { success: true, message: 'Event updated' }
-  } catch (error) {
-    console.error('[Events] Error updating event:', error)
-    throw error
-  }
+    })
+    .where(eq(events.id, eventId))
 }
 
-// Eliminar evento
+// Delete an event
 export async function deleteEvent(userId: string, eventId: number) {
-  try {
-    // Verificar que el usuario es admin del evento
-    const eventRecord = await db
-      .select()
-      .from(events)
-      .where(eq(events.id, eventId))
-      .then(r => r[0])
+  // Verify user is owner
+  const [event] = await db.select().from(events).where(eq(events.id, eventId))
 
-    if (!eventRecord) {
-      throw new Error('Event not found')
-    }
-
-    if (eventRecord.adminId !== userId) {
-      throw new Error('Only event admin can delete event')
-    }
-
-    // Eliminar todos los miembros del evento primero
-    await db
-      .delete(eventMembers)
-      .where(eq(eventMembers.eventId, eventId))
-
-    // Eliminar el evento
-    await db
-      .delete(events)
-      .where(eq(events.id, eventId))
-
-    return { success: true, message: 'Event deleted' }
-  } catch (error) {
-    console.error('[Events] Error deleting event:', error)
-    throw error
+  if (!event) {
+    throw new Error('Evento no encontrado')
   }
+
+  if (event.userId !== userId) {
+    throw new Error('Solo el propietario puede eliminar este evento')
+  }
+
+  // Delete all event members
+  await db.delete(eventMembers).where(eq(eventMembers.eventId, eventId))
+
+  // Delete the event
+  await db.delete(events).where(eq(events.id, eventId))
 }
 
-// Obtener detalles completos del evento
-export async function getEventDetails(userId: string, eventId: number) {
-  try {
-    // Verificar que el usuario es miembro del evento
-    const access = await db
-      .select()
-      .from(eventMembers)
-      .where(and(
-        eq(eventMembers.eventId, eventId),
-        eq(eventMembers.userId, userId)
-      ))
+// Get event members
+export async function getEventMembers(userId: string, eventId: number) {
+  // Verify user has access to event
+  const [event] = await db.select().from(events).where(eq(events.id, eventId))
 
-    if (!access || access.length === 0) {
-      throw new Error('Access denied')
-    }
-
-    // Obtener detalles del evento
-    const event = await db
-      .select()
-      .from(events)
-      .where(eq(events.id, eventId))
-      .then(r => r[0])
-
-    if (!event) {
-      throw new Error('Event not found')
-    }
-
-    return event
-  } catch (error) {
-    console.error('[Events] Error fetching event details:', error)
-    throw error
+  if (!event || (event.userId !== userId && event.userId !== userId)) {
+    throw new Error('No tienes acceso a este evento')
   }
+
+  return db
+    .select()
+    .from(eventMembers)
+    .where(eq(eventMembers.eventId, eventId))
+}
+
+// Add a member to an event
+export async function addEventMember(userId: string, eventId: number, memberUserId: string, role: string = 'member') {
+  // Verify user is owner
+  const [event] = await db.select().from(events).where(eq(events.id, eventId))
+
+  if (!event || event.userId !== userId) {
+    throw new Error('Solo el propietario puede agregar miembros')
+  }
+
+  // Check if member already exists
+  const existing = await db
+    .select()
+    .from(eventMembers)
+    .where(and(eq(eventMembers.eventId, eventId), eq(eventMembers.userId, memberUserId)))
+    .limit(1)
+
+  if (existing.length > 0) {
+    throw new Error('Este usuario ya es miembro del evento')
+  }
+
+  await db.insert(eventMembers).values({
+    eventId,
+    userId: memberUserId,
+    role,
+  })
+}
+
+// Remove a member from an event
+export async function removeEventMember(userId: string, eventId: number, memberUserId: string) {
+  // Verify user is owner
+  const [event] = await db.select().from(events).where(eq(events.id, eventId))
+
+  if (!event || event.userId !== userId) {
+    throw new Error('Solo el propietario puede remover miembros')
+  }
+
+  await db.delete(eventMembers).where(and(eq(eventMembers.eventId, eventId), eq(eventMembers.userId, memberUserId)))
 }

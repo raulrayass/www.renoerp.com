@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { churches } from '@/lib/db/schema'
-import { eq, and, asc, count } from 'drizzle-orm'
+import { eq, and, asc } from 'drizzle-orm'
 
 const CHURCHES_PER_PAGE = 25
 
@@ -28,10 +28,10 @@ export async function getChurches(userId: string, eventId: number, page: number 
 
 export async function getChurchesCount(userId: string, eventId: number) {
   const result = await db
-    .select({ count: count() })
+    .select({ count: db.sql`count(*)` })
     .from(churches)
     .where(and(eq(churches.userId, userId), eq(churches.eventId, eventId)))
-  return result[0].count || 0
+  return parseInt(result[0].count as string, 10)
 }
 
 export async function createChurch(userId: string, eventId: number, name: string) {
@@ -39,13 +39,10 @@ export async function createChurch(userId: string, eventId: number, name: string
     throw new Error('El nombre de la iglesia es requerido')
   }
 
-  // Check if church already exists in this event
-  const existing = await db
-    .select()
-    .from(churches)
-    .where(and(eq(churches.userId, userId), eq(churches.eventId, eventId), eq(churches.name, name.trim())))
-    .limit(1)
-    .then(r => r[0])
+  // Check if church already exists
+  const existing = await db.query.churches.findFirst({
+    where: and(eq(churches.userId, userId), eq(churches.eventId, eventId), eq(churches.name, name.trim())),
+  })
 
   if (existing) {
     throw new Error('Esta iglesia ya existe')
@@ -63,13 +60,10 @@ export async function updateChurch(userId: string, eventId: number, churchId: nu
     throw new Error('El nombre de la iglesia es requerido')
   }
 
-  // Check if new name already exists in this event (but allow same name)
-  const existing = await db
-    .select()
-    .from(churches)
-    .where(and(eq(churches.userId, userId), eq(churches.eventId, eventId), eq(churches.name, name.trim())))
-    .limit(1)
-    .then(r => r[0])
+  // Check if new name already exists (but allow same name)
+  const existing = await db.query.churches.findFirst({
+    where: and(eq(churches.userId, userId), eq(churches.eventId, eventId), eq(churches.name, name.trim())),
+  })
 
   if (existing && existing.id !== churchId) {
     throw new Error('Esta iglesia ya existe')

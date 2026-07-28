@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getGames } from '@/app/actions/games'
 import { useSession } from '@/lib/auth-client'
+import { useEventContext } from '@/lib/contexts/event-context'
 
 export interface Game {
   id: number
@@ -10,6 +11,7 @@ export interface Game {
   description?: string | null
   gameDate?: string | null
   userId: string
+  eventId: number
   createdAt?: Date
 }
 
@@ -22,6 +24,7 @@ interface UseGamesState {
 
 export function useGames(): UseGamesState {
   const session = useSession()
+  const { currentEventId } = useEventContext()
   const [games, setGames] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -29,7 +32,7 @@ export function useGames(): UseGamesState {
   const userId = session?.data?.user?.id
 
   const loadGames = useCallback(async () => {
-    if (!userId) {
+    if (!userId || !currentEventId) {
       setGames([])
       setIsLoading(false)
       return
@@ -37,7 +40,7 @@ export function useGames(): UseGamesState {
 
     try {
       setIsLoading(true)
-      const data = await getGames(userId)
+      const data = await getGames(userId, currentEventId)
       setGames(data || [])
       setError(null)
     } catch (err) {
@@ -46,7 +49,7 @@ export function useGames(): UseGamesState {
     } finally {
       setIsLoading(false)
     }
-  }, [userId])
+  }, [userId, currentEventId])
 
   useEffect(() => {
     loadGames()
