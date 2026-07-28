@@ -1,26 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { useSession } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import { runMigration } from '@/app/actions/migrate'
 import { toast } from 'sonner'
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 
 export default function MigrationPage() {
-  const session = useSession()
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
 
   const handleMigrate = async () => {
     try {
-      if (!session?.data?.user?.email) {
-        toast.error('Por favor inicia sesión primero')
-        return
-      }
-
       setLoading(true)
-      const response = await runMigration(session.data.user.email)
+      const response = await runMigration()
 
       if (response.success) {
         setResult(response)
