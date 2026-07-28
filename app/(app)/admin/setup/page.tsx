@@ -1,25 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { useSession } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import { simpleMigrate } from '@/app/actions/simple-migrate'
 import { toast } from 'sonner'
 
 export default function SetupPage() {
-  const session = useSession()
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
 
   const handleMigrate = async () => {
     try {
-      if (!session?.data?.user?.id) {
-        toast.error('No user session found')
-        return
-      }
-
       setLoading(true)
-      const response = await simpleMigrate(session.data.user.id)
+      const response = await simpleMigrate()
       setResult(response)
 
       if (response.success) {

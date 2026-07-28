@@ -12,23 +12,17 @@ import {
 } from '@/lib/db/schema'
 import { eq, isNull, and } from 'drizzle-orm'
 
-export async function simpleMigrate(userId: string) {
+export async function simpleMigrate() {
   try {
-    console.log('[v0] Starting simple migration for user:', userId)
-
-    // 1. Get the current user
-    let user = await db
-      .select()
-      .from(appUsers)
-      .where(eq(appUsers.id, userId))
-      .limit(1)
-      .then(r => r[0])
-
-    if (!user) {
-      return { success: false, error: `User ${userId} not found in database` }
+    // 1. Get FIRST user from database
+    const users = await db.select().from(appUsers)
+    
+    if (!users || users.length === 0) {
+      return { success: false, error: 'No users found in database' }
     }
-
-    console.log(`[v0] Found user: ${user.email}`)
+    
+    const user = users[0]
+    console.log(`[v0] Using user: ${user.email} (ID: ${user.id})`)
 
     // 2. Check if "Permanece 2026" event exists
     const eventName = 'Permanece 2026'
