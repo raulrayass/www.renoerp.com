@@ -2,44 +2,45 @@
 
 import { db } from '@/lib/db'
 import { categories } from '@/lib/db/schema'
-import { and, eq, asc } from 'drizzle-orm'
+import { and, eq, asc, count } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 
 const CATEGORIES_PER_PAGE = 25
 
 // Get ALL categories (no pagination)
-export async function getAllCategories(userId: string) {
+export async function getAllCategories(userId: string, eventId: number) {
   return db
     .select()
     .from(categories)
-    .where(eq(categories.userId, userId))
+    .where(and(eq(categories.userId, userId), eq(categories.eventId, eventId)))
     .orderBy(asc(categories.name))
 }
 
-export async function getCategories(userId: string, page: number = 1) {
+export async function getCategories(userId: string, eventId: number, page: number = 1) {
   const offset = (page - 1) * CATEGORIES_PER_PAGE
   return db
     .select()
     .from(categories)
-    .where(eq(categories.userId, userId))
+    .where(and(eq(categories.userId, userId), eq(categories.eventId, eventId)))
     .orderBy(asc(categories.name))
     .limit(CATEGORIES_PER_PAGE)
     .offset(offset)
 }
 
-export async function getCategoriesCount(userId: string) {
+export async function getCategoriesCount(userId: string, eventId: number) {
   const result = await db
-    .select({ count: db.sql`count(*)` })
+    .select({ count: count() })
     .from(categories)
-    .where(eq(categories.userId, userId))
-  return parseInt(result[0].count as string, 10)
+    .where(and(eq(categories.userId, userId), eq(categories.eventId, eventId)))
+  return result[0].count
 }
 
 export async function createCategory(
   userId: string,
+  eventId: number,
   data: { name: string; type: string; color: string; icon: string }
 ) {
-  await db.insert(categories).values({ userId, ...data })
+  await db.insert(categories).values({ userId, eventId, ...data })
   revalidatePath('/')
   revalidatePath('/categories')
   revalidatePath('/transactions')

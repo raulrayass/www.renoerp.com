@@ -2,8 +2,7 @@
 
 import { db } from '@/lib/db'
 import { attendees, attendeePayments, transactions, categories } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
-import { desc } from 'drizzle-orm'
+import { eq, and, desc, sql, count } from 'drizzle-orm'
 
 const ATTENDEES_PER_PAGE = 20
 
@@ -30,10 +29,10 @@ export async function getAttendees(userId: string, eventId: number, page: number
 
 export async function getAttendeesCount(userId: string, eventId: number) {
   const result = await db
-    .select({ count: db.sql`count(*)` })
+    .select({ count: count() })
     .from(attendees)
     .where(and(eq(attendees.userId, userId), eq(attendees.eventId, eventId)))
-  return parseInt(result[0].count as string, 10)
+  return result[0].count
 }
 
 export async function getAttendeePayments(userId: string, eventId: number, attendeeId: number) {
@@ -62,7 +61,7 @@ export async function createAttendee(
     roomId?: number | null
     teamId?: number | null
     totalAmount: number
-    discount?: number // 0, 10, 20, 30
+    discount?: number
     notes?: string
   }
 ) {
@@ -132,7 +131,6 @@ export async function toggleCheckIn(userId: string, attendeeId: number, checkedI
 }
 
 export async function deleteAttendee(userId: string, attendeeId: number) {
-  // Obtener el campero para conocer su nombre (necesario para borrar transacciones)
   const [attendee] = await db
     .select()
     .from(attendees)
@@ -140,13 +138,11 @@ export async function deleteAttendee(userId: string, attendeeId: number) {
 
   if (!attendee) throw new Error('Campero no encontrado')
 
-  // Obtener todos los pagos del campero
   const payments = await db
     .select()
     .from(attendeePayments)
     .where(and(eq(attendeePayments.userId, userId), eq(attendeePayments.attendeeId, attendeeId)))
 
-  // Borrar la transacción correspondiente a cada pago (por nombre + monto)
   for (const payment of payments) {
     await db
       .delete(transactions)
@@ -179,7 +175,6 @@ export async function addAttendeePayment(
 
   if (!attendee) throw new Error('Campero no encontrado')
 
-  // Validate payment doesn't exceed remaining amount
   const originalTotal = parseFloat(attendee.totalAmount as string)
   const discount = attendee.discount || 0
   const totalAmount = originalTotal * (1 - discount / 100)
@@ -192,17 +187,16 @@ export async function addAttendeePayment(
     )
   }
 
-  // Create payment record
   await db.insert(attendeePayments).values({
     attendeeId,
     userId,
+    eventId: attendee.eventId,
     amount,
     paymentMethod,
     paymentDate,
     notes: notes || '',
   })
 
-  // Update attendee paid amount and status
   const newPaidAmount = alreadyPaid + amount
   const newStatus = newPaidAmount >= totalAmount ? 'paid' : newPaidAmount > 0 ? 'partial' : 'pending'
 
@@ -215,7 +209,6 @@ export async function addAttendeePayment(
     })
     .where(and(eq(attendees.userId, userId), eq(attendees.id, attendeeId)))
 
-  // Determine category name based on payment method
   const categoryNameMap: Record<string, string> = {
     'cash': 'Pago de Camperos - Efectivo',
     'transfer': 'Pago de Camperos - Transferencia/Depósito',
@@ -224,21 +217,21 @@ export async function addAttendeePayment(
   }
   const categoryName = categoryNameMap[paymentMethod] || 'Pago de Camperos - Efectivo'
 
-  // Find or create category based on payment method
   let [campPaymentCat] = await db
     .select()
     .from(categories)
-    .where(and(eq(categories.userId, userId), eq(categories.name, categoryName)))
+    .where(and(eq(categories.userId, userId), eq(categories.eventId, attendee.eventId), eq(categories.name, categoryName)))
 
   if (!campPaymentCat) {
     const colorMap: Record<string, string> = {
-      'Pago de Camperos - Efectivo': '#22c55e', // green
-      'Pago de Camperos - Transferencia/Depósito': '#3b82f6', // blue
+      'Pago de Camperos - Efectivo': '#22c55e',
+      'Pago de Camperos - Transferencia/Depósito': '#3b82f6',
     }
     const [newCat] = await db
       .insert(categories)
       .values({
         userId,
+        eventId: attendee.eventId,
         name: categoryName,
         type: 'income',
         color: colorMap[categoryName] || '#22c55e',
@@ -248,9 +241,9 @@ export async function addAttendeePayment(
     campPaymentCat = newCat
   }
 
-  // Create transaction for this payment with payment method
   await db.insert(transactions).values({
     userId,
+    eventId: attendee.eventId,
     categoryId: campPaymentCat!.id,
     type: 'income',
     amount,
@@ -275,7 +268,6 @@ export async function deleteAttendeePayment(userId: string, paymentId: number) {
 
   if (!attendee) throw new Error('Campero no encontrado')
 
-  // Delete corresponding transaction
   await db
     .delete(transactions)
     .where(
@@ -287,7 +279,6 @@ export async function deleteAttendeePayment(userId: string, paymentId: number) {
       )
     )
 
-  // Update attendee paid amount
   const newPaidAmount = Math.max(0, parseFloat(attendee.amountPaid as string) - parseFloat(payment.amount as string))
   const originalTotal = parseFloat(attendee.totalAmount as string)
   const discount = attendee.discount || 0
@@ -303,12 +294,12 @@ export async function deleteAttendeePayment(userId: string, paymentId: number) {
     })
     .where(eq(attendees.id, payment.attendeeId))
 
-  // Delete payment
   await db.delete(attendeePayments).where(eq(attendeePayments.id, paymentId))
 }
 
 export async function bulkCreateAttendees(
   userId: string,
+  eventId: number,
   attendeesList: Array<{
     name: string
     age?: number
@@ -328,12 +319,12 @@ export async function bulkCreateAttendees(
 ) {
   if (attendeesList.length === 0) return
 
-  // Insert attendees
   const createdAttendees = await db
     .insert(attendees)
     .values(
       attendeesList.map((a) => ({
         userId,
+        eventId,
         name: a.name.trim(),
         age: a.age ?? null,
         sex: a.sex || null,
@@ -358,27 +349,27 @@ export async function bulkCreateAttendees(
     )
     .returning()
 
-  // Get or create category for payments (nombre correcto y consistente con addAttendeePayment)
   const categoryName = 'Pago de Camperos - Efectivo'
-  let campPaymentCat = await db.query.categories.findFirst({
-    where: (c) => and(eq(c.userId, userId), eq(c.name, categoryName)),
-  })
+  let [campPaymentCat] = await db
+    .select()
+    .from(categories)
+    .where(and(eq(categories.userId, userId), eq(categories.eventId, eventId), eq(categories.name, categoryName)))
 
   if (!campPaymentCat) {
-    const created = await db
+    const [created] = await db
       .insert(categories)
       .values({
         userId,
+        eventId,
         name: categoryName,
         type: 'income',
         color: '#22c55e',
         icon: 'users',
       })
       .returning()
-    campPaymentCat = created[0]
+    campPaymentCat = created
   }
 
-  // Create attendee_payments records AND transactions for initial payments
   const paymentsToInsert: any[] = []
   const transactionsToInsert: any[] = []
   const today = new Date().toISOString().split('T')[0]
@@ -386,18 +377,18 @@ export async function bulkCreateAttendees(
   for (let i = 0; i < createdAttendees.length; i++) {
     const initialPayment = parseFloat((attendeesList[i].initialPayment || 0).toString())
     if (initialPayment > 0) {
-      // Registro en attendee_payments (esto es lo que faltaba y causaba transacciones huérfanas)
       paymentsToInsert.push({
         attendeeId: createdAttendees[i].id,
         userId,
+        eventId,
         amount: initialPayment,
         paymentMethod: 'cash',
         paymentDate: today,
         notes: 'Pago inicial (importación)',
       })
-      // Transacción correspondiente (misma descripción que usa deleteAttendee)
       transactionsToInsert.push({
         userId,
+        eventId,
         categoryId: campPaymentCat.id,
         type: 'income',
         amount: initialPayment,
@@ -416,17 +407,13 @@ export async function bulkCreateAttendees(
   }
 }
 
-export async function getChurchDistribution(userId: string) {
+export async function getChurchDistribution(userId: string, eventId: number) {
   try {
-    // Get all attendees with churches
-    const allAttendees = await db.query.attendees.findMany({
-      where: eq(attendees.userId, userId),
-      columns: {
-        church: true,
-      },
-    })
+    const allAttendees = await db
+      .select({ church: attendees.church })
+      .from(attendees)
+      .where(and(eq(attendees.userId, userId), eq(attendees.eventId, eventId)))
 
-    // Group and count by church
     const churchMap = new Map<string | null, number>()
     for (const attendee of allAttendees) {
       const church = attendee.church || 'Sin iglesia asignada'
@@ -434,27 +421,17 @@ export async function getChurchDistribution(userId: string) {
     }
 
     const colors = [
-      '#3b82f6',
-      '#ef4444',
-      '#10b981',
-      '#f59e0b',
-      '#8b5cf6',
-      '#ec4899',
-      '#14b8a6',
-      '#f97316',
-      '#06b6d4',
-      '#84cc16',
+      '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+      '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
     ]
 
-    const result = Array.from(churchMap.entries())
+    return Array.from(churchMap.entries())
       .map(([name, count], index) => ({
         name: name || 'Sin iglesia asignada',
         value: count,
         color: colors[index % colors.length],
       }))
       .sort((a, b) => b.value - a.value)
-
-    return result
   } catch (error) {
     console.error('[v0] Error fetching church distribution:', error)
     return []
@@ -462,7 +439,6 @@ export async function getChurchDistribution(userId: string) {
 }
 
 export async function generateExcelTemplate() {
-  // Returns data for creating an Excel template file
   return {
     columns: ['Nombre', 'Correo', 'Teléfono', 'Monto Total ($)', 'Notas'],
     data: [

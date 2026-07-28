@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { rooms, attendees } from '@/lib/db/schema'
-import { eq, and, asc } from 'drizzle-orm'
+import { eq, and, asc, count } from 'drizzle-orm'
 
 const ROOMS_PER_PAGE = 20
 
@@ -28,10 +28,10 @@ export async function getRooms(userId: string, page: number = 1) {
 
 export async function getRoomsCount(userId: string) {
   const result = await db
-    .select({ count: db.sql`count(*)` })
+    .select({ count: count() })
     .from(rooms)
     .where(eq(rooms.userId, userId))
-  return parseInt(result[0].count as string, 10)
+  return result[0].count || 0
 }
 
 export async function createRoom(

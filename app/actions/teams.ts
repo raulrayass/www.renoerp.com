@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { teams, attendees } from '@/lib/db/schema'
-import { eq, and, asc, desc } from 'drizzle-orm'
+import { eq, and, asc, desc, count } from 'drizzle-orm'
 
 const TEAMS_PER_PAGE = 20
 
@@ -28,10 +28,10 @@ export async function getTeams(userId: string, eventId: number, page: number = 1
 
 export async function getTeamsCount(userId: string, eventId: number) {
   const result = await db
-    .select({ count: db.sql`count(*)` })
+    .select({ count: count() })
     .from(teams)
     .where(and(eq(teams.userId, userId), eq(teams.eventId, eventId)))
-  return parseInt(result[0].count as string, 10)
+  return result[0].count || 0
 }
 
 export async function createTeam(
