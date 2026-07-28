@@ -8,6 +8,7 @@ import { Square, Users, DollarSign, MapPin, Trophy, LogOut, User } from 'lucide-
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { Button } from '@/components/ui/button'
+import { EventSelector } from '@/components/event-selector'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,10 +88,15 @@ export function Topbar() {
               className="w-10 h-10 rounded-lg object-contain"
               priority
             />
-            <div className="flex flex-col leading-tight min-w-0">
+            <div className="hidden sm:flex flex-col leading-tight min-w-0">
               <span className="font-bold text-foreground text-xs sm:text-sm truncate">Permanece Camp</span>
             </div>
           </Link>
+
+          {/* Event Selector - Mobile and Desktop */}
+          <div className="flex-1 flex justify-center lg:justify-start px-2">
+            <EventSelector />
+          </div>
 
           {/* Nav - Hidden on mobile, shown on md+ */}
           <nav className="hidden lg:flex items-center gap-1 flex-1 ml-6">
