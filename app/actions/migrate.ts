@@ -22,29 +22,28 @@ import { eq } from 'drizzle-orm'
 const CURRENT_YEAR = new Date().getFullYear()
 const DEFAULT_EVENT_NAME = `Permanece ${CURRENT_YEAR}`
 
-export async function runMigration(userId: string) {
+export async function runMigration(userEmail?: string) {
   console.log('[v0] 🚀 Starting migration to multi-event architecture...\n')
   console.log(`[v0] 📅 Creating event: "${DEFAULT_EVENT_NAME}"\n`)
 
   try {
-    if (!userId) {
-      throw new Error('No user ID provided.')
-    }
+    // Use provided email or default to lafuentezapopan@gmail.com
+    const targetEmail = userEmail || 'lafuentezapopan@gmail.com'
+    console.log(`[v0] 👤 Searching for user: ${targetEmail}`)
 
-    console.log(`[v0] 👤 Migrating for user ID: ${userId}`)
-
-    // Step 1: Get the current user
+    // Step 1: Get the user by email
     const users = await db
       .select()
       .from(appUsers)
-      .where(eq(appUsers.id, userId))
+      .where(eq(appUsers.email, targetEmail))
     
     if (users.length === 0) {
-      throw new Error(`User not found in database: ${userId}`)
+      throw new Error(`User not found in database: ${targetEmail}`)
     }
 
     const user = users[0]
-    console.log(`[v0] ✓ Found user: ${user.email}\n`)
+    const userId = user.id
+    console.log(`[v0] ✓ Found user: ${user.email} (ID: ${userId})\n`)
 
     let eventsCreated = 0
     let dataLinked = 0
