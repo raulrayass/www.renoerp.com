@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export function GamesClient({ userId }: Props) {
+  const { currentEventId, isInitialized } = useEventContext()
   // Hooks centralizados para sincronización cross-module
   const { games: gameList, isLoading: gamesLoading, error: gamesError } = useGames()
   const { teams, isLoading: teamsLoading, error: teamsError } = useTeams()
@@ -52,7 +54,7 @@ export function GamesClient({ userId }: Props) {
   const searchParams = useSearchParams()
 
   const emptyForm = { name: '', description: '', gameDate: '' }
-  const loading = gamesLoading || teamsLoading || scoresLoading
+  const loading = gamesLoading || teamsLoading || scoresLoading || !isInitialized
 
   useEffect(() => {
     if (searchParams.get('new') === '1') {

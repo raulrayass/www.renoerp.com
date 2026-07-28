@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import {
   getAllStaff,
@@ -68,6 +69,7 @@ const emptyForm = {
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export function StaffClient({ userId }: Props) {
+  const { currentEventId, isInitialized } = useEventContext()
   const [staffList, setStaffList] = useState<Staff[]>([])
   const [churches, setChurches] = useState<Church[]>([])
   const [teams, setTeams] = useState<Team[]>([])
@@ -102,8 +104,9 @@ export function StaffClient({ userId }: Props) {
   const searchParams = useSearchParams()
 
   useEffect(() => {
+    if (!currentEventId || !isInitialized) return
     initializeDefaults()
-  }, [userId])
+  }, [userId, currentEventId, isInitialized])
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -121,6 +124,7 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function initializeDefaults() {
+    if (!currentEventId) return
     setLoading(true)
     try {
       await loadStaff()
@@ -134,7 +138,8 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function loadStaff() {
-    const allData = await getAllStaff(userId)
+    if (!currentEventId) return
+    const allData = await getAllStaff(userId, currentEventId)
     setStaffList(allData)
   }
 
