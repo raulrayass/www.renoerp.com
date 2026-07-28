@@ -57,18 +57,24 @@ export function EventProvider({ children }: { children: ReactNode }) {
   // 2. Evento "Permanece 2026" (tiene todos los datos actuales)
   // 3. Primer evento disponible
   const refetchEvents = React.useCallback(async () => {
+    console.log('[v0] EventContext: refetchEvents called, userId:', userId)
+    
     if (!userId) {
+      console.log('[v0] EventContext: No userId, returning')
       setIsLoading(false)
+      setIsInitialized(true)
       return
     }
 
     try {
       setIsLoading(true)
       const userEvents = await getUserEvents(userId)
+      console.log('[v0] EventContext: Got events:', userEvents)
       setEvents(userEvents || [])
       
       // Siempre seleccionar un evento si hay disponibles y no hay uno seleccionado
       if (userEvents && userEvents.length > 0) {
+        console.log('[v0] EventContext: Found', userEvents.length, 'events, currentEventId:', currentEventId)
         if (!currentEventId) {
           // Intentar obtener el último evento seleccionado del localStorage
           const savedEventId = localStorage.getItem('lastEventId')
@@ -87,24 +93,28 @@ export function EventProvider({ children }: { children: ReactNode }) {
           }
           
           if (eventToSelect) {
+            console.log('[v0] EventContext: Setting event:', eventToSelect)
             setCurrentEventId(eventToSelect)
             localStorage.setItem('lastEventId', String(eventToSelect))
           }
         }
       }
     } catch (error) {
-      console.error('[EventContext] Error fetching events:', error)
+      console.error('[v0] EventContext Error fetching events:', error)
       setEvents([])
     } finally {
+      console.log('[v0] EventContext: Finished, isInitialized set to true')
       setIsLoading(false)
       setIsInitialized(true)
     }
-  }, [userId, currentEventId])
+  }, [userId])
 
   // Cargar eventos cuando userId cambia
   useEffect(() => {
-    refetchEvents()
-  }, [userId, refetchEvents])
+    if (userId) {
+      refetchEvents()
+    }
+  }, [userId])
 
   // Guardar evento seleccionado en localStorage
   const handleSetCurrentEventId = (eventId: number) => {
