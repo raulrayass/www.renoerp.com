@@ -21,26 +21,17 @@ export function useDashboardStats(): DashboardStats {
   const { games, isLoading: gamesLoading } = useGames()
   const { teams, isLoading: teamsLoading } = useTeams()
   const { scores: gameScores, isLoading: scoresLoading } = useGameScores()
-  const [attendees, setAttendees] = useState<any[]>([])
-  const [isLoadingAttendees, setIsLoadingAttendees] = useState(false)
+  const { attendees, isLoading: attendeesLoading } = useAttendees()
   const [error, setError] = useState<Error | null>(null)
 
   const userId = session?.data?.user?.id
-
-  // Load attendees
-  useEffect(() => {
-    if (!userId) return
-    setIsLoadingAttendees(true)
-    // Attendees are loaded via useAttendees hook if available
-    setIsLoadingAttendees(false)
-  }, [userId])
 
   // Calculate stats
   const calculateStats = useCallback(() => {
     const totalGames = games?.length ?? 0
     const totalTeams = teams?.length ?? 0
     const totalScores = gameScores?.length ?? 0
-    const totalAttendees = attendees?.length ?? 0
+    const totalAttendeesCount = Array.isArray(attendees) ? attendees.length : 0
 
     // Calculate top team by total points
     const teamPoints = new Map<number, number>()
@@ -71,7 +62,7 @@ export function useDashboardStats(): DashboardStats {
     return {
       totalGames,
       totalTeams,
-      totalAttendees,
+      totalAttendees: totalAttendeesCount,
       totalScores,
       topTeamByPoints: topTeam,
       gamesThisWeek,
@@ -83,7 +74,7 @@ export function useDashboardStats(): DashboardStats {
 
   return {
     ...stats,
-    isLoading: gamesLoading || teamsLoading || scoresLoading || isLoadingAttendees,
+    isLoading: gamesLoading || teamsLoading || scoresLoading || attendeesLoading,
     error,
   }
 }

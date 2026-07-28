@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getAllGameScores } from '@/app/actions/games'
 import { useSession } from '@/lib/auth-client'
+import { useEventContext } from '@/lib/contexts/event-context'
 
 export interface GameScore {
   id: number
@@ -10,6 +11,7 @@ export interface GameScore {
   teamId: number
   points: number
   userId: string
+  eventId: number
   createdAt?: Date
 }
 
@@ -22,6 +24,7 @@ interface GameScoresState {
 
 export function useGameScores(): GameScoresState {
   const session = useSession()
+  const { currentEventId } = useEventContext()
   const [scores, setScores] = useState<GameScore[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -29,7 +32,7 @@ export function useGameScores(): GameScoresState {
   const userId = session?.data?.user?.id
 
   const loadScores = useCallback(async () => {
-    if (!userId) {
+    if (!userId || !currentEventId) {
       setScores([])
       setIsLoading(false)
       return
@@ -37,7 +40,7 @@ export function useGameScores(): GameScoresState {
 
     try {
       setIsLoading(true)
-      const data = await getAllGameScores(userId)
+      const data = await getAllGameScores(userId, currentEventId)
       setScores(data || [])
       setError(null)
     } catch (err) {
@@ -46,7 +49,7 @@ export function useGameScores(): GameScoresState {
     } finally {
       setIsLoading(false)
     }
-  }, [userId])
+  }, [userId, currentEventId])
 
   useEffect(() => {
     loadScores()

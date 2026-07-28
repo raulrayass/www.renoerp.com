@@ -19,6 +19,7 @@ import { COUNTRIES } from '@/lib/countries'
 import { CountryFlagSvg } from '@/lib/country-flags-svg'
 import { TeamFlag } from '@/components/team-flag'
 import { useTeams, useGameScores } from '@/lib/hooks'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { MobileSheet } from '@/components/mobile'
 import { ListSkeleton } from '@/components/list-skeleton'
 
@@ -30,6 +31,7 @@ export function TeamsClient({ userId }: Props) {
   // Hooks centralizados para sincronización
   const { teams: teamList, isLoading: teamsLoading } = useTeams()
   const { scores: allGameScores } = useGameScores()
+  const { currentEventId } = useEventContext()
 
   // Local UI state
   const [memberCounts, setMemberCounts] = useState<Record<number, number>>({})
@@ -63,15 +65,16 @@ export function TeamsClient({ userId }: Props) {
   // Cargar conteos de miembros al montar
   useEffect(() => {
     async function loadMemberCounts() {
+      if (!currentEventId) return
       try {
-        const counts = await getTeamMemberCounts(userId)
+        const counts = await getTeamMemberCounts(userId, currentEventId)
         setMemberCounts(counts)
       } catch (error) {
         console.error('Error loading member counts:', error)
       }
     }
     loadMemberCounts()
-  }, [userId, teamList.length]) // Refetch si cambia cantidad de equipos
+  }, [userId, currentEventId, teamList.length]) // Refetch si cambia cantidad de equipos
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -95,7 +98,7 @@ export function TeamsClient({ userId }: Props) {
       setExpandedTeamId(teamId)
       if (!expandedMembers[teamId]) {
         try {
-          const members = await getTeamMembers(userId, teamId)
+          const members = await getTeamMembers(userId, currentEventId, teamId)
           setExpandedMembers({ ...expandedMembers, [teamId]: members })
         } catch (error) {
           toast.error('Error al cargar integrantes del equipo')
@@ -111,13 +114,17 @@ export function TeamsClient({ userId }: Props) {
       toast.error('El nombre del equipo es obligatorio')
       return
     }
+    if (!currentEventId) {
+      toast.error('Selecciona un evento primero')
+      return
+    }
     startTransition(async () => {
       try {
         if (editingId) {
-          await updateTeam(userId, editingId, form)
+          await updateTeam(userId, currentEventId, editingId, form)
           toast.success('Equipo actualizado')
         } else {
-          await createTeam(userId, form)
+          await createTeam(userId, currentEventId, form)
           toast.success('Equipo creado')
         }
         setDialogOpen(false)
@@ -133,14 +140,15 @@ export function TeamsClient({ userId }: Props) {
   }
 
   async function handleDelete(id: number) {
+    setDeleteDialogOpen(false)
+    setDeletingId(null)
     startTransition(async () => {
       try {
-        await deleteTeam(userId, id)
+        await deleteTeam(userId, currentEventId, id)
         toast.success('Equipo eliminado')
-        setDeleteDialogOpen(false)
-        // Los hooks SWR se actualizan automáticamente
+        clearNewParam()
       } catch (error) {
-        toast.error('Error al eliminar el equipo')
+        toast.error('Error al eliminar equipo')
         console.error(error)
       }
     })

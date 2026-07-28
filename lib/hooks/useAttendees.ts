@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getAttendees } from '@/app/actions/attendees'
 import { useSession } from '@/lib/auth-client'
+import { useEventContext } from '@/lib/contexts/event-context'
 
 export interface Attendee {
   id: number
@@ -26,6 +27,7 @@ export interface Attendee {
   checkedIn: boolean
   notes: string
   userId: string
+  eventId: number
   createdAt?: Date
   updatedAt?: Date
 }
@@ -39,6 +41,7 @@ interface UseAttendeesState {
 
 export function useAttendees(): UseAttendeesState {
   const session = useSession()
+  const { currentEventId } = useEventContext()
   const [attendees, setAttendees] = useState<Attendee[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -46,7 +49,7 @@ export function useAttendees(): UseAttendeesState {
   const userId = session?.data?.user?.id
 
   const loadAttendees = useCallback(async () => {
-    if (!userId) {
+    if (!userId || !currentEventId) {
       setAttendees([])
       setIsLoading(false)
       return
@@ -54,7 +57,7 @@ export function useAttendees(): UseAttendeesState {
 
     try {
       setIsLoading(true)
-      const data = await getAttendees(userId)
+      const data = await getAttendees(userId, currentEventId)
       setAttendees(data || [])
       setError(null)
     } catch (err) {
@@ -63,7 +66,7 @@ export function useAttendees(): UseAttendeesState {
     } finally {
       setIsLoading(false)
     }
-  }, [userId])
+  }, [userId, currentEventId])
 
   useEffect(() => {
     loadAttendees()

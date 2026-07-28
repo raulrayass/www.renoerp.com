@@ -18,6 +18,7 @@ import {
 import { getChurches } from '@/app/actions/churches'
 import { getTeams } from '@/app/actions/teams'
 import { getRooms } from '@/app/actions/rooms'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { Attendee, AttendeePayment, Church, Team, Room } from '@/lib/db/schema'
 import { formatMXN } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
@@ -67,6 +68,7 @@ const emptyForm = {
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export function AttendeesClient({ userId }: Props) {
+  const { currentEventId } = useEventContext()
   const [attendeeList, setAttendeeList] = useState<Attendee[]>([])
   const [churches, setChurches] = useState<Church[]>([])
   const [teams, setTeams] = useState<Team[]>([])
@@ -143,17 +145,20 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   async function loadChurches() {
-    const data = await getChurches(userId)
+    if (!currentEventId) return
+    const data = await getChurches(userId, currentEventId)
     setChurches(data)
   }
 
   async function loadTeams() {
-    const data = await getTeams(userId)
+    if (!currentEventId) return
+    const data = await getTeams(userId, currentEventId)
     setTeams(data)
   }
 
   async function loadRooms() {
-    const data = await getRooms(userId)
+    if (!currentEventId) return
+    const data = await getRooms(userId, currentEventId)
     setRooms(data)
   }
 
@@ -199,11 +204,11 @@ export function AttendeesClient({ userId }: Props) {
     startTransition(async () => {
       try {
         if (editingId) {
-          await updateAttendee(userId, editingId, payload)
-          toast.success('Campero actualizado correctamente')
+          await updateAttendee(userId, currentEventId, editingId, payload)
+          toast.success('Campero actualizado')
         } else {
-          await createAttendee(userId, payload)
-          toast.success('Campero agregado correctamente')
+          await createAttendee(userId, currentEventId, payload)
+          toast.success('Campero creado')
         }
         setDialogOpen(false)
         setForm({ ...emptyForm })
@@ -243,7 +248,7 @@ export function AttendeesClient({ userId }: Props) {
 
     startTransition(async () => {
       try {
-        await addAttendeePayment(userId, selectedAttendeeId, amount, paymentForm.date, paymentForm.paymentMethod, paymentForm.notes)
+        await addAttendeePayment(userId, currentEventId, selectedAttendeeId, amount, paymentForm.date, paymentForm.paymentMethod, paymentForm.notes)
         toast.success(`Pago de $${amount.toFixed(2)} registrado para ${attendee.name}`)
         setPaymentDialogOpen(false)
         setPaymentForm({
@@ -264,11 +269,11 @@ export function AttendeesClient({ userId }: Props) {
   async function handleDelete(id: number) {
     startTransition(async () => {
       try {
-        await deleteAttendee(userId, id)
+        await deleteAttendee(userId, currentEventId, id)
         toast.success('Campero eliminado')
-        await loadAttendees()
+        clearNewParam()
       } catch (error) {
-        toast.error('Error al eliminar el campero')
+        toast.error('Error al eliminar campero')
         console.error(error)
       }
     })
@@ -278,7 +283,7 @@ export function AttendeesClient({ userId }: Props) {
     const next = !attendee.checkedIn
     startTransition(async () => {
       try {
-        await toggleCheckIn(userId, attendee.id, next)
+        await toggleCheckIn(userId, currentEventId, attendee.id, next)
         toast.success(next ? `${attendee.name} registró Check-in` : `Check-in cancelado para ${attendee.name}`)
         await loadAttendees()
       } catch (error) {
@@ -293,12 +298,11 @@ export function AttendeesClient({ userId }: Props) {
     setHistoryDialogOpen(true)
     setLoadingHistory(true)
     try {
-      const data = await getAttendeePayments(userId, attendeeId)
-      setPaymentHistory(data)
+      const data = await getAttendeePayments(userId, currentEventId, attendeeId)
+      setPaymentHistory(data || [])
+      setLoadingHistory(false)
     } catch (error) {
-      toast.error('Error al cargar el historial de pagos')
-      console.error(error)
-    } finally {
+      toast.error('Error al cargar historial')
       setLoadingHistory(false)
     }
   }
@@ -306,10 +310,10 @@ export function AttendeesClient({ userId }: Props) {
   async function handleDeletePayment(paymentId: number) {
     startTransition(async () => {
       try {
-        await deleteAttendeePayment(userId, paymentId)
+        await deleteAttendeePayment(userId, currentEventId, paymentId)
         toast.success('Pago eliminado')
         if (historyAttendeeId) {
-          const data = await getAttendeePayments(userId, historyAttendeeId)
+          const data = await getAttendeePayments(userId, currentEventId, historyAttendeeId)
           setPaymentHistory(data)
         }
         await loadAttendees()
