@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db'
 import { events, eventMembers } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 
 // Obtener todos los eventos donde el usuario es miembro O admin
 export async function getUserEvents(userId: string) {
@@ -26,7 +26,7 @@ export async function getUserEvents(userId: string) {
     .select({
       id: events.id,
       name: events.name,
-      role: db.literal('admin'),
+      role: sql<string>`'admin'`,
     })
     .from(events)
     .where(eq(events.adminId, userId))
