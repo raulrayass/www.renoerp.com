@@ -20,7 +20,10 @@ const getBaseURL = () => {
 export const auth = betterAuth({
   database: pool,
   baseURL: getBaseURL(),
-  secret: process.env.BETTER_AUTH_SECRET,
+  secret: process.env.BETTER_AUTH_SECRET || 'dev-secret-key-change-in-production',
+  emailAndPassword: {
+    enabled: true,
+  },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
