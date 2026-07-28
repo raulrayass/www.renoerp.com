@@ -20,8 +20,21 @@ export function EventSelector() {
   
   const currentEvent = events.find(e => e.id === currentEventId)
 
-  if (isLoading || !currentEvent || events.length === 0) {
+  if (isLoading) {
     return null
+  }
+
+  // Si no hay eventos, mostrar solo opción de crear
+  if (!currentEvent || events.length === 0) {
+    return (
+      <Button
+        onClick={() => router.push('/events/create')}
+        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+      >
+        <Plus className="w-4 h-4" />
+        Crear Campamento
+      </Button>
+    )
   }
 
   return (
