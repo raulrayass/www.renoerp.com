@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEventContext } from '@/contexts/EventContext'
 import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import {
   getAllAttendees,
@@ -67,6 +68,7 @@ const emptyForm = {
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export function AttendeesClient({ userId }: Props) {
+  const { currentEventId } = useEventContext()
   const [attendeeList, setAttendeeList] = useState<Attendee[]>([])
   const [churches, setChurches] = useState<Church[]>([])
   const [teams, setTeams] = useState<Team[]>([])
@@ -120,8 +122,9 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   useEffect(() => {
+    if (!currentEventId) return
     initializeDefaults()
-  }, [userId])
+  }, [userId, currentEventId])
 
   async function initializeDefaults() {
     setLoading(true)
@@ -137,8 +140,9 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   async function loadAttendees() {
+    if (!currentEventId) return
     // Load all attendees for calculations and metrics (not paginated)
-    const allData = await getAllAttendees(userId)
+    const allData = await getAllAttendees(userId, currentEventId)
     setAttendeeList(allData)
   }
 
@@ -148,7 +152,8 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   async function loadTeams() {
-    const data = await getTeams(userId)
+    if (!currentEventId) return
+    const data = await getTeams(userId, currentEventId)
     setTeams(data)
   }
 
@@ -202,7 +207,7 @@ export function AttendeesClient({ userId }: Props) {
           await updateAttendee(userId, editingId, payload)
           toast.success('Campero actualizado correctamente')
         } else {
-          await createAttendee(userId, payload)
+          await createAttendee(userId, currentEventId!, payload)
           toast.success('Campero agregado correctamente')
         }
         setDialogOpen(false)
@@ -293,7 +298,7 @@ export function AttendeesClient({ userId }: Props) {
     setHistoryDialogOpen(true)
     setLoadingHistory(true)
     try {
-      const data = await getAttendeePayments(userId, attendeeId)
+      const data = await getAttendeePayments(userId, currentEventId!, attendeeId)
       setPaymentHistory(data)
     } catch (error) {
       toast.error('Error al cargar el historial de pagos')
@@ -309,7 +314,7 @@ export function AttendeesClient({ userId }: Props) {
         await deleteAttendeePayment(userId, paymentId)
         toast.success('Pago eliminado')
         if (historyAttendeeId) {
-          const data = await getAttendeePayments(userId, historyAttendeeId)
+          const data = await getAttendeePayments(userId, currentEventId!, historyAttendeeId)
           setPaymentHistory(data)
         }
         await loadAttendees()
@@ -411,7 +416,7 @@ export function AttendeesClient({ userId }: Props) {
               a.totalAmount > 0 // Monto total es requerido y debe ser > 0
           )
         ) {
-          await bulkCreateAttendees(userId, attendeesToImport)
+          await bulkCreateAttendees(userId, currentEventId!, attendeesToImport)
           toast.success(`${attendeesToImport.length} camperos importados correctamente`)
           await loadAttendees()
         } else {
@@ -541,7 +546,7 @@ export function AttendeesClient({ userId }: Props) {
       // Título
       doc.setFontSize(16)
       doc.text('Reporte de Camperos - Permanece Camp', margin, margin + 5)
-      
+
       // Fecha de generación
       doc.setFontSize(10)
       doc.setTextColor(100)
@@ -555,7 +560,7 @@ export function AttendeesClient({ userId }: Props) {
         const total = originalTotal * (1 - discount / 100)
         const paid = parseFloat(a.amountPaid as string)
         const remaining = total - paid
-        
+
         return [
           a.name,
           a.age ? a.age.toString() : '-',
