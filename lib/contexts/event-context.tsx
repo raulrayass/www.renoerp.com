@@ -35,6 +35,7 @@ export interface EventContextType {
   currentEventId: number | null
   events: Array<{ id: number; name: string; role: string }>
   isLoading: boolean
+  isInitialized: boolean
   setCurrentEventId: (eventId: number) => void
   refetchEvents: () => Promise<void>
 }
@@ -48,6 +49,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
   const [currentEventId, setCurrentEventId] = useState<number | null>(null)
   const [events, setEvents] = useState<Array<{ id: number; name: string; role: string }>>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Cargar eventos del usuario
   // Prioridad de selección:
@@ -57,6 +59,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
   const refetchEvents = React.useCallback(async () => {
     if (!userId) {
       setIsLoading(false)
+      setIsInitialized(true)
       return
     }
 
@@ -65,27 +68,29 @@ export function EventProvider({ children }: { children: ReactNode }) {
       const userEvents = await getUserEvents(userId)
       setEvents(userEvents || [])
       
-      // Si no hay evento seleccionado y hay eventos disponibles
-      if (!currentEventId && userEvents && userEvents.length > 0) {
-        // Intentar obtener el último evento seleccionado del localStorage
-        const savedEventId = localStorage.getItem('lastEventId')
-        const savedId = savedEventId ? parseInt(savedEventId, 10) : null
-        
-        let eventToSelect: number | null = null
+      // Siempre seleccionar un evento si hay disponibles y no hay uno seleccionado
+      if (userEvents && userEvents.length > 0) {
+        if (!currentEventId) {
+          // Intentar obtener el último evento seleccionado del localStorage
+          const savedEventId = localStorage.getItem('lastEventId')
+          const savedId = savedEventId ? parseInt(savedEventId, 10) : null
+          
+          let eventToSelect: number | null = null
 
-        // Prioridad 1: Usar evento guardado si existe y está disponible
-        if (savedId && userEvents.some(e => e.id === savedId)) {
-          eventToSelect = savedId
-        } 
-        // Prioridad 2: Buscar "Campamento 2026" (evento con todos los módulos y datos)
-        else {
-          const mainEvent = userEvents.find(e => e.name === CURRENT_EVENT_NAME)
-          eventToSelect = mainEvent?.id || userEvents[0]?.id
-        }
-        
-        if (eventToSelect) {
-          setCurrentEventId(eventToSelect)
-          localStorage.setItem('lastEventId', String(eventToSelect))
+          // Prioridad 1: Usar evento guardado si existe y está disponible
+          if (savedId && userEvents.some(e => e.id === savedId)) {
+            eventToSelect = savedId
+          } 
+          // Prioridad 2: Buscar "Campamento 2026" (evento con todos los módulos y datos)
+          else {
+            const mainEvent = userEvents.find(e => e.name === CURRENT_EVENT_NAME)
+            eventToSelect = mainEvent?.id || userEvents[0]?.id
+          }
+          
+          if (eventToSelect) {
+            setCurrentEventId(eventToSelect)
+            localStorage.setItem('lastEventId', String(eventToSelect))
+          }
         }
       }
     } catch (error) {
@@ -93,13 +98,16 @@ export function EventProvider({ children }: { children: ReactNode }) {
       setEvents([])
     } finally {
       setIsLoading(false)
+      setIsInitialized(true)
     }
-  }, [userId, currentEventId])
+  }, [userId])
 
   // Cargar eventos cuando userId cambia
   useEffect(() => {
-    refetchEvents()
-  }, [userId, refetchEvents])
+    if (userId) {
+      refetchEvents()
+    }
+  }, [userId])
 
   // Guardar evento seleccionado en localStorage
   const handleSetCurrentEventId = (eventId: number) => {
@@ -113,6 +121,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
         currentEventId,
         events,
         isLoading,
+        isInitialized,
         setCurrentEventId: handleSetCurrentEventId,
         refetchEvents,
       }}

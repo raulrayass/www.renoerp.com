@@ -15,13 +15,16 @@ import {
 import { Button } from '@/components/ui/button'
 
 export function EventSelector() {
-  const { currentEventId, events, isLoading, setCurrentEventId } = useEventContext()
+  const { currentEventId, events, isLoading, isInitialized, setCurrentEventId } = useEventContext()
   const router = useRouter()
   
   const currentEvent = events.find(e => e.id === currentEventId)
 
-  if (isLoading) {
-    return null
+  // Mostrar skeleton mientras se carga
+  if (!isInitialized) {
+    return (
+      <div className="h-10 sm:h-11 w-40 bg-muted rounded-xl sm:rounded-2xl animate-pulse" />
+    )
   }
 
   // Si no hay eventos, mostrar solo opción de crear

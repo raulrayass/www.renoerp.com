@@ -13,7 +13,7 @@ import { toast } from 'sonner'
 export default function CreateEventPage() {
   const router = useRouter()
   const { user } = useUser()
-  const { selectEvent, setEvents } = useEventContext()
+  const { setCurrentEventId, refetchEvents } = useEventContext()
   
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,15 +36,16 @@ export default function CreateEventPage() {
         status: 'active',
       })
 
+      if (!newEvent?.id) {
+        toast.error('Error al crear el campamento')
+        return
+      }
+
       toast.success(`Campamento "${name}" creado exitosamente`)
       
-      // Actualizar eventos y seleccionar el nuevo
-      const events = await (await import('@/app/actions/events')).getUserEvents(user.id)
-      setEvents(events || [])
-      
-      if (newEvent?.id) {
-        selectEvent(newEvent.id)
-      }
+      // Actualizar la lista de eventos y seleccionar el nuevo
+      await refetchEvents()
+      setCurrentEventId(newEvent.id)
 
       router.push('/')
     } catch (error) {

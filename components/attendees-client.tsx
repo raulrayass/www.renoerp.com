@@ -68,7 +68,7 @@ const emptyForm = {
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export function AttendeesClient({ userId }: Props) {
-  const { currentEventId } = useEventContext()
+  const { currentEventId, isInitialized } = useEventContext()
   const [attendeeList, setAttendeeList] = useState<Attendee[]>([])
   const [churches, setChurches] = useState<Church[]>([])
   const [teams, setTeams] = useState<Team[]>([])
@@ -122,9 +122,9 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   useEffect(() => {
-    if (!currentEventId) return
+    if (!currentEventId || !isInitialized) return
     initializeDefaults()
-  }, [userId, currentEventId])
+  }, [userId, currentEventId, isInitialized])
 
   async function initializeDefaults() {
     setLoading(true)
