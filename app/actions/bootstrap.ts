@@ -17,7 +17,7 @@ import {
   transactions,
   attendeePayments,
 } from '@/lib/db/schema'
-import { eq, isNull } from 'drizzle-orm'
+import { eq, isNull, and } from 'drizzle-orm'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const EVENT_NAME = `Permanece ${CURRENT_YEAR}`
@@ -74,7 +74,7 @@ export async function bootstrapEvent() {
 
     console.log(`[v0] ✓ User added as admin`)
 
-    // 5. Link all orphaned data to event
+    // 5. Link all ORPHANED data (no eventId) to event
     const updates = {
       attendees: 0,
       churches: 0,
@@ -89,81 +89,81 @@ export async function bootstrapEvent() {
       attendeePayments: 0,
     }
 
-    // Link attendees
+    // Link attendees (only those without eventId)
     const attendeeResult = await db
       .update(attendees)
       .set({ eventId })
-      .where(eq(attendees.userId, userId))
+      .where(and(eq(attendees.userId, userId), isNull(attendees.eventId)))
     updates.attendees = attendeeResult.rowsAffected || 0
 
-    // Link churches
+    // Link churches (only those without eventId)
     const churchResult = await db
       .update(churches)
       .set({ eventId })
-      .where(eq(churches.userId, userId))
+      .where(and(eq(churches.userId, userId), isNull(churches.eventId)))
     updates.churches = churchResult.rowsAffected || 0
 
-    // Link teams
+    // Link teams (only those without eventId)
     const teamResult = await db
       .update(teams)
       .set({ eventId })
-      .where(eq(teams.userId, userId))
+      .where(and(eq(teams.userId, userId), isNull(teams.eventId)))
     updates.teams = teamResult.rowsAffected || 0
 
-    // Link rooms
+    // Link rooms (only those without eventId)
     const roomResult = await db
       .update(rooms)
       .set({ eventId })
-      .where(eq(rooms.userId, userId))
+      .where(and(eq(rooms.userId, userId), isNull(rooms.eventId)))
     updates.rooms = roomResult.rowsAffected || 0
 
-    // Link games
+    // Link games (only those without eventId)
     const gameResult = await db
       .update(games)
       .set({ eventId })
-      .where(eq(games.userId, userId))
+      .where(and(eq(games.userId, userId), isNull(games.eventId)))
     updates.games = gameResult.rowsAffected || 0
 
-    // Link game scores
+    // Link game scores (only those without eventId)
     const gameScoreResult = await db
       .update(gameScores)
       .set({ eventId })
-      .where(eq(gameScores.userId, userId))
+      .where(and(eq(gameScores.userId, userId), isNull(gameScores.eventId)))
     updates.gameScores = gameScoreResult.rowsAffected || 0
 
-    // Link staff
+    // Link staff (only those without eventId)
     const staffResult = await db
       .update(staff)
       .set({ eventId })
-      .where(eq(staff.userId, userId))
+      .where(and(eq(staff.userId, userId), isNull(staff.eventId)))
     updates.staff = staffResult.rowsAffected || 0
 
-    // Link staff payments
+    // Link staff payments (only those without eventId)
     const staffPaymentResult = await db
       .update(staffPayments)
       .set({ eventId })
-      .where(eq(staffPayments.userId, userId))
+      .where(and(eq(staffPayments.userId, userId), isNull(staffPayments.eventId)))
     updates.staffPayments = staffPaymentResult.rowsAffected || 0
 
-    // Link categories
+    // Link categories (only those without eventId)
     const categoryResult = await db
       .update(categories)
       .set({ eventId })
-      .where(eq(categories.userId, userId))
+      .where(and(eq(categories.userId, userId), isNull(categories.eventId)))
     updates.categories = categoryResult.rowsAffected || 0
 
-    // Link transactions
+    // Link transactions (only those without eventId)
     const transactionResult = await db
       .update(transactions)
       .set({ eventId })
-      .where(eq(transactions.userId, userId))
+      .where(and(eq(transactions.userId, userId), isNull(transactions.eventId)))
     updates.transactions = transactionResult.rowsAffected || 0
 
-    // Link attendee payments
+    // Link attendee payments (only those without eventId)
     const attendeePaymentResult = await db
       .update(attendeePayments)
       .set({ eventId })
-      .where(eq(attendeePayments.userId, userId))
+      .where(and(eq(attendeePayments.userId, userId), isNull(attendeePayments.eventId)))
     updates.attendeePayments = attendeePaymentResult.rowsAffected || 0
 
     console.log(`[v0] ✓ Data linked:`)
