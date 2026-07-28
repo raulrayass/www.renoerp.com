@@ -48,22 +48,23 @@ export async function createCategory(
 
 export async function updateCategory(
   userId: string,
+  eventId: number,
   id: number,
   data: { name: string; type: string; color: string; icon: string }
 ) {
   await db
     .update(categories)
     .set(data)
-    .where(and(eq(categories.id, id), eq(categories.userId, userId)))
+    .where(and(eq(categories.id, id), eq(categories.userId, userId), eq(categories.eventId, eventId)))
   revalidatePath('/')
   revalidatePath('/categories')
   revalidatePath('/transactions')
 }
 
-export async function deleteCategory(userId: string, id: number) {
+export async function deleteCategory(userId: string, eventId: number, id: number) {
   await db
     .delete(categories)
-    .where(and(eq(categories.id, id), eq(categories.userId, userId)))
+    .where(and(eq(categories.id, id), eq(categories.userId, userId), eq(categories.eventId, eventId)))
   revalidatePath('/')
   revalidatePath('/categories')
   revalidatePath('/transactions')

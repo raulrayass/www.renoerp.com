@@ -196,3 +196,125 @@ export async function getEventMembers(userId: string, eventId: number) {
     throw error
   }
 }
+
+// Actualizar evento
+export async function updateEvent(
+  userId: string,
+  eventId: number,
+  data: {
+    name?: string
+    startDate?: string | null
+    endDate?: string | null
+    country?: string
+    city?: string
+    status?: 'active' | 'draft' | 'completed'
+  }
+) {
+  try {
+    // Verificar que el usuario es admin del evento
+    const eventRecord = await db
+      .select()
+      .from(events)
+      .where(eq(events.id, eventId))
+      .then(r => r[0])
+
+    if (!eventRecord) {
+      throw new Error('Event not found')
+    }
+
+    if (eventRecord.adminId !== userId) {
+      throw new Error('Only event admin can update event')
+    }
+
+    // Preparar datos a actualizar
+    const updateData: any = {
+      updatedAt: new Date(),
+    }
+    if (data.name !== undefined) updateData.name = data.name
+    if (data.country !== undefined) updateData.country = data.country
+    if (data.city !== undefined) updateData.city = data.city
+    if (data.status !== undefined) updateData.status = data.status
+    if (data.startDate !== undefined) updateData.startDate = data.startDate ? new Date(data.startDate) : null
+    if (data.endDate !== undefined) updateData.endDate = data.endDate ? new Date(data.endDate) : null
+
+    // Actualizar evento
+    await db
+      .update(events)
+      .set(updateData)
+      .where(eq(events.id, eventId))
+
+    return { success: true, message: 'Event updated' }
+  } catch (error) {
+    console.error('[Events] Error updating event:', error)
+    throw error
+  }
+}
+
+// Eliminar evento
+export async function deleteEvent(userId: string, eventId: number) {
+  try {
+    // Verificar que el usuario es admin del evento
+    const eventRecord = await db
+      .select()
+      .from(events)
+      .where(eq(events.id, eventId))
+      .then(r => r[0])
+
+    if (!eventRecord) {
+      throw new Error('Event not found')
+    }
+
+    if (eventRecord.adminId !== userId) {
+      throw new Error('Only event admin can delete event')
+    }
+
+    // Eliminar todos los miembros del evento primero
+    await db
+      .delete(eventMembers)
+      .where(eq(eventMembers.eventId, eventId))
+
+    // Eliminar el evento
+    await db
+      .delete(events)
+      .where(eq(events.id, eventId))
+
+    return { success: true, message: 'Event deleted' }
+  } catch (error) {
+    console.error('[Events] Error deleting event:', error)
+    throw error
+  }
+}
+
+// Obtener detalles completos del evento
+export async function getEventDetails(userId: string, eventId: number) {
+  try {
+    // Verificar que el usuario es miembro del evento
+    const access = await db
+      .select()
+      .from(eventMembers)
+      .where(and(
+        eq(eventMembers.eventId, eventId),
+        eq(eventMembers.userId, userId)
+      ))
+
+    if (!access || access.length === 0) {
+      throw new Error('Access denied')
+    }
+
+    // Obtener detalles del evento
+    const event = await db
+      .select()
+      .from(events)
+      .where(eq(events.id, eventId))
+      .then(r => r[0])
+
+    if (!event) {
+      throw new Error('Event not found')
+    }
+
+    return event
+  } catch (error) {
+    console.error('[Events] Error fetching event details:', error)
+    throw error
+  }
+}
