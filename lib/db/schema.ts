@@ -1,12 +1,7 @@
 import { pgTable, text, timestamp, serial, numeric, date, integer, boolean } from 'drizzle-orm/pg-core'
 
-// Simple user table - identified only by email
-export const appUsers = pgTable('app_users', {
-  id: text('id').primaryKey(), // nanoid
-  email: text('email').notNull().unique(),
-  name: text('name'),
-  createdAt: timestamp('createdAt').notNull().defaultNow(),
-})
+// User management delegated to Better Auth (table 'user')
+// All app data uses Better Auth UUID via session.user.id
 
 export const categories = pgTable('categories', {
   id: serial('id').primaryKey(),
@@ -146,7 +141,6 @@ export const staffPayments = pgTable('staff_payments', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
-export type AppUser = typeof appUsers.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
 export type Transaction = typeof transactions.$inferSelect
