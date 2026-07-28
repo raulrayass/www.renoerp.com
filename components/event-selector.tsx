@@ -15,8 +15,10 @@ import {
 import { Button } from '@/components/ui/button'
 
 export function EventSelector() {
-  const { currentEvent, events, selectEvent, isLoading } = useEventContext()
+  const { currentEventId, events, isLoading, setCurrentEventId } = useEventContext()
   const router = useRouter()
+  
+  const currentEvent = events.find(e => e.id === currentEventId)
 
   if (isLoading || !currentEvent || events.length === 0) {
     return null
@@ -56,18 +58,18 @@ export function EventSelector() {
           {events.map((event) => (
             <DropdownMenuItem
               key={event.id}
-              onClick={() => selectEvent(event.id)}
+              onClick={() => setCurrentEventId(event.id)}
               className={`gap-3 cursor-pointer py-3 px-4 transition-all duration-200 rounded-none ${
-                currentEvent.id === event.id
+                currentEvent?.id === event.id
                   ? 'bg-primary/15 text-primary'
                   : 'hover:bg-secondary/50'
               }`}
             >
-              <div className={`w-3 h-3 rounded-full flex-shrink-0 ${currentEvent.id === event.id ? 'bg-primary' : 'bg-muted'}`} />
+              <div className={`w-3 h-3 rounded-full flex-shrink-0 ${currentEvent?.id === event.id ? 'bg-primary' : 'bg-muted'}`} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">{event.name}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {event.status === 'active' ? '✓ Activo' : '○ Inactivo'}
+                  ✓ {event.role}
                 </p>
               </div>
             </DropdownMenuItem>
