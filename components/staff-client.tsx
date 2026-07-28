@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import {
   getAllStaff,
@@ -68,6 +69,7 @@ const emptyForm = {
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export function StaffClient({ userId }: Props) {
+  const { currentEventId } = useEventContext()
   const [staffList, setStaffList] = useState<Staff[]>([])
   const [churches, setChurches] = useState<Church[]>([])
   const [teams, setTeams] = useState<Team[]>([])
@@ -134,22 +136,29 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function loadStaff() {
-    const allData = await getAllStaff(userId)
+    if (!currentEventId) {
+      console.log('[v0] Event ID not set, skipping loadStaff')
+      return
+    }
+    const allData = await getAllStaff(userId, currentEventId)
     setStaffList(allData)
   }
 
   async function loadChurches() {
-    const data = await getChurches(userId)
+    if (!currentEventId) return
+    const data = await getChurches(userId, currentEventId)
     setChurches(data)
   }
 
   async function loadTeams() {
-    const data = await getTeams(userId)
+    if (!currentEventId) return
+    const data = await getTeams(userId, currentEventId)
     setTeams(data)
   }
 
   async function loadRooms() {
-    const data = await getRooms(userId)
+    if (!currentEventId) return
+    const data = await getRooms(userId, currentEventId)
     setRooms(data)
   }
 
