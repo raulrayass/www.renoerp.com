@@ -139,17 +139,20 @@ export function StaffClient({ userId }: Props) {
   }
 
   async function loadChurches() {
-    const data = await getChurches(userId)
+    if (!currentEventId) return
+    const data = await getChurches(userId, currentEventId)
     setChurches(data)
   }
 
   async function loadTeams() {
-    const data = await getTeams(userId)
+    if (!currentEventId) return
+    const data = await getTeams(userId, currentEventId)
     setTeams(data)
   }
 
   async function loadRooms() {
-    const data = await getRooms(userId)
+    if (!currentEventId) return
+    const data = await getRooms(userId, currentEventId)
     setRooms(data)
   }
 

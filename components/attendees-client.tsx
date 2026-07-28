@@ -147,7 +147,8 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   async function loadChurches() {
-    const data = await getChurches(userId)
+    if (!currentEventId) return
+    const data = await getChurches(userId, currentEventId)
     setChurches(data)
   }
 
@@ -158,7 +159,8 @@ export function AttendeesClient({ userId }: Props) {
   }
 
   async function loadRooms() {
-    const data = await getRooms(userId)
+    if (!currentEventId) return
+    const data = await getRooms(userId, currentEventId)
     setRooms(data)
   }
 
