@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, FINANZAS_TABS } from '@/components/group-tabs'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -157,6 +158,7 @@ const defaultForm = {
 }
 
 export function TransactionsClient({ userId }: { userId: string }) {
+  const { currentEventId } = useEventContext()
   const [isPending, startTransition] = useTransition()
   const [transactions, setTransactions] = useState<TransactionRow[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -180,9 +182,13 @@ export function TransactionsClient({ userId }: { userId: string }) {
   const searchParams = useSearchParams()
 
   async function reload() {
+    if (!currentEventId) {
+      console.log('[v0] Event ID not set for transactions')
+      return
+    }
     const [txs, cats] = await Promise.all([
-      getTransactions(userId),
-      getCategories(userId),
+      getTransactions(userId, currentEventId),
+      getCategories(userId, currentEventId),
     ])
     setTransactions(txs)
     setCategories(cats)
@@ -191,7 +197,7 @@ export function TransactionsClient({ userId }: { userId: string }) {
   useEffect(() => {
     setLoading(true)
     reload().finally(() => setLoading(false))
-  }, [userId])
+  }, [userId, currentEventId])
 
   // Abre el modal de nueva transacción cuando el FAB del dock navega con ?new=1
   useEffect(() => {

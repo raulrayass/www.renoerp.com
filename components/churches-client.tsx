@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, LOGISTICA_TABS } from '@/components/group-tabs'
 import { getChurches, createChurch, updateChurch, deleteChurch } from '@/app/actions/churches'
 import { Church } from '@/lib/db/schema'
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function ChurchesClient({ userId }: Props) {
+  const { currentEventId } = useEventContext()
   const [churches, setChurches] = useState<Church[]>([])
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -35,7 +37,7 @@ export function ChurchesClient({ userId }: Props) {
 
   useEffect(() => {
     loadChurches()
-  }, [userId])
+  }, [userId, currentEventId])
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -53,7 +55,8 @@ export function ChurchesClient({ userId }: Props) {
   }
 
   async function loadChurches() {
-    const data = await getChurches(userId)
+    if (!currentEventId) return
+    const data = await getChurches(userId, currentEventId)
     setChurches(data)
   }
 
@@ -66,10 +69,10 @@ export function ChurchesClient({ userId }: Props) {
     startTransition(async () => {
       try {
         if (editingId) {
-          await updateChurch(userId, editingId, churchName)
+          await updateChurch(userId, currentEventId!, editingId, churchName)
           toast.success('Iglesia actualizada')
         } else {
-          await createChurch(userId, churchName)
+          await createChurch(userId, currentEventId!, churchName)
           toast.success('Iglesia agregada')
         }
         setDialogOpen(false)
@@ -86,7 +89,7 @@ export function ChurchesClient({ userId }: Props) {
   async function handleDelete(id: number) {
     startTransition(async () => {
       try {
-        await deleteChurch(userId, id)
+        await deleteChurch(userId, currentEventId!, id)
         toast.success('Iglesia eliminada')
         setDeleteDialogOpen(false)
         await loadChurches()

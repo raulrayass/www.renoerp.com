@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, FINANZAS_TABS } from '@/components/group-tabs'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -54,6 +55,7 @@ interface Props {
 }
 
 export function CategoriesClient({ userId }: Props) {
+  const { currentEventId } = useEventContext()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -66,8 +68,9 @@ export function CategoriesClient({ userId }: Props) {
   const [form, setForm] = useState(defaultForm)
 
   useEffect(() => {
-    getCategories(userId).then(setCategories)
-  }, [userId])
+    if (!currentEventId) return
+    getCategories(userId, currentEventId).then(setCategories)
+  }, [userId, currentEventId])
 
   // Abre el modal de nueva categoría cuando el FAB del dock navega con ?new=1
   useEffect(() => {

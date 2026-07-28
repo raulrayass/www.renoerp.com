@@ -140,7 +140,11 @@ export function AttendeesClient({ userId }: Props) {
 
   async function loadAttendees() {
     // Load all attendees for calculations and metrics (not paginated)
-    const allData = await getAllAttendees(userId)
+    if (!currentEventId) {
+      console.log('[v0] Event ID not set, skipping loadAttendees')
+      return
+    }
+    const allData = await getAllAttendees(userId, currentEventId)
     setAttendeeList(allData)
   }
 

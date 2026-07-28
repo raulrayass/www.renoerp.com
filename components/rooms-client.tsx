@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, LOGISTICA_TABS } from '@/components/group-tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function RoomsClient({ userId }: Props) {
+  const { currentEventId } = useEventContext()
   const [roomList, setRoomList] = useState<Room[]>([])
   const [occupancy, setOccupancy] = useState<Record<number, number>>({})
   const [expandedRoomId, setExpandedRoomId] = useState<number | null>(null)
@@ -41,7 +43,7 @@ export function RoomsClient({ userId }: Props) {
 
   useEffect(() => {
     loadRooms()
-  }, [userId])
+  }, [userId, currentEventId])
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -59,10 +61,11 @@ export function RoomsClient({ userId }: Props) {
   }
 
   async function loadRooms() {
+    if (!currentEventId) return
     setLoading(true)
     try {
-      const data = await getRooms(userId)
-      const occ = await getRoomOccupancy(userId)
+      const data = await getRooms(userId, currentEventId)
+      const occ = await getRoomOccupancy(userId, currentEventId)
       setRoomList(data)
       setOccupancy(occ)
     } catch (error) {
