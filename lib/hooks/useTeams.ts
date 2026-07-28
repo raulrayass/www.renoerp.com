@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getTeams } from '@/app/actions/teams'
 import { useSession } from '@/lib/auth-client'
-import { useEventContext } from '@/lib/contexts/event-context'
 
 export interface Team {
   id: number
@@ -12,7 +11,6 @@ export interface Team {
   country?: string | null
   useCountry?: boolean
   userId: string
-  eventId: number
   createdAt?: Date
 }
 
@@ -25,7 +23,6 @@ interface UseTeamsState {
 
 export function useTeams(): UseTeamsState {
   const session = useSession()
-  const { currentEventId } = useEventContext()
   const [teams, setTeams] = useState<Team[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -33,7 +30,7 @@ export function useTeams(): UseTeamsState {
   const userId = session?.data?.user?.id
 
   const loadTeams = useCallback(async () => {
-    if (!userId || !currentEventId) {
+    if (!userId) {
       setTeams([])
       setIsLoading(false)
       return
@@ -41,7 +38,7 @@ export function useTeams(): UseTeamsState {
 
     try {
       setIsLoading(true)
-      const data = await getTeams(userId, currentEventId)
+      const data = await getTeams(userId)
       setTeams(data || [])
       setError(null)
     } catch (err) {
@@ -50,7 +47,7 @@ export function useTeams(): UseTeamsState {
     } finally {
       setIsLoading(false)
     }
-  }, [userId, currentEventId])
+  }, [userId])
 
   useEffect(() => {
     loadTeams()
