@@ -20,7 +20,7 @@ import {
 import { eq } from 'drizzle-orm'
 
 const CURRENT_YEAR = new Date().getFullYear()
-const DEFAULT_EVENT_NAME = `Campamento ${CURRENT_YEAR}`
+const DEFAULT_EVENT_NAME = `Permanece ${CURRENT_YEAR}`
 
 export async function runMigration() {
   console.log('[v0] 🚀 Starting migration to multi-event architecture...\n')
