@@ -7,10 +7,9 @@ import { revalidatePath } from 'next/cache'
 
 export async function getTransactions(
   userId: string,
-  eventId: number,
   filters?: { type?: string; categoryId?: number; from?: string; to?: string }
 ) {
-  const conditions = [eq(transactions.userId, userId), eq(transactions.eventId, eventId)]
+  const conditions = [eq(transactions.userId, userId)]
 
   if (filters?.type && filters.type !== 'all') {
     conditions.push(eq(transactions.type, filters.type))
@@ -29,7 +28,6 @@ export async function getTransactions(
     .select({
       id: transactions.id,
       userId: transactions.userId,
-      eventId: transactions.eventId,
       categoryId: transactions.categoryId,
       type: transactions.type,
       amount: transactions.amount,
@@ -48,7 +46,7 @@ export async function getTransactions(
     .orderBy(desc(transactions.date), desc(transactions.createdAt))
 }
 
-export async function getDashboardData(userId: string, eventId: number) {
+export async function getDashboardData(userId: string) {
   const allTransactions = await db
     .select({
       id: transactions.id,
@@ -63,7 +61,7 @@ export async function getDashboardData(userId: string, eventId: number) {
     })
     .from(transactions)
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
-    .where(and(eq(transactions.userId, userId), eq(transactions.eventId, eventId)))
+    .where(eq(transactions.userId, userId))
     .orderBy(desc(transactions.date))
 
   // Payment method breakdown - correctly track available balance per method
@@ -171,17 +169,15 @@ export async function getDashboardData(userId: string, eventId: number) {
 
 export async function createTransaction(
   userId: string,
-  eventId: number,
   data: { categoryId: number; type: string; amount: string; description: string; date: string; paymentMethod?: string }
 ) {
-  await db.insert(transactions).values({ userId, eventId, ...data, paymentMethod: data.paymentMethod || 'cash' })
+  await db.insert(transactions).values({ userId, ...data, paymentMethod: data.paymentMethod || 'cash' })
   revalidatePath('/')
   revalidatePath('/transactions')
 }
 
 export async function updateTransaction(
   userId: string,
-  eventId: number,
   id: number,
   data: { categoryId: number; type: string; amount: string; description: string; date: string; paymentMethod?: string }
 ) {
@@ -189,7 +185,7 @@ export async function updateTransaction(
   const [oldTransaction] = await db
     .select()
     .from(transactions)
-    .where(and(eq(transactions.id, id), eq(transactions.userId, userId), eq(transactions.eventId, eventId)))
+    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
 
   if (!oldTransaction) throw new Error('Transacción no encontrada')
 
@@ -295,12 +291,12 @@ export async function updateTransaction(
   revalidatePath('/transactions')
 }
 
-export async function deleteTransaction(userId: string, eventId: number, id: number) {
+export async function deleteTransaction(userId: string, id: number) {
   // Get the transaction to see if it's a payment
   const [transaction] = await db
     .select()
     .from(transactions)
-    .where(and(eq(transactions.id, id), eq(transactions.userId, userId), eq(transactions.eventId, eventId)))
+    .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
 
   if (!transaction) throw new Error('Transacción no encontrada')
 
@@ -388,7 +384,7 @@ export async function deleteTransaction(userId: string, eventId: number, id: num
   revalidatePath('/transactions')
 }
 
-export async function getPaymentMethodBreakdown(userId: string, eventId: number) {
+export async function getPaymentMethodBreakdown(userId: string) {
   try {
     const allTransactions = await db
       .select({
@@ -396,7 +392,7 @@ export async function getPaymentMethodBreakdown(userId: string, eventId: number)
         amount: transactions.amount,
       })
       .from(transactions)
-      .where(and(eq(transactions.userId, userId), eq(transactions.eventId, eventId)))
+      .where(eq(transactions.userId, userId))
 
     // Group by payment method
     const breakdown = {

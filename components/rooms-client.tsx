@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, LOGISTICA_TABS } from '@/components/group-tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,7 +21,6 @@ interface Props {
 }
 
 export function RoomsClient({ userId }: Props) {
-  const { currentEventId, isInitialized } = useEventContext()
   const [roomList, setRoomList] = useState<Room[]>([])
   const [occupancy, setOccupancy] = useState<Record<number, number>>({})
   const [expandedRoomId, setExpandedRoomId] = useState<number | null>(null)
@@ -42,9 +40,8 @@ export function RoomsClient({ userId }: Props) {
   const emptyForm = { name: '', capacity: '' }
 
   useEffect(() => {
-    if (!currentEventId || !isInitialized) return
     loadRooms()
-  }, [userId, currentEventId, isInitialized])
+  }, [userId])
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -62,11 +59,10 @@ export function RoomsClient({ userId }: Props) {
   }
 
   async function loadRooms() {
-    if (!currentEventId) return
     setLoading(true)
     try {
-      const data = await getRooms(userId, currentEventId)
-      const occ = await getRoomOccupancy(userId, currentEventId)
+      const data = await getRooms(userId)
+      const occ = await getRoomOccupancy(userId)
       setRoomList(data)
       setOccupancy(occ)
     } catch (error) {
@@ -84,8 +80,7 @@ export function RoomsClient({ userId }: Props) {
       setExpandedRoomId(roomId)
       if (!expandedOccupants[roomId]) {
         try {
-          if (!currentEventId) return
-          const occupants = await getRoomOccupants(userId, currentEventId, roomId)
+          const occupants = await getRoomOccupants(userId, roomId)
           setExpandedOccupants({ ...expandedOccupants, [roomId]: occupants })
         } catch (error) {
           toast.error('Error al cargar integrantes de la habitación')
@@ -101,18 +96,14 @@ export function RoomsClient({ userId }: Props) {
       toast.error('El nombre de la habitación es obligatorio')
       return
     }
-    if (!currentEventId) {
-      toast.error('No hay evento seleccionado')
-      return
-    }
     const capacity = form.capacity ? parseInt(form.capacity, 10) : null
     startTransition(async () => {
       try {
         if (editingId) {
-          await updateRoom(userId, currentEventId, editingId, { name: form.name, capacity })
+          await updateRoom(userId, editingId, { name: form.name, capacity })
           toast.success('Habitación actualizada')
         } else {
-          await createRoom(userId, currentEventId, { name: form.name, capacity })
+          await createRoom(userId, { name: form.name, capacity })
           toast.success('Habitación creada')
         }
         setDialogOpen(false)
@@ -128,13 +119,9 @@ export function RoomsClient({ userId }: Props) {
   }
 
   async function handleDelete(id: number) {
-    if (!currentEventId) {
-      toast.error('No hay evento seleccionado')
-      return
-    }
     startTransition(async () => {
       try {
-        await deleteRoom(userId, currentEventId, id)
+        await deleteRoom(userId, id)
         toast.success('Habitación eliminada')
         setDeleteDialogOpen(false)
         await loadRooms()

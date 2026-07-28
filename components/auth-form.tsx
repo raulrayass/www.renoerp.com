@@ -6,16 +6,11 @@ import { useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 
 export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [useEmailLogin, setUseEmailLogin] = useState(false)
 
   const handleGoogleSignIn = async () => {
     setError(null)
@@ -36,31 +31,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
     } catch (err: any) {
       console.error('[v0] Google OAuth error:', err)
       setError(err?.message ?? 'Ocurrió un error al iniciar sesión con Google')
-      setLoading(false)
-    }
-  }
-
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-
-    try {
-      const response = await authClient.signIn.email({
-        email,
-        password,
-        callbackURL: '/',
-      })
-
-      if (response.data) {
-        router.push('/')
-        router.refresh()
-      } else if (response.error) {
-        setError(response.error?.message ?? 'Error al iniciar sesión')
-      }
-    } catch (err: any) {
-      console.error('[v0] Email login error:', err)
-      setError('Error al iniciar sesión. Verifica tus credenciales.')
       setLoading(false)
     }
   }
@@ -88,7 +58,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Bienvenido</h1>
             <p className="text-sm text-muted-foreground">
-              {useEmailLogin ? 'Inicia sesión con tu correo' : 'Elige cómo deseas acceder'}
+              Inicia sesión con tu cuenta de Google para continuar
             </p>
           </div>
 
@@ -101,68 +71,13 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
               </div>
             )}
 
-            {useEmailLogin ? (
-              <form onSubmit={handleEmailSignIn} className="flex flex-col gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium">
-                    Correo
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="test@test.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium">
-                    Contraseña
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Test123456!"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
-                    required
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  size="lg"
-                  className="w-full h-12 font-medium"
-                >
-                  {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => {
-                    setUseEmailLogin(false)
-                    setError(null)
-                  }}
-                  className="w-full"
-                >
-                  Volver
-                </Button>
-              </form>
-            ) : (
-              <>
-                <Button
-                  onClick={handleGoogleSignIn}
-                  disabled={loading}
-                  size="lg"
-                  className="w-full h-12 font-medium gap-2 bg-white text-foreground hover:bg-muted border border-input"
-                  variant="outline"
-                >
+            <Button
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              size="lg"
+              className="w-full h-12 font-medium gap-2 bg-white text-foreground hover:bg-muted border border-input"
+              variant="outline"
+            >
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -191,18 +106,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
                   Iniciar sesión con Google
                 </>
               )}
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setUseEmailLogin(true)}
-                  className="w-full text-sm"
-                >
-                  ¿Prefieres usar correo? Haz clic aquí
-                </Button>
-              </>
-            )}
+            </Button>
           </div>
 
           <p className="text-xs text-muted-foreground text-center mt-6">

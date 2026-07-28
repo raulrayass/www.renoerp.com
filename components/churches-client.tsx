@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, LOGISTICA_TABS } from '@/components/group-tabs'
 import { getChurches, createChurch, updateChurch, deleteChurch } from '@/app/actions/churches'
 import { Church } from '@/lib/db/schema'
@@ -22,7 +21,6 @@ interface Props {
 }
 
 export function ChurchesClient({ userId }: Props) {
-  const { currentEventId, isInitialized } = useEventContext()
   const [churches, setChurches] = useState<Church[]>([])
   const [isPending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -36,9 +34,8 @@ export function ChurchesClient({ userId }: Props) {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    if (!currentEventId || !isInitialized) return
     loadChurches()
-  }, [userId, currentEventId, isInitialized])
+  }, [userId])
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -56,8 +53,7 @@ export function ChurchesClient({ userId }: Props) {
   }
 
   async function loadChurches() {
-    if (!currentEventId) return
-    const data = await getChurches(userId, currentEventId)
+    const data = await getChurches(userId)
     setChurches(data)
   }
 
@@ -67,17 +63,13 @@ export function ChurchesClient({ userId }: Props) {
       toast.error('El nombre de la iglesia es obligatorio')
       return
     }
-    if (!currentEventId) {
-      toast.error('No hay evento seleccionado')
-      return
-    }
     startTransition(async () => {
       try {
         if (editingId) {
-          await updateChurch(userId, currentEventId, editingId, churchName)
+          await updateChurch(userId, editingId, churchName)
           toast.success('Iglesia actualizada')
         } else {
-          await createChurch(userId, currentEventId, churchName)
+          await createChurch(userId, churchName)
           toast.success('Iglesia agregada')
         }
         setDialogOpen(false)
@@ -92,13 +84,9 @@ export function ChurchesClient({ userId }: Props) {
   }
 
   async function handleDelete(id: number) {
-    if (!currentEventId) {
-      toast.error('No hay evento seleccionado')
-      return
-    }
     startTransition(async () => {
       try {
-        await deleteChurch(userId, currentEventId, id)
+        await deleteChurch(userId, id)
         toast.success('Iglesia eliminada')
         setDeleteDialogOpen(false)
         await loadChurches()

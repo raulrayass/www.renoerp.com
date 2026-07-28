@@ -2,41 +2,40 @@
 
 import { db } from '@/lib/db'
 import { rooms, attendees } from '@/lib/db/schema'
-import { eq, and, asc, count } from 'drizzle-orm'
+import { eq, and, asc } from 'drizzle-orm'
 
 const ROOMS_PER_PAGE = 20
 
 // Get ALL rooms (no pagination)
-export async function getAllRooms(userId: string, eventId: number) {
+export async function getAllRooms(userId: string) {
   return db
     .select()
     .from(rooms)
-    .where(and(eq(rooms.userId, userId), eq(rooms.eventId, eventId)))
+    .where(eq(rooms.userId, userId))
     .orderBy(asc(rooms.name))
 }
 
-export async function getRooms(userId: string, eventId: number, page: number = 1) {
+export async function getRooms(userId: string, page: number = 1) {
   const offset = (page - 1) * ROOMS_PER_PAGE
   return db
     .select()
     .from(rooms)
-    .where(and(eq(rooms.userId, userId), eq(rooms.eventId, eventId)))
+    .where(eq(rooms.userId, userId))
     .orderBy(asc(rooms.name))
     .limit(ROOMS_PER_PAGE)
     .offset(offset)
 }
 
-export async function getRoomsCount(userId: string, eventId: number) {
+export async function getRoomsCount(userId: string) {
   const result = await db
-    .select({ count: count() })
+    .select({ count: db.sql`count(*)` })
     .from(rooms)
-    .where(and(eq(rooms.userId, userId), eq(rooms.eventId, eventId)))
-  return result[0].count || 0
+    .where(eq(rooms.userId, userId))
+  return parseInt(result[0].count as string, 10)
 }
 
 export async function createRoom(
   userId: string,
-  eventId: number,
   data: { name: string; capacity?: number | null }
 ) {
   if (!data.name.trim()) {
@@ -46,7 +45,7 @@ export async function createRoom(
   const existing = await db
     .select()
     .from(rooms)
-    .where(and(eq(rooms.userId, userId), eq(rooms.eventId, eventId), eq(rooms.name, data.name.trim())))
+    .where(and(eq(rooms.userId, userId), eq(rooms.name, data.name.trim())))
     .limit(1)
     .then(r => r[0])
 
@@ -56,7 +55,6 @@ export async function createRoom(
 
   await db.insert(rooms).values({
     userId,
-    eventId,
     name: data.name.trim(),
     capacity: data.capacity ?? null,
   })
@@ -64,7 +62,6 @@ export async function createRoom(
 
 export async function updateRoom(
   userId: string,
-  eventId: number,
   roomId: number,
   data: { name: string; capacity?: number | null }
 ) {
@@ -75,7 +72,7 @@ export async function updateRoom(
   const existing = await db
     .select()
     .from(rooms)
-    .where(and(eq(rooms.userId, userId), eq(rooms.eventId, eventId), eq(rooms.name, data.name.trim())))
+    .where(and(eq(rooms.userId, userId), eq(rooms.name, data.name.trim())))
     .limit(1)
     .then(r => r[0])
 
@@ -86,24 +83,24 @@ export async function updateRoom(
   await db
     .update(rooms)
     .set({ name: data.name.trim(), capacity: data.capacity ?? null, updatedAt: new Date() })
-    .where(and(eq(rooms.userId, userId), eq(rooms.eventId, eventId), eq(rooms.id, roomId)))
+    .where(and(eq(rooms.userId, userId), eq(rooms.id, roomId)))
 }
 
-export async function deleteRoom(userId: string, eventId: number, roomId: number) {
+export async function deleteRoom(userId: string, roomId: number) {
   // Unassign room from any campers first
   await db
     .update(attendees)
     .set({ roomId: null })
-    .where(and(eq(attendees.userId, userId), eq(attendees.eventId, eventId), eq(attendees.roomId, roomId)))
+    .where(and(eq(attendees.userId, userId), eq(attendees.roomId, roomId)))
 
-  await db.delete(rooms).where(and(eq(rooms.userId, userId), eq(rooms.eventId, eventId), eq(rooms.id, roomId)))
+  await db.delete(rooms).where(and(eq(rooms.userId, userId), eq(rooms.id, roomId)))
 }
 
-export async function getRoomOccupancy(userId: string, eventId: number) {
+export async function getRoomOccupancy(userId: string) {
   const all = await db
     .select({ roomId: attendees.roomId })
     .from(attendees)
-    .where(and(eq(attendees.userId, userId), eq(attendees.eventId, eventId)))
+    .where(eq(attendees.userId, userId))
   const counts: Record<number, number> = {}
   for (const a of all) {
     if (a.roomId) counts[a.roomId] = (counts[a.roomId] || 0) + 1
@@ -111,10 +108,10 @@ export async function getRoomOccupancy(userId: string, eventId: number) {
   return counts
 }
 
-export async function getRoomOccupants(userId: string, eventId: number, roomId: number) {
+export async function getRoomOccupants(userId: string, roomId: number) {
   return db
     .select()
     .from(attendees)
-    .where(and(eq(attendees.userId, userId), eq(attendees.eventId, eventId), eq(attendees.roomId, roomId)))
+    .where(and(eq(attendees.userId, userId), eq(attendees.roomId, roomId)))
     .orderBy(asc(attendees.name))
 }

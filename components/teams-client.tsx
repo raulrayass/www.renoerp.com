@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,7 +27,6 @@ interface Props {
 }
 
 export function TeamsClient({ userId }: Props) {
-  const { currentEventId, isInitialized } = useEventContext()
   // Hooks centralizados para sincronización
   const { teams: teamList, isLoading: teamsLoading } = useTeams()
   const { scores: allGameScores } = useGameScores()
@@ -49,7 +47,7 @@ export function TeamsClient({ userId }: Props) {
   const searchParams = useSearchParams()
 
   const emptyForm = { name: '', color: '#4a9d67', country: null as string | null, useCountry: false }
-  const loading = teamsLoading || !isInitialized
+  const loading = teamsLoading
 
   const PRESET_COLORS = [
     { name: 'Verde', value: '#4a9d67' },
@@ -65,16 +63,15 @@ export function TeamsClient({ userId }: Props) {
   // Cargar conteos de miembros al montar
   useEffect(() => {
     async function loadMemberCounts() {
-      if (!currentEventId) return
       try {
-        const counts = await getTeamMemberCounts(userId, currentEventId)
+        const counts = await getTeamMemberCounts(userId)
         setMemberCounts(counts)
       } catch (error) {
         console.error('Error loading member counts:', error)
       }
     }
     loadMemberCounts()
-  }, [userId, teamList.length, currentEventId]) // Refetch si cambia cantidad de equipos o evento
+  }, [userId, teamList.length]) // Refetch si cambia cantidad de equipos
 
   // Abre el modal de agregar cuando el FAB del dock navega con ?new=1
   useEffect(() => {
