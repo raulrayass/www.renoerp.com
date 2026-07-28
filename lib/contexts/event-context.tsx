@@ -35,6 +35,7 @@ export interface EventContextType {
   currentEventId: number | null
   events: Array<{ id: number; name: string; role: string }>
   isLoading: boolean
+  isInitialized: boolean
   setCurrentEventId: (eventId: number) => void
   refetchEvents: () => Promise<void>
 }
@@ -48,6 +49,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
   const [currentEventId, setCurrentEventId] = useState<number | null>(null)
   const [events, setEvents] = useState<Array<{ id: number; name: string; role: string }>>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Cargar eventos del usuario
   // Prioridad de selección:
@@ -95,6 +97,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
       setEvents([])
     } finally {
       setIsLoading(false)
+      setIsInitialized(true)
     }
   }, [userId, currentEventId])
 
@@ -115,6 +118,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
         currentEventId,
         events,
         isLoading,
+        isInitialized,
         setCurrentEventId: handleSetCurrentEventId,
         refetchEvents,
       }}
