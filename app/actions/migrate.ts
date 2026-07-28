@@ -18,24 +18,20 @@ import {
   staffPayments,
 } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
-import { auth } from '@/lib/auth'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const DEFAULT_EVENT_NAME = `Permanece ${CURRENT_YEAR}`
 
-export async function runMigration() {
+export async function runMigration(userId: string) {
   console.log('[v0] 🚀 Starting migration to multi-event architecture...\n')
   console.log(`[v0] 📅 Creating event: "${DEFAULT_EVENT_NAME}"\n`)
 
   try {
-    // Step 0: Get current authenticated user
-    const session = await auth.api.getSession()
-    if (!session?.user?.id) {
-      throw new Error('No user authenticated. Please log in first.')
+    if (!userId) {
+      throw new Error('No user ID provided.')
     }
 
-    const userId = session.user.id
-    console.log(`[v0] 👤 Migrating for user: ${session.user.email}`)
+    console.log(`[v0] 👤 Migrating for user ID: ${userId}`)
 
     // Step 1: Get the current user
     const users = await db
