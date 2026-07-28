@@ -1,9 +1,21 @@
 import { db } from '@/lib/db'
 import { sql } from 'drizzle-orm'
 
-export async function POST() {
+export async function GET() {
   try {
-    console.log('[v0] Starting database migration...')
+    console.log('[v0] Starting database migration (GET)...')
+
+    // Add eventId column to categories if not exists
+    await db.execute(
+      sql`ALTER TABLE categories ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to categories')
+
+    // Add eventId column to transactions if not exists
+    await db.execute(
+      sql`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to transactions')
 
     // Add paymentMethod column to transactions
     await db.execute(
@@ -11,11 +23,165 @@ export async function POST() {
     )
     console.log('[v0] Added paymentMethod to transactions')
 
+    // Add eventId column to attendee_payments if not exists
+    await db.execute(
+      sql`ALTER TABLE attendee_payments ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to attendee_payments')
+
     // Add paymentMethod column to attendee_payments
     await db.execute(
       sql`ALTER TABLE attendee_payments ADD COLUMN IF NOT EXISTS "paymentMethod" text DEFAULT 'cash'`
     )
     console.log('[v0] Added paymentMethod to attendee_payments')
+
+    // Add eventId column to attendees if not exists
+    await db.execute(
+      sql`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to attendees')
+
+    // Add eventId column to churches if not exists
+    await db.execute(
+      sql`ALTER TABLE churches ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to churches')
+
+    // Add eventId column to teams if not exists
+    await db.execute(
+      sql`ALTER TABLE teams ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to teams')
+
+    // Add eventId column to rooms if not exists
+    await db.execute(
+      sql`ALTER TABLE rooms ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to rooms')
+
+    // Add eventId column to games if not exists
+    await db.execute(
+      sql`ALTER TABLE games ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to games')
+
+    // Add eventId column to game_scores if not exists
+    await db.execute(
+      sql`ALTER TABLE game_scores ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to game_scores')
+
+    // Add eventId column to staff if not exists
+    await db.execute(
+      sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to staff')
+
+    // Add eventId column to staff_payments if not exists
+    await db.execute(
+      sql`ALTER TABLE staff_payments ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to staff_payments')
+
+    // Update existing records
+    await db.execute(sql`UPDATE transactions SET "paymentMethod" = 'cash' WHERE "paymentMethod" IS NULL`)
+    await db.execute(sql`UPDATE attendee_payments SET "paymentMethod" = 'cash' WHERE "paymentMethod" IS NULL`)
+    console.log('[v0] Updated existing records to have cash as payment method')
+
+    return Response.json({
+      success: true,
+      message: 'Database migration completed successfully',
+    })
+  } catch (error) {
+    console.error('[v0] Migration error:', error)
+    return Response.json(
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST() {
+  try {
+    console.log('[v0] Starting database migration...')
+
+    // Add eventId column to categories if not exists
+    await db.execute(
+      sql`ALTER TABLE categories ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to categories')
+
+    // Add eventId column to transactions if not exists
+    await db.execute(
+      sql`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to transactions')
+
+    // Add paymentMethod column to transactions
+    await db.execute(
+      sql`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS "paymentMethod" text DEFAULT 'cash'`
+    )
+    console.log('[v0] Added paymentMethod to transactions')
+
+    // Add eventId column to attendee_payments if not exists
+    await db.execute(
+      sql`ALTER TABLE attendee_payments ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to attendee_payments')
+
+    // Add paymentMethod column to attendee_payments
+    await db.execute(
+      sql`ALTER TABLE attendee_payments ADD COLUMN IF NOT EXISTS "paymentMethod" text DEFAULT 'cash'`
+    )
+    console.log('[v0] Added paymentMethod to attendee_payments')
+
+    // Add eventId column to attendees if not exists
+    await db.execute(
+      sql`ALTER TABLE attendees ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to attendees')
+
+    // Add eventId column to churches if not exists
+    await db.execute(
+      sql`ALTER TABLE churches ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to churches')
+
+    // Add eventId column to teams if not exists
+    await db.execute(
+      sql`ALTER TABLE teams ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to teams')
+
+    // Add eventId column to rooms if not exists
+    await db.execute(
+      sql`ALTER TABLE rooms ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to rooms')
+
+    // Add eventId column to games if not exists
+    await db.execute(
+      sql`ALTER TABLE games ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to games')
+
+    // Add eventId column to game_scores if not exists
+    await db.execute(
+      sql`ALTER TABLE game_scores ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to game_scores')
+
+    // Add eventId column to staff if not exists
+    await db.execute(
+      sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to staff')
+
+    // Add eventId column to staff_payments if not exists
+    await db.execute(
+      sql`ALTER TABLE staff_payments ADD COLUMN IF NOT EXISTS "eventId" integer NOT NULL DEFAULT 1`
+    )
+    console.log('[v0] Added eventId to staff_payments')
 
     // Update existing records
     await db.execute(sql`UPDATE transactions SET "paymentMethod" = 'cash' WHERE "paymentMethod" IS NULL`)
