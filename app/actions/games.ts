@@ -7,34 +7,33 @@ import { eq, and, desc } from 'drizzle-orm'
 const GAMES_PER_PAGE = 15
 
 // Get ALL games for leaderboard and calculations (no pagination)
-export async function getAllGames(userId: string, eventId: number) {
+export async function getAllGames(userId: string) {
   return await db.query.games.findMany({
-    where: and(eq(games.userId, userId), eq(games.eventId, eventId)),
+    where: eq(games.userId, userId),
     orderBy: (games, { desc }) => [desc(games.createdAt)],
   })
 }
 
-export async function getGames(userId: string, eventId: number, page: number = 1) {
+export async function getGames(userId: string, page: number = 1) {
   const offset = (page - 1) * GAMES_PER_PAGE
   return await db.query.games.findMany({
-    where: and(eq(games.userId, userId), eq(games.eventId, eventId)),
+    where: eq(games.userId, userId),
     orderBy: (games, { desc }) => [desc(games.createdAt)],
     limit: GAMES_PER_PAGE,
     offset: offset,
   })
 }
 
-export async function getGamesCount(userId: string, eventId: number) {
+export async function getGamesCount(userId: string) {
   const result = await db
     .select({ count: db.sql`count(*)` })
     .from(games)
-    .where(and(eq(games.userId, userId), eq(games.eventId, eventId)))
+    .where(eq(games.userId, userId))
   return parseInt(result[0].count as string, 10)
 }
 
 export async function createGame(
   userId: string,
-  eventId: number,
   data: { name: string; description?: string; gameDate?: string | null }
 ) {
   if (!data.name.trim()) {
@@ -44,7 +43,6 @@ export async function createGame(
     .insert(games)
     .values({
       userId,
-      eventId,
       name: data.name.trim(),
       description: data.description || '',
       gameDate: data.gameDate || null,
@@ -55,7 +53,6 @@ export async function createGame(
 
 export async function updateGame(
   userId: string,
-  eventId: number,
   gameId: number,
   data: { name: string; description?: string; gameDate?: string | null }
 ) {
@@ -70,34 +67,33 @@ export async function updateGame(
       gameDate: data.gameDate || null,
       updatedAt: new Date(),
     })
-    .where(and(eq(games.userId, userId), eq(games.eventId, eventId), eq(games.id, gameId)))
+    .where(and(eq(games.userId, userId), eq(games.id, gameId)))
 }
 
-export async function deleteGame(userId: string, eventId: number, gameId: number) {
-  await db.delete(gameScores).where(and(eq(gameScores.userId, userId), eq(gameScores.eventId, eventId), eq(gameScores.gameId, gameId)))
-  await db.delete(games).where(and(eq(games.userId, userId), eq(games.eventId, eventId), eq(games.id, gameId)))
+export async function deleteGame(userId: string, gameId: number) {
+  await db.delete(gameScores).where(and(eq(gameScores.userId, userId), eq(gameScores.gameId, gameId)))
+  await db.delete(games).where(and(eq(games.userId, userId), eq(games.id, gameId)))
 }
 
-export async function getAllGameScores(userId: string, eventId: number) {
+export async function getAllGameScores(userId: string) {
   return db
     .select()
     .from(gameScores)
-    .where(and(eq(gameScores.userId, userId), eq(gameScores.eventId, eventId)))
+    .where(eq(gameScores.userId, userId))
 }
 
-export async function getGameScores(userId: string, eventId: number, gameId: number) {
+export async function getGameScores(userId: string, gameId: number) {
   return db
     .select()
     .from(gameScores)
-    .where(and(eq(gameScores.userId, userId), eq(gameScores.eventId, eventId), eq(gameScores.gameId, gameId)))
+    .where(and(eq(gameScores.userId, userId), eq(gameScores.gameId, gameId)))
 }
 
 // Add points for a team in a specific game (accumulative)
-export async function addGameScore(userId: string, eventId: number, gameId: number, teamId: number, points: number) {
+export async function addGameScore(userId: string, gameId: number, teamId: number, points: number) {
   if (points === 0) return
   await db.insert(gameScores).values({
     userId,
-    eventId,
     gameId,
     teamId,
     points,
@@ -105,11 +101,10 @@ export async function addGameScore(userId: string, eventId: number, gameId: numb
 }
 
 // Set (upsert) the points a team earned in a specific game
-export async function setGameScore(userId: string, eventId: number, gameId: number, teamId: number, points: number) {
+export async function setGameScore(userId: string, gameId: number, teamId: number, points: number) {
   const existing = await db.query.gameScores.findFirst({
     where: and(
       eq(gameScores.userId, userId),
-      eq(gameScores.eventId, eventId),
       eq(gameScores.gameId, gameId),
       eq(gameScores.teamId, teamId)
     ),
@@ -121,24 +116,24 @@ export async function setGameScore(userId: string, eventId: number, gameId: numb
       .set({ points })
       .where(eq(gameScores.id, existing.id))
   } else {
-    await db.insert(gameScores).values({ userId, eventId, gameId, teamId, points })
+    await db.insert(gameScores).values({ userId, gameId, teamId, points })
   }
 }
 
-export async function deleteGameScore(userId: string, eventId: number, scoreId: number) {
+export async function deleteGameScore(userId: string, scoreId: number) {
   await db
     .delete(gameScores)
-    .where(and(eq(gameScores.userId, userId), eq(gameScores.eventId, eventId), eq(gameScores.id, scoreId)))
+    .where(and(eq(gameScores.userId, userId), eq(gameScores.id, scoreId)))
 }
 
 // Leaderboard: total points per team across all games
-export async function getLeaderboard(userId: string, eventId: number) {
+export async function getLeaderboard(userId: string) {
   const allTeams = await db.query.teams.findMany({
-    where: and(eq(teams.userId, userId), eq(teams.eventId, eventId)),
+    where: eq(teams.userId, userId),
     orderBy: (teams, { asc }) => [asc(teams.name)],
   })
   const allScores = await db.query.gameScores.findMany({
-    where: and(eq(gameScores.userId, userId), eq(gameScores.eventId, eventId)),
+    where: eq(gameScores.userId, userId),
   })
 
   const totals: Record<number, number> = {}

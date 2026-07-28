@@ -20,7 +20,6 @@ import { TeamFlag } from '@/components/team-flag'
 import { ScoreboardFullscreen } from '@/components/scoreboard-fullscreen'
 import { PodiumFullscreen } from '@/components/podium-fullscreen'
 import { useGames, useTeams, useGameScores } from '@/lib/hooks'
-import { useEventContext } from '@/lib/contexts/event-context'
 import { MobileSheet } from '@/components/mobile'
 import { ListSkeleton } from '@/components/list-skeleton'
 
@@ -33,7 +32,6 @@ export function GamesClient({ userId }: Props) {
   const { games: gameList, isLoading: gamesLoading, error: gamesError } = useGames()
   const { teams, isLoading: teamsLoading, error: teamsError } = useTeams()
   const { scores: allGameScores, isLoading: scoresLoading } = useGameScores()
-  const { currentEventId } = useEventContext()
 
   // Local UI state
   const [gameScores, setGameScores] = useState<GameScore[]>([])
@@ -81,8 +79,8 @@ export function GamesClient({ userId }: Props) {
   async function loadScoresForGame(gameId: number) {
     try {
       const [gameScoresData, allScoresData] = await Promise.all([
-        getGameScores(userId, currentEventId, gameId),
-        getAllGameScores(userId, currentEventId),
+        getGameScores(userId, gameId),
+        getAllGameScores(userId),
       ])
       setGameScores(gameScoresData)
       setAllGameScores(allScoresData)
@@ -99,16 +97,12 @@ export function GamesClient({ userId }: Props) {
       return
     }
     startTransition(async () => {
-      if (!currentEventId) {
-        toast.error('Selecciona un evento primero')
-        return
-      }
       try {
         if (editingId) {
-          await updateGame(userId, currentEventId, editingId, form)
+          await updateGame(userId, editingId, form)
           toast.success('Juego actualizado')
         } else {
-          await createGame(userId, currentEventId, form)
+          await createGame(userId, form)
           toast.success('Juego creado')
         }
         setDialogOpen(false)
@@ -151,24 +145,7 @@ export function GamesClient({ userId }: Props) {
 
     startTransition(async () => {
       try {
-        await deleteGame(userId, currentEventId, id)
-        toast.success('Juego eliminado')
-        clearNewParam()
-      } catch (error) {
-        toast.error('Error al eliminar juego')
-        console.error(error)
-      }
-    })
-  }
-
-  async function handleAddScore() {
-    if (!selectedGameId || !scoringForm.teamId || !scoringForm.points) {
-      toast.error('Por favor completa todos los campos')
-      return
-    }
-    startTransition(async () => {
-      try {
-        await addGameScore(userId, currentEventId, selectedGameId, parseInt(scoringForm.teamId, 10), parseInt(scoringForm.points, 10))
+        await addGameScore(userId, selectedGameId, parseInt(scoringForm.teamId, 10), parseInt(scoringForm.points, 10))
         toast.success('Puntos registrados')
         setScoringForm({ teamId: '', points: '' })
         await loadScoresForGame(selectedGameId)
@@ -182,7 +159,7 @@ export function GamesClient({ userId }: Props) {
   async function handleDeleteScore(scoreId: number, gameId: number) {
     startTransition(async () => {
       try {
-        await deleteGameScore(userId, currentEventId, scoreId)
+        await deleteGameScore(userId, scoreId)
         toast.success('Puntos eliminados')
         await loadScoresForGame(gameId)
       } catch (error) {

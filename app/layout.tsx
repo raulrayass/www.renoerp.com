@@ -4,7 +4,6 @@ import { Geist, Geist_Mono, Poppins } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { UserProvider } from '@/components/user-provider'
 import { LoadingScreen, LoadingProvider } from '@/components/loading-screen'
-import { EventProvider } from '@/lib/contexts/event-context'
 import './globals.css'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -71,9 +70,7 @@ export default function RootLayout({
         <LoadingProvider>
           <LoadingScreen />
           <UserProvider>
-            <EventProvider>
-              {children}
-            </EventProvider>
+            {children}
           </UserProvider>
         </LoadingProvider>
         <Toaster position="top-center" richColors closeButton />
