@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -93,13 +92,12 @@ export function CreateEventForm({ userId }: CreateEventFormProps) {
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description">Descripción (opcional)</Label>
-              <Textarea
+              <Input
                 id="description"
                 placeholder="Describe el evento, sus objetivos, etc."
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 disabled={isPending}
-                rows={4}
               />
             </div>
 
