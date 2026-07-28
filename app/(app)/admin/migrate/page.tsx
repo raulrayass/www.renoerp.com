@@ -14,13 +14,13 @@ export default function MigrationPage() {
 
   const handleMigrate = async () => {
     try {
-      if (!session?.data?.user?.id) {
+      if (!session?.data?.user?.email) {
         toast.error('Por favor inicia sesión primero')
         return
       }
 
       setLoading(true)
-      const response = await runMigration(session.data.user.id)
+      const response = await runMigration(session.data.user.email)
 
       if (response.success) {
         setResult(response)
@@ -45,7 +45,7 @@ export default function MigrationPage() {
             Migración de Datos
           </h1>
           <p className="text-sm text-muted-foreground mt-2">
-            Crea el evento "Campamento 2026" y vincula todos tus datos actuales
+            Crea el evento "Permanece 2026" y vincula todos tus datos actuales
           </p>
         </div>
 
@@ -98,7 +98,7 @@ export default function MigrationPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-800 space-y-2">
           <p className="font-semibold">Qué sucederá:</p>
           <ul className="space-y-1 list-disc list-inside">
-            <li>Se creará "Campamento 2026"</li>
+            <li>Se creará "Permanece 2026"</li>
             <li>Todos tus datos se vincularán a este evento</li>
             <li>Tú serás el admin</li>
             <li>Aparecerá en el selector de eventos</li>
