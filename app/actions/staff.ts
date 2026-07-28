@@ -8,44 +8,45 @@ import { desc } from 'drizzle-orm'
 const STAFF_PER_PAGE = 20
 
 // Get ALL staff for reports and metrics (no pagination)
-export async function getAllStaff(userId: string) {
+export async function getAllStaff(userId: string, eventId: number) {
   return db
     .select()
     .from(staff)
-    .where(eq(staff.userId, userId))
+    .where(and(eq(staff.userId, userId), eq(staff.eventId, eventId)))
     .orderBy(desc(staff.createdAt))
 }
 
 // Get paginated staff for UI display
-export async function getStaff(userId: string, page: number = 1) {
+export async function getStaff(userId: string, eventId: number, page: number = 1) {
   const offset = (page - 1) * STAFF_PER_PAGE
   return db
     .select()
     .from(staff)
-    .where(eq(staff.userId, userId))
+    .where(and(eq(staff.userId, userId), eq(staff.eventId, eventId)))
     .orderBy(desc(staff.createdAt))
     .limit(STAFF_PER_PAGE)
     .offset(offset)
 }
 
-export async function getStaffCount(userId: string) {
+export async function getStaffCount(userId: string, eventId: number) {
   const result = await db
     .select({ count: db.sql`count(*)` })
     .from(staff)
-    .where(eq(staff.userId, userId))
+    .where(and(eq(staff.userId, userId), eq(staff.eventId, eventId)))
   return parseInt(result[0].count as string, 10)
 }
 
-export async function getStaffPayments(userId: string, staffId: number) {
+export async function getStaffPayments(userId: string, eventId: number, staffId: number) {
   return db
     .select()
     .from(staffPayments)
-    .where(and(eq(staffPayments.userId, userId), eq(staffPayments.staffId, staffId)))
+    .where(and(eq(staffPayments.userId, userId), eq(staffPayments.eventId, eventId), eq(staffPayments.staffId, staffId)))
     .orderBy(desc(staffPayments.createdAt))
 }
 
 export async function createStaff(
   userId: string,
+  eventId: number,
   data: {
     name: string
     age?: number | null
@@ -60,6 +61,7 @@ export async function createStaff(
 ) {
   await db.insert(staff).values({
     userId,
+    eventId,
     name: data.name,
     age: data.age ?? null,
     shirtSize: data.shirtSize || null,
@@ -76,6 +78,7 @@ export async function createStaff(
 
 export async function updateStaff(
   userId: string,
+  eventId: number,
   staffId: number,
   data: Partial<{
     name: string
@@ -99,22 +102,22 @@ export async function updateStaff(
   await db
     .update(staff)
     .set(updateData)
-    .where(and(eq(staff.userId, userId), eq(staff.id, staffId)))
+    .where(and(eq(staff.userId, userId), eq(staff.eventId, eventId), eq(staff.id, staffId)))
 }
 
-export async function toggleCheckIn(userId: string, staffId: number, checkedIn: boolean) {
+export async function toggleCheckIn(userId: string, eventId: number, staffId: number, checkedIn: boolean) {
   await db
     .update(staff)
     .set({ checkedIn, updatedAt: new Date() })
-    .where(and(eq(staff.userId, userId), eq(staff.id, staffId)))
+    .where(and(eq(staff.userId, userId), eq(staff.eventId, eventId), eq(staff.id, staffId)))
 }
 
-export async function deleteStaff(userId: string, staffId: number) {
+export async function deleteStaff(userId: string, eventId: number, staffId: number) {
   // Obtener el staff para conocer su nombre (necesario para borrar transacciones)
   const [staffMember] = await db
     .select()
     .from(staff)
-    .where(and(eq(staff.userId, userId), eq(staff.id, staffId)))
+    .where(and(eq(staff.userId, userId), eq(staff.eventId, eventId), eq(staff.id, staffId)))
 
   if (!staffMember) throw new Error('Staff no encontrado')
 
@@ -131,6 +134,7 @@ export async function deleteStaff(userId: string, staffId: number) {
       .where(
         and(
           eq(transactions.userId, userId),
+          eq(transactions.eventId, eventId),
           eq(transactions.type, 'income'),
           eq(transactions.amount, payment.amount),
           eq(transactions.description, `Pago de ${staffMember.name}`)
@@ -139,11 +143,12 @@ export async function deleteStaff(userId: string, staffId: number) {
   }
 
   await db.delete(staffPayments).where(eq(staffPayments.staffId, staffId))
-  await db.delete(staff).where(and(eq(staff.userId, userId), eq(staff.id, staffId)))
+  await db.delete(staff).where(and(eq(staff.userId, userId), eq(staff.eventId, eventId), eq(staff.id, staffId)))
 }
 
 export async function addStaffPayment(
   userId: string,
+  eventId: number,
   staffId: number,
   amount: number,
   paymentDate: string,
@@ -153,7 +158,7 @@ export async function addStaffPayment(
   const [staffMember] = await db
     .select()
     .from(staff)
-    .where(and(eq(staff.userId, userId), eq(staff.id, staffId)))
+    .where(and(eq(staff.userId, userId), eq(staff.eventId, eventId), eq(staff.id, staffId)))
 
   if (!staffMember) throw new Error('Staff no encontrado')
 
@@ -174,6 +179,7 @@ export async function addStaffPayment(
   await db.insert(staffPayments).values({
     staffId,
     userId,
+    eventId,
     amount,
     paymentMethod,
     paymentDate,
@@ -191,7 +197,7 @@ export async function addStaffPayment(
       status: newStatus,
       updatedAt: new Date(),
     })
-    .where(and(eq(staff.userId, userId), eq(staff.id, staffId)))
+    .where(and(eq(staff.userId, userId), eq(staff.eventId, eventId), eq(staff.id, staffId)))
 
   // Determine category name based on payment method
   const categoryNameMap: Record<string, string> = {
@@ -206,7 +212,7 @@ export async function addStaffPayment(
   let [staffPaymentCat] = await db
     .select()
     .from(categories)
-    .where(and(eq(categories.userId, userId), eq(categories.name, categoryName)))
+    .where(and(eq(categories.userId, userId), eq(categories.eventId, eventId), eq(categories.name, categoryName)))
 
   if (!staffPaymentCat) {
     const colorMap: Record<string, string> = {
@@ -217,6 +223,7 @@ export async function addStaffPayment(
       .insert(categories)
       .values({
         userId,
+        eventId,
         name: categoryName,
         type: 'income',
         color: colorMap[categoryName] || '#22c55e',
@@ -229,6 +236,7 @@ export async function addStaffPayment(
   // Create transaction for this payment with payment method
   await db.insert(transactions).values({
     userId,
+    eventId,
     categoryId: staffPaymentCat!.id,
     type: 'income',
     amount,
@@ -238,11 +246,11 @@ export async function addStaffPayment(
   })
 }
 
-export async function deleteStaffPayment(userId: string, paymentId: number) {
+export async function deleteStaffPayment(userId: string, eventId: number, paymentId: number) {
   const [payment] = await db
     .select()
     .from(staffPayments)
-    .where(and(eq(staffPayments.userId, userId), eq(staffPayments.id, paymentId)))
+    .where(and(eq(staffPayments.userId, userId), eq(staffPayments.eventId, eventId), eq(staffPayments.id, paymentId)))
 
   if (!payment) throw new Error('Pago no encontrado')
 
@@ -259,6 +267,7 @@ export async function deleteStaffPayment(userId: string, paymentId: number) {
     .where(
       and(
         eq(transactions.userId, userId),
+        eq(transactions.eventId, eventId),
         eq(transactions.type, 'income'),
         eq(transactions.amount, payment.amount),
         eq(transactions.description, `Pago de ${staffMember.name}`)
@@ -287,6 +296,7 @@ export async function deleteStaffPayment(userId: string, paymentId: number) {
 
 export async function bulkCreateStaff(
   userId: string,
+  eventId: number,
   staffList: Array<{
     name: string
     age?: number
@@ -308,6 +318,7 @@ export async function bulkCreateStaff(
     .values(
       staffList.map((s) => ({
         userId,
+        eventId,
         name: s.name.trim(),
         age: s.age ?? null,
         sex: s.sex || null,
@@ -332,7 +343,7 @@ export async function bulkCreateStaff(
 
   // Get or create category for payments
   let staffPaymentCat = await db.query.categories.findFirst({
-    where: (c) => and(eq(c.userId, userId), eq(c.name, 'Pago de Staff')),
+    where: (c) => and(eq(c.userId, userId), eq(c.eventId, eventId), eq(c.name, 'Pago de Staff')),
   })
 
   if (!staffPaymentCat) {
@@ -340,6 +351,7 @@ export async function bulkCreateStaff(
       .insert(categories)
       .values({
         userId,
+        eventId,
         name: 'Pago de Staff',
         type: 'income',
         color: '#3b82f6',
@@ -361,6 +373,7 @@ export async function bulkCreateStaff(
       paymentsToInsert.push({
         staffId: createdStaff[i].id,
         userId,
+        eventId,
         amount: initialPayment,
         paymentMethod: 'cash',
         paymentDate: today,
@@ -369,6 +382,7 @@ export async function bulkCreateStaff(
       // Transacción correspondiente (misma descripción que usa deleteStaff)
       transactionsToInsert.push({
         userId,
+        eventId,
         categoryId: staffPaymentCat.id,
         type: 'income',
         amount: initialPayment,
@@ -387,11 +401,11 @@ export async function bulkCreateStaff(
   }
 }
 
-export async function getCategoryDistribution(userId: string) {
+export async function getCategoryDistribution(userId: string, eventId: number) {
   try {
     // Get all staff with categories/ministries
     const allStaff = await db.query.staff.findMany({
-      where: eq(staff.userId, userId),
+      where: and(eq(staff.userId, userId), eq(staff.eventId, eventId)),
       columns: {
         category: true,
       },
