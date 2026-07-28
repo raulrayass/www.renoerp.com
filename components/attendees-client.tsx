@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEventContext } from '@/contexts/EventContext'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, PERSONAS_TABS } from '@/components/group-tabs'
 import {
   getAllAttendees,
