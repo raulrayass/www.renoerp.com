@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Square, Users, DollarSign, MapPin, Trophy, LogOut, User } from 'lucide-react'
+import { Square, Users, DollarSign, MapPin, Trophy, LogOut, User, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
 import { useEventContext } from '@/lib/contexts/event-context'
@@ -144,6 +144,17 @@ export function Topbar() {
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide"></p>
                     <p className="text-sm font-semibold text-foreground truncate mt-1">{user.email}</p>
                   </DropdownMenuLabel>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator className="my-2" />
+                <DropdownMenuGroup>
+                  <Link href="/events" className="w-full">
+                    <DropdownMenuItem className="gap-2.5 cursor-pointer py-2.5 px-3 transition-all duration-200">
+                      <div className="w-3.5 h-3.5 flex items-center justify-center rounded-md bg-primary/10">
+                        <Calendar className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="font-medium">Gestionar Campamentos</span>
+                    </DropdownMenuItem>
+                  </Link>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator className="my-2" />
                 <DropdownMenuGroup>
