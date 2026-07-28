@@ -7,8 +7,8 @@ import { usePathname } from 'next/navigation'
 import { Square, Users, DollarSign, MapPin, Trophy, LogOut, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/components/user-provider'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { Button } from '@/components/ui/button'
-import { EventSelector } from '@/components/event-selector'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,8 +66,11 @@ const navItems = [
 export function Topbar() {
   const pathname = usePathname()
   const { user, signOut } = useUser()
+  const { currentEventId, events } = useEventContext()
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  
+  const currentEvent = events.find(e => e.id === currentEventId)
 
   const handleConfirmLogout = async () => {
     setIsLoggingOut(true)
@@ -93,10 +96,14 @@ export function Topbar() {
             </div>
           </Link>
 
-          {/* Event Selector - Mobile and Desktop */}
-          <div className="flex-1 flex justify-center lg:justify-start px-2">
-            <EventSelector />
-          </div>
+          {/* Event Indicator */}
+          {currentEvent && (
+            <div className="flex-1 flex justify-center lg:justify-start px-2">
+              <div className="text-sm font-medium text-foreground">
+                {currentEvent.name}
+              </div>
+            </div>
+          )}
 
           {/* Nav - Hidden on mobile, shown on md+ */}
           <nav className="hidden lg:flex items-center gap-1 flex-1 ml-6">

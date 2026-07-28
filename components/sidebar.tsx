@@ -81,14 +81,14 @@ export function Sidebar({ user }: SidebarProps) {
           variant="ghost"
           className="w-full justify-start gap-3 text-sidebar-foreground/70 hover:bg-primary/10 hover:text-primary transition-all duration-200 group mb-2"
           onClick={() => {
-            router.push('/events/create')
+            router.push('/profile')
             setMobileOpen(false)
           }}
         >
           <div className="w-4 h-4 flex items-center justify-center rounded bg-primary/5 group-hover:bg-primary/15 transition-colors duration-200">
             <Plus className="w-3.5 h-3.5" />
           </div>
-          <span className="font-medium group-hover:font-semibold transition-all">Crear Campamento</span>
+          <span className="font-medium group-hover:font-semibold transition-all">Perfil</span>
         </Button>
         <Button
           variant="ghost"

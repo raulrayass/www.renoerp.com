@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useEventContext } from '@/lib/contexts/event-context'
 import { GroupTabs, FINANZAS_TABS } from '@/components/group-tabs'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -157,6 +158,7 @@ const defaultForm = {
 }
 
 export function TransactionsClient({ userId }: { userId: string }) {
+  const { currentEventId, isInitialized } = useEventContext()
   const [isPending, startTransition] = useTransition()
   const [transactions, setTransactions] = useState<TransactionRow[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -180,18 +182,20 @@ export function TransactionsClient({ userId }: { userId: string }) {
   const searchParams = useSearchParams()
 
   async function reload() {
+    if (!currentEventId) return
     const [txs, cats] = await Promise.all([
-      getTransactions(userId),
-      getCategories(userId),
+      getTransactions(userId, currentEventId),
+      getCategories(userId, currentEventId),
     ])
     setTransactions(txs)
     setCategories(cats)
   }
 
   useEffect(() => {
+    if (!currentEventId || !isInitialized) return
     setLoading(true)
     reload().finally(() => setLoading(false))
-  }, [userId])
+  }, [userId, currentEventId, isInitialized])
 
   // Abre el modal de nueva transacción cuando el FAB del dock navega con ?new=1
   useEffect(() => {
@@ -293,8 +297,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
     }
     startTransition(async () => {
       try {
-        if (editingId) {
-          await updateTransaction(userId, editingId, {
+        if (editingId && currentEventId) {
+          await updateTransaction(userId, currentEventId, editingId, {
             categoryId: parseInt(form.categoryId),
             type: form.type,
             amount: form.amount,
@@ -303,8 +307,8 @@ export function TransactionsClient({ userId }: { userId: string }) {
             paymentMethod: form.paymentMethod,
           })
           toast.success('Transacción actualizada')
-        } else {
-          await createTransaction(userId, {
+        } else if (currentEventId) {
+          await createTransaction(userId, currentEventId, {
             categoryId: parseInt(form.categoryId),
             type: form.type,
             amount: form.amount,
@@ -325,10 +329,10 @@ export function TransactionsClient({ userId }: { userId: string }) {
   }
 
   async function handleDelete() {
-    if (!deletingId) return
+    if (!deletingId || !currentEventId) return
     startTransition(async () => {
       try {
-        await deleteTransaction(userId, deletingId)
+        await deleteTransaction(userId, currentEventId, deletingId)
         toast.success('Transacción eliminada')
         setDeleteDialogOpen(false)
         await reload()
