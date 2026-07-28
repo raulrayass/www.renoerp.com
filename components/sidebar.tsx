@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { EventSelector } from '@/components/event-selector'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: Square },
@@ -46,6 +47,9 @@ export function Sidebar({ user }: SidebarProps) {
         </div>
         <span className="text-lg font-bold text-sidebar-foreground">FinanzApp</span>
       </div>
+
+      {/* Event Selector */}
+      <EventSelector />
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-1">

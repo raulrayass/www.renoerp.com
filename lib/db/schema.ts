@@ -146,6 +146,26 @@ export const staffPayments = pgTable('staff_payments', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 })
 
+export const events = pgTable('events', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').notNull(), // Owner/creator of the event
+  name: text('name').notNull(),
+  description: text('description'),
+  startDate: date('startDate').notNull(),
+  endDate: date('endDate').notNull(),
+  location: text('location'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+export const eventMembers = pgTable('event_members', {
+  id: serial('id').primaryKey(),
+  eventId: integer('eventId').notNull(),
+  userId: text('userId').notNull(),
+  role: text('role').notNull().default('member'), // 'admin' | 'member'
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
 export type AppUser = typeof appUsers.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
@@ -169,3 +189,7 @@ export type Staff = typeof staff.$inferSelect
 export type NewStaff = typeof staff.$inferInsert
 export type StaffPayment = typeof staffPayments.$inferSelect
 export type NewStaffPayment = typeof staffPayments.$inferInsert
+export type Event = typeof events.$inferSelect
+export type NewEvent = typeof events.$inferInsert
+export type EventMember = typeof eventMembers.$inferSelect
+export type NewEventMember = typeof eventMembers.$inferInsert
